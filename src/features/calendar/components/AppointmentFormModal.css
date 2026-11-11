@@ -1,0 +1,328 @@
+/* ==========================================================================
+   Luma Salon — Appointment Form Modal Styling
+   ========================================================================== */
+
+.cal-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 15, 0.75);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cal-modal-card {
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  background: #0d1322;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8), 0 0 1px rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPopIn {
+  from {
+    transform: scale(0.96) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Header */
+.cal-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.cal-modal-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #c084fc;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.cal-modal-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.cal-modal-close-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cal-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+/* Form */
+.cal-modal-form {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Error Alert */
+.cal-form-error-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  color: #fca5a5;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.cal-form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.cal-form-row.tri-col {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1.2fr;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .cal-form-row,
+  .cal-form-row.tri-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+}
+
+.cal-field-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cal-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #cbd5e1;
+}
+
+.cal-label .req {
+  color: #f87171;
+}
+
+.cal-opt {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: normal;
+}
+
+/* Inputs */
+.cal-input {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #f1f5f9;
+  font-size: 0.88rem;
+  outline: none;
+  transition: all 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cal-input:focus {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+}
+
+.cal-select {
+  cursor: pointer;
+}
+
+.cal-select option {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+.cal-select option:disabled {
+  color: #64748b;
+  background: #090d16;
+}
+
+.cal-textarea {
+  resize: vertical;
+  min-height: 72px;
+  line-height: 1.45;
+}
+
+/* Date picker color scheme */
+.cal-date-picker {
+  color-scheme: dark;
+}
+
+/* Currency input prefix */
+.cal-currency-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cal-currency-symbol {
+  position: absolute;
+  left: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.cal-input.with-prefix {
+  padding-left: 28px;
+}
+
+/* Readonly computed display */
+.cal-input-readonly {
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #c084fc;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  height: 40px;
+  box-sizing: border-box;
+}
+
+/* Footer */
+.cal-modal-footer {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cal-modal-cancel-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.cal-modal-cancel-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+.cal-modal-save-btn {
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+  color: #ffffff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  box-shadow: 0 2px 10px rgba(168, 85, 247, 0.3);
+}
+
+.cal-modal-save-btn:hover:not(:disabled) {
+  opacity: 0.93;
+  transform: translateY(-1px);
+}
+
+.cal-modal-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .cal-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .cal-modal-card {
+    max-width: 100%;
+    max-height: 94vh;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+  }
+
+  .cal-modal-header {
+    padding: 14px 16px;
+  }
+
+  .cal-modal-form {
+    padding: 16px 16px calc(16px + var(--safe-area-bottom)) 16px;
+    gap: 12px;
+  }
+
+  .cal-modal-footer {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .cal-modal-cancel-btn,
+  .cal-modal-save-btn {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,218 @@
+/* Record Stock Loss Modal Styles - Luma Luxury Theme */
+
+.stock-loss-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 15, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.stock-loss-modal-content {
+  background: #161a23;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(239, 68, 68, 0.2);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 540px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.stock-loss-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(239, 68, 68, 0.04);
+}
+
+.stock-loss-modal-header .header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stock-loss-modal-header .icon-warning {
+  color: #ef4444;
+}
+
+.stock-loss-modal-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.stock-loss-modal-header .btn-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stock-loss-modal-header .btn-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.stock-loss-form {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.loss-error-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.loss-warning-banner {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.stock-loss-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.loss-type-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.loss-type-selector .type-btn {
+  padding: 0.65rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.loss-type-selector .type-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+.loss-type-selector .type-btn.active {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+}
+
+.stock-loss-form .form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.stock-loss-form .flex-1 {
+  flex: 1;
+}
+
+.stock-loss-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.stock-loss-form select,
+.stock-loss-form input,
+.stock-loss-form textarea {
+  background: #0f1218;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  color: #f8fafc;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.stock-loss-form select:focus,
+.stock-loss-form input:focus,
+.stock-loss-form textarea:focus {
+  outline: none;
+  border-color: #ef4444;
+}
+
+.stock-loss-form .input-disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ef4444;
+  font-weight: 700;
+  cursor: not-allowed;
+}
+
+.stock-loss-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stock-loss-modal-footer .btn-secondary {
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stock-loss-modal-footer .btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.stock-loss-modal-footer .btn-danger {
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stock-loss-modal-footer .btn-danger:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.stock-loss-modal-footer button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

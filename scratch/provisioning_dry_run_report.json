@@ -1,0 +1,270 @@
+{
+  "items": [
+    {
+      "userId": "user-owner-01",
+      "name": "Owner 1",
+      "role": "OWNER",
+      "normalizedEmail": "owner1@lumasalon.example.com",
+      "employeeId": null,
+      "staffValidation": "NOT_APPLICABLE",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-owner-02",
+      "name": "Owner 2",
+      "role": "OWNER",
+      "normalizedEmail": "owner2@lumasalon.example.com",
+      "employeeId": null,
+      "staffValidation": "NOT_APPLICABLE",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-rec-01",
+      "name": "Receptionist 1",
+      "role": "RECEPTIONIST",
+      "normalizedEmail": "receptionist@lumasalon.example.com",
+      "employeeId": null,
+      "staffValidation": "NOT_APPLICABLE",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-01",
+      "name": "Mia Vance",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "mia@lumasalon.example.com",
+      "employeeId": "staff-01",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-02",
+      "name": "Rohan Sen",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "rohan@lumasalon.example.com",
+      "employeeId": "staff-02",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-03",
+      "name": "Ananya Roy",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "ananya@lumasalon.example.com",
+      "employeeId": "staff-03",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-04",
+      "name": "Kabir Sharma",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "kabir@lumasalon.example.com",
+      "employeeId": "staff-04",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-05",
+      "name": "Pooja Patel",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "pooja@lumasalon.example.com",
+      "employeeId": "staff-05",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-06",
+      "name": "Vikram Malhotra",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "vikram@lumasalon.example.com",
+      "employeeId": "staff-06",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-07",
+      "name": "Sneha Reddy",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "sneha@lumasalon.example.com",
+      "employeeId": "staff-07",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-08",
+      "name": "Arjun Kapoor",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "arjun@lumasalon.example.com",
+      "employeeId": "staff-08",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-09",
+      "name": "Divya Nair",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "divya@lumasalon.example.com",
+      "employeeId": "staff-09",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-10",
+      "name": "Karan Verma",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "karan@lumasalon.example.com",
+      "employeeId": "staff-10",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-11",
+      "name": "Meera Joshi",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "meera@lumasalon.example.com",
+      "employeeId": "staff-11",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-12",
+      "name": "Siddharth Rao",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "siddharth@lumasalon.example.com",
+      "employeeId": "staff-12",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-13",
+      "name": "Riya Sen",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "riya@lumasalon.example.com",
+      "employeeId": "staff-13",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-14",
+      "name": "Aditya Singhania",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "aditya@lumasalon.example.com",
+      "employeeId": "staff-14",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-15",
+      "name": "Tanvi Deshmukh",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "tanvi@lumasalon.example.com",
+      "employeeId": "staff-15",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-16",
+      "name": "Manish Gupta",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "manish@lumasalon.example.com",
+      "employeeId": "staff-16",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-17",
+      "name": "Kavita Iyer",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "kavita@lumasalon.example.com",
+      "employeeId": "staff-17",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-18",
+      "name": "Nikhil Bhatia",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "nikhil@lumasalon.example.com",
+      "employeeId": "staff-18",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-19",
+      "name": "Ishita Dutta",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "ishita@lumasalon.example.com",
+      "employeeId": "staff-19",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    },
+    {
+      "userId": "user-emp-20",
+      "name": "Varun Dhawan",
+      "role": "EMPLOYEE",
+      "normalizedEmail": "varun@lumasalon.example.com",
+      "employeeId": "staff-20",
+      "staffValidation": "VALID_MAPPING",
+      "authStatus": "NOT_PROVISIONED",
+      "proposedAction": "INVITE_AND_LINK",
+      "notes": "Supabase Auth invitation email will be dispatched and account linked to public.users."
+    }
+  ],
+  "summary": {
+    "totalUsers": 23,
+    "byRole": {
+      "OWNER": 2,
+      "RECEPTIONIST": 1,
+      "EMPLOYEE": 20
+    },
+    "uniqueEmails": 23,
+    "inviteAndLinkCount": 23,
+    "linkExistingCount": 0,
+    "skipAlreadyLinkedCount": 0,
+    "rejectErrorCount": 0
+  }
+}

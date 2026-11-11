@@ -1,0 +1,151 @@
+.reminders-sent-card {
+  margin-top: 1rem;
+  background: rgba(13, 19, 35, 0.95);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  animation: fadeInCard 0.25s ease forwards;
+}
+
+/* Banner */
+.sent-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sent-badge-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+  flex-shrink: 0;
+}
+
+.sent-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.sent-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.sent-subtitle {
+  font-size: 0.8125rem;
+  color: #34d399;
+}
+
+/* Meta Grid */
+.sent-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.85rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+}
+
+.sent-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sent-meta-label {
+  font-size: 0.71875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.sent-meta-val {
+  font-size: 0.875rem;
+  color: #f1f5f9;
+  font-weight: 600;
+}
+
+.sent-meta-val.highlight {
+  color: #34d399;
+}
+
+.sent-meta-val.channel {
+  color: #38bdf8;
+}
+
+/* Recipients Summary List */
+.sent-recipients-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.sent-recipient-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-sm);
+}
+
+.recipient-summary-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.recipient-summary-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.recipient-summary-service {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.recipient-summary-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.recipient-summary-phone {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.delivery-status-pill {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}

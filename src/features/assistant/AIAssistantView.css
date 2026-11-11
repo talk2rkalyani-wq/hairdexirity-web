@@ -1,0 +1,109 @@
+.assistant-view-container {
+  width: 100%;
+  min-height: calc(100vh - var(--header-height));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem 1.25rem 2.5rem 1.25rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.assistant-content-wrapper {
+  width: 100%;
+  max-width: var(--max-content-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.assistant-cards-flow {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.65rem;
+  margin: 1.25rem 0 0 0;
+}
+
+/* Conversation Active State */
+.in-conversation .ai-hero-section {
+  padding: 0.75rem 1rem 0.25rem 1rem;
+  transition: padding 0.3s ease;
+}
+
+.in-conversation .hero-title {
+  font-size: 2.15rem;
+  transition: font-size 0.3s ease;
+}
+
+.in-conversation .hero-subtitle {
+  display: none; /* Collapsed during active chat to prioritize results visibility */
+}
+
+.in-conversation .hero-decor-wrap {
+  opacity: 0.45;
+  width: 200px;
+  height: 200px;
+}
+
+.conversation-flow {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.compact-suggestions {
+  width: 100%;
+  max-width: var(--max-content-width);
+  margin-top: 0.5rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .assistant-view-container {
+    padding: 0.75rem 1rem 2rem 1rem;
+    max-width: 100vw;
+  }
+
+  .assistant-content-wrapper {
+    max-width: 100%;
+  }
+
+  .assistant-cards-flow {
+    gap: 1.35rem;
+    margin: 1rem 0 0 0;
+  }
+
+  .in-conversation .hero-title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .assistant-view-container {
+    padding: 0.5rem 0.75rem 1.5rem 0.75rem;
+  }
+
+  .in-conversation .hero-title {
+    font-size: 1.5rem;
+  }
+
+  .assistant-cards-flow {
+    gap: 1rem;
+  }
+}

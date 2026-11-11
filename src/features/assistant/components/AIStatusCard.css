@@ -1,0 +1,69 @@
+.ai-status-card {
+  width: 100%;
+  max-width: var(--max-content-width);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.65rem;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  transition: border-color var(--transition-normal);
+}
+
+.ai-status-card:hover {
+  border-color: rgba(168, 85, 247, 0.32);
+}
+
+.status-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ai-icon-badge {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--ai-badge-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 0.775rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+  flex-shrink: 0;
+}
+
+.status-label {
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: #7e8da6;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status-greeting {
+  font-size: 1.05rem;
+  color: #e2e8f0;
+  line-height: 1.55;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  max-width: 440px;
+}
+
+@media (max-width: 768px) {
+  .ai-status-card {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .status-greeting {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+}

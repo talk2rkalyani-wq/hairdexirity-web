@@ -1,0 +1,102 @@
+.reconciliation-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalScaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reconciliation-collections-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.recon-tile {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recon-tile-label {
+  font-size: 0.7rem;
+  color: #718096;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.recon-tile-val {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.recon-net-bar {
+  background: #edf2f7;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #4a5568;
+}
+
+.net-total-text {
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.read-only-input {
+  background-color: #f7fafc;
+  color: #4a5568;
+  cursor: default;
+}
+
+.form-control-lg {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 10px 14px;
+}
+
+.discrepancy-card {
+  padding: 10px 14px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.disc-status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.disc-balanced {
+  background: #f0fff4;
+  border: 1px solid #c6f6d5;
+  color: #276749;
+}
+
+.disc-surplus {
+  background: #ebf8ff;
+  border: 1px solid #bee3f8;
+  color: #2b6cb0;
+}
+
+.disc-shortage {
+  background: #fff5f5;
+  border: 1px solid #feb2b2;
+  color: #c53030;
+}
+

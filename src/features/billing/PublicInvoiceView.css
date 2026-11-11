@@ -1,0 +1,497 @@
+/* ==============================================================================
+   Luma Salon — Public Customer Invoice View Styles
+   Mobile-First, Responsive & Luxury Branding
+   ============================================================================== */
+
+.public-invoice-page-container {
+  min-height: 100vh;
+  background: #0f1113;
+  color: #1a1d20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px 40px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Loading & Error Cards */
+.public-loading-card,
+.public-error-card {
+  margin-top: 80px;
+  background: #ffffff;
+  padding: 40px 32px;
+  border-radius: 12px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.public-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(197, 160, 89, 0.2);
+  border-top-color: #c5a059;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  animation: publicSpin 0.8s linear infinite;
+}
+
+@keyframes publicSpin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1d20;
+  margin: 0;
+}
+
+.loading-sub {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.error-icon-badge {
+  color: #dc2626;
+  margin-bottom: 12px;
+}
+
+.error-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1a1d20;
+  margin: 0;
+}
+
+.error-description {
+  font-size: 0.88rem;
+  color: #475569;
+  margin: 10px 0 24px;
+  line-height: 1.5;
+}
+
+.salon-support-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.support-heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.support-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.support-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #1a1d20;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.support-link:hover {
+  color: #c5a059;
+}
+
+/* Floating Top Navigation */
+.public-top-nav {
+  width: 100%;
+  max-width: 800px;
+  padding: 16px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.brand-primary {
+  color: #ffffff;
+}
+
+.brand-secondary {
+  color: #c5a059;
+}
+
+.btn-public-download-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #c5a059;
+  color: #1a1d20;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-public-download-top:hover {
+  background: #b08d46;
+}
+
+/* Main Digital Invoice Card */
+.public-invoice-card {
+  background: #ffffff;
+  max-width: 800px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  position: relative;
+  padding: 32px;
+}
+
+.card-brand-stripe {
+  height: 4px;
+  background: #c5a059;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.public-header-section {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #edf0f4;
+  padding-bottom: 20px;
+}
+
+.salon-name {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1a1d20;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.salon-tag {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #c5a059;
+  letter-spacing: 1px;
+  display: block;
+  margin-top: 2px;
+}
+
+.salon-meta-text {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.invoice-meta-right {
+  text-align: right;
+}
+
+.doc-type-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.inv-code-display {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #c5a059;
+  margin: 2px 0 4px;
+}
+
+.inv-date-display {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.status-badge-wrap {
+  margin-top: 8px;
+}
+
+.public-status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.public-status-badge.paid { background: #dcfce7; color: #15803d; }
+.public-status-badge.partial { background: #fef3c7; color: #b45309; }
+.public-status-badge.unpaid { background: #fee2e2; color: #b91c1c; }
+
+/* Customer Banner */
+.customer-banner {
+  display: flex;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 20px 0;
+}
+
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #c5a059;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: block;
+}
+
+.customer-name,
+.tender-name {
+  font-size: 0.95rem;
+  color: #1e293b;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Items Table */
+.table-wrapper {
+  overflow-x: auto;
+  margin: 10px 0 24px;
+}
+
+.public-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.public-items-table th {
+  background: #1a1d20;
+  color: #ffffff;
+  padding: 9px 12px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-align: left;
+}
+
+.public-items-table td {
+  padding: 12px;
+  border-bottom: 1px solid #edf0f4;
+  color: #334155;
+}
+
+.public-items-table tbody tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+.item-name-bold {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.item-type-tag {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.item-total-col {
+  font-weight: 700;
+  color: #1a1d20;
+}
+
+/* Financials Split */
+.financials-split {
+  display: flex;
+  gap: 24px;
+  border-top: 1px solid #edf0f4;
+  padding-top: 20px;
+}
+
+.left-policies-col {
+  flex: 1;
+}
+
+.settlement-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px;
+}
+
+.payments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payment-row {
+  display: flex;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.p-method {
+  font-weight: 600;
+  color: #475569;
+}
+
+.p-amt {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.salon-terms {
+  margin-top: 24px;
+  font-size: 0.74rem;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.salon-terms strong {
+  color: #64748b;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.right-breakdown-box {
+  width: 280px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  color: #475569;
+}
+
+.breakdown-row.discount {
+  color: #dc2626;
+}
+
+.breakdown-row.total-highlight {
+  border-top: 1px solid #cbd5e1;
+  padding-top: 8px;
+  margin-top: 4px;
+  font-weight: 800;
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.breakdown-row .gold-text {
+  color: #c5a059;
+}
+
+.breakdown-row.paid-highlight {
+  font-weight: 700;
+}
+
+.breakdown-row .green-text {
+  color: #16a34a;
+}
+
+.breakdown-row.balance-highlight {
+  font-weight: 700;
+}
+
+.breakdown-row .red-text {
+  color: #dc2626;
+}
+
+.breakdown-row.settled {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+/* Card Footer */
+.public-card-footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #edf0f4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-download-pdf-large {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #1a1d20;
+  color: #ffffff;
+  width: 100%;
+  max-width: 320px;
+  padding: 13px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-download-pdf-large:hover {
+  background: #2b3036;
+  transform: translateY(-1px);
+}
+
+.security-guarantee-note {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+  .public-invoice-card {
+    padding: 20px 16px;
+  }
+  .public-header-section {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .invoice-meta-right {
+    text-align: left;
+  }
+  .financials-split {
+    flex-direction: column-reverse;
+    gap: 16px;
+  }
+  .right-breakdown-box {
+    width: 100%;
+  }
+}
+

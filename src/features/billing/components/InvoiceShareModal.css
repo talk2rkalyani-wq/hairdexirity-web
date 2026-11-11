@@ -1,0 +1,455 @@
+/* ==============================================================================
+   Luma Salon — Invoice Sharing & Link Management Modal Styles
+   ============================================================================== */
+
+.share-modal-card {
+  max-width: 620px;
+  width: 95%;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+  border: 1px solid #e5e8ec;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideUp 0.22s ease-out;
+}
+
+@keyframes modalSlideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.share-modal-header {
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid #edf0f4;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: #fafbfc;
+}
+
+.share-modal-header .modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1d20;
+  margin: 0;
+}
+
+.invoice-meta-sub {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-top: 4px;
+  display: block;
+}
+
+.share-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.share-alert.success-alert {
+  background: #eef8f2;
+  color: #1e7e45;
+  border-bottom: 1px solid #d4edd9;
+}
+
+.share-alert.error-alert {
+  background: #fdeeee;
+  color: #b91c1c;
+  border-bottom: 1px solid #f8d7da;
+}
+
+.share-tabs-nav {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 0 16px;
+  gap: 4px;
+}
+
+.share-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.share-tab-btn:hover {
+  color: #1e293b;
+}
+
+.share-tab-btn.active {
+  color: #c5a059;
+  border-bottom-color: #c5a059;
+}
+
+.share-modal-content {
+  padding: 20px 24px;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Tab 1: Link & PDF */
+.quick-actions-bar {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-download-pdf-hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #1a1d20;
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.btn-download-pdf-hero:hover {
+  background: #2b3036;
+  transform: translateY(-1px);
+}
+
+.btn-preview-hero {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  color: #334155;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+}
+
+.btn-preview-hero:hover {
+  background: #e2e8f0;
+}
+
+.link-box-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f8fafc;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.link-input-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.link-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.link-input-field {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  font-family: monospace;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #1e293b;
+}
+
+.btn-copy-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #c5a059;
+  color: #ffffff;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-copy-link:hover {
+  background: #b08d46;
+}
+
+.btn-copy-link.copied {
+  background: #16a34a;
+}
+
+.link-security-note {
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+/* WhatsApp & Email Tab */
+.form-group-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group-row label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.input-text-standard {
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+}
+
+.input-text-standard:focus {
+  border-color: #c5a059;
+  box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.15);
+}
+
+.input-hint.warn {
+  font-size: 0.76rem;
+  color: #d97706;
+  margin-top: 3px;
+}
+
+.message-preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preview-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.message-bubble {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.message-bubble.whatsapp-bubble {
+  background: #eefcf3;
+  border-color: #c6f6d5;
+}
+
+.message-bubble.email-bubble {
+  background: #f8fafc;
+}
+
+.message-bubble pre {
+  margin: 0;
+  font-family: inherit;
+  font-size: 0.82rem;
+  color: #1e293b;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.share-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.btn-share-channel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn-share-channel.whatsapp {
+  background: #25d366;
+  color: #ffffff;
+}
+
+.btn-share-channel.email {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn-share-channel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tab 4: Link Controls */
+.manage-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #edf0f4;
+  padding-bottom: 12px;
+}
+
+.manage-section-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.manage-sub {
+  margin: 3px 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.btn-secondary-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #334155;
+  cursor: pointer;
+}
+
+.btn-secondary-action:hover {
+  background: #f1f5f9;
+}
+
+.shares-table-wrap {
+  overflow-x: auto;
+}
+
+.shares-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.shares-table th,
+.shares-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.shares-table th {
+  font-weight: 600;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.share-status-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.share-status-pill.active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.share-status-pill.revoked {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.share-status-pill.expired {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.btn-revoke-share {
+  background: none;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-revoke-share:hover {
+  background: #fef2f2;
+}
+
+.share-modal-footer {
+  padding: 14px 24px;
+  border-top: 1px solid #edf0f4;
+  display: flex;
+  justify-content: flex-end;
+  background: #fafbfc;
+}
+
+.btn-done {
+  padding: 9px 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #334155;
+  cursor: pointer;
+}
+
+.btn-done:hover {
+  background: #e2e8f0;
+}
+

@@ -1,0 +1,310 @@
+/* Stock Adjustment Modal Styles - Luma Luxury Theme */
+
+.stock-adj-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 15, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stock-adj-card {
+  background: #161a23;
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(197, 160, 89, 0.2);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 520px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stock-adj-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.stock-adj-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.stock-adj-product-summary {
+  padding: 1rem 1.5rem;
+  background: rgba(197, 160, 89, 0.06);
+  border-bottom: 1px solid rgba(197, 160, 89, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stock-adj-prod-name {
+  font-weight: 600;
+  color: #f1f5f9;
+  font-size: 0.95rem;
+}
+
+.stock-adj-prod-meta {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  margin-top: 0.15rem;
+}
+
+.stock-adj-current-badge {
+  text-align: right;
+}
+
+.stock-adj-current-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stock-adj-current-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #c5a059;
+}
+
+.stock-adj-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.stock-adj-type-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.stock-adj-type-btn {
+  padding: 0.65rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.5);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.stock-adj-type-btn.active.add {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.stock-adj-type-btn.active.deduct {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.stock-adj-type-btn.active.return {
+  background: rgba(236, 72, 153, 0.15);
+  color: #f472b6;
+  border-color: rgba(236, 72, 153, 0.4);
+}
+
+.stock-adj-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.stock-adj-label {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.stock-adj-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stock-adj-input {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 0.65rem 0.85rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.stock-adj-input:focus {
+  outline: none;
+  border-color: #c5a059;
+  box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.2);
+}
+
+.stock-adj-unit-tag {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0 0.5rem;
+}
+
+.stock-adj-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.85rem;
+}
+
+.stock-adj-preview-val {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.stock-adj-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.stock-adj-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.stock-adj-chip:hover {
+  background: rgba(197, 160, 89, 0.15);
+  border-color: rgba(197, 160, 89, 0.3);
+  color: #f1f5f9;
+}
+
+.stock-adj-textarea {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.85rem;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.stock-adj-textarea:focus {
+  outline: none;
+  border-color: #c5a059;
+}
+
+.stock-adj-footer {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.btn-adj-cancel {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-adj-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.btn-adj-confirm {
+  background: #c5a059;
+  border: none;
+  color: #0d1117;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.15s ease;
+}
+
+.btn-adj-confirm:hover:not(:disabled) {
+  background: #d4b16a;
+  transform: translateY(-1px);
+}
+
+.btn-adj-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .stock-adj-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .stock-adj-card {
+    max-width: 100%;
+    max-height: 94vh;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+  }
+
+  .stock-adj-header {
+    padding: 1.25rem 1.25rem 1rem 1.25rem;
+  }
+
+  .stock-adj-body {
+    padding: 1.15rem;
+    gap: 1rem;
+  }
+
+  .stock-adj-footer {
+    padding: 1rem 1.25rem calc(1rem + var(--safe-area-bottom)) 1.25rem;
+  }
+
+  .btn-adj-cancel,
+  .btn-adj-confirm {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .stock-adj-type-btn {
+    padding: 0.55rem 0.25rem;
+    font-size: 0.75rem;
+  }
+}
+

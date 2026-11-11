@@ -1,0 +1,124 @@
+/* ==========================================================================
+   Luma Salon — Booking Confirmation Card Styling
+   ========================================================================== */
+
+.booking-confirmed-card {
+  background: rgba(10, 22, 22, 0.9);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 1px rgba(16, 185, 129, 0.4);
+  max-width: 520px;
+  animation: confirmPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes confirmPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Banner */
+.confirmed-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding-bottom: 12px;
+}
+
+.confirmed-badge-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+.confirmed-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.confirmed-title {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 0.01em;
+}
+
+.confirmed-subtitle {
+  font-size: 0.76rem;
+  color: #94a3b8;
+}
+
+/* Grid */
+.confirmed-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 16px;
+}
+
+.confirmed-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.confirmed-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.confirmed-val {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.confirmed-val.highlight {
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.confirmed-val.time-val {
+  color: #818cf8;
+  font-weight: 600;
+}
+
+.confirmed-val.price-val {
+  color: #34d399;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.confirmed-val.id-val {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.confirmed-val.status-val {
+  color: #34d399;
+  font-weight: 600;
+}
+

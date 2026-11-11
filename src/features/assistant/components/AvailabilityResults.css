@@ -1,0 +1,70 @@
+/* ==========================================================================
+   Luma Salon — Availability Results Styling
+   ========================================================================== */
+
+.avail-results-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.avail-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* No Results Factual Box */
+.avail-no-results-box {
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.avail-no-results-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fbbf24;
+}
+
+.avail-no-results-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.avail-reason-text {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.avail-service-reminder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.reminder-label {
+  font-weight: 500;
+}
+
+.reminder-val {
+  color: #e2e8f0;
+  font-weight: 600;
+}

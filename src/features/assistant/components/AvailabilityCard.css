@@ -1,0 +1,157 @@
+/* ==========================================================================
+   Luma Salon — Availability Card Styling
+   ========================================================================== */
+
+.avail-card {
+  background: rgba(13, 19, 33, 0.85);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.avail-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+/* Header */
+.avail-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.avail-staff-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avail-staff-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.avail-role-badge {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.avail-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.avail-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+/* Available Window Box */
+.avail-window-box {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.avail-window-time {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.avail-window-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.avail-window-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.avail-hours-sub {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* Skills Row */
+.avail-skills-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.avail-skills-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.avail-skills-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.avail-skill-tag {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* Checklist */
+.avail-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.avail-check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.avail-check-icon {
+  color: #34d399;
+  font-weight: 700;
+}

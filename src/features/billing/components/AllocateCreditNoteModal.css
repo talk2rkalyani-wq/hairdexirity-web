@@ -1,0 +1,54 @@
+.allocate-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalScaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.credit-summary-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.summary-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  color: #718096;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.summary-val {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: #718096;
+  margin-top: 2px;
+}
+
+.no-invoices-notice {
+  font-size: 0.85rem;
+  color: #a0aec0;
+  font-style: italic;
+  padding: 8px 0;
+}
+

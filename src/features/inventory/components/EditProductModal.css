@@ -1,0 +1,194 @@
+/* Edit Product Modal Styles - Luma Luxury Theme */
+
+.edit-prod-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 15, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.edit-prod-card {
+  background: #161a23;
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(197, 160, 89, 0.2);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.edit-prod-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.edit-prod-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.edit-prod-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.edit-prod-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .edit-prod-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.edit-prod-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.edit-prod-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.edit-prod-input,
+.edit-prod-select,
+.edit-prod-textarea {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.875rem;
+}
+
+.edit-prod-input:focus,
+.edit-prod-select:focus,
+.edit-prod-textarea:focus {
+  outline: none;
+  border-color: #c5a059;
+  box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.2);
+}
+
+.edit-prod-textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.edit-prod-field-error {
+  color: #f87171;
+  font-size: 0.75rem;
+}
+
+.edit-prod-footer {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  position: sticky;
+  bottom: 0;
+  background: #161a23;
+  z-index: 10;
+}
+
+.btn-edit-cancel {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-edit-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.btn-edit-confirm {
+  background: #c5a059;
+  border: none;
+  color: #0d1117;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.15s ease;
+}
+
+.btn-edit-confirm:hover:not(:disabled) {
+  background: #d4b16a;
+  transform: translateY(-1px);
+}
+
+.btn-edit-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .edit-prod-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .edit-prod-card {
+    max-width: 100%;
+    max-height: 94vh;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+  }
+
+  .edit-prod-header {
+    padding: 1.25rem 1.25rem 1rem 1.25rem;
+  }
+
+  .edit-prod-body {
+    padding: 1.15rem;
+    gap: 1rem;
+  }
+
+  .edit-prod-footer {
+    padding: 1rem 1.25rem calc(1rem + var(--safe-area-bottom)) 1.25rem;
+  }
+
+  .btn-edit-cancel,
+  .btn-edit-confirm {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+}
+

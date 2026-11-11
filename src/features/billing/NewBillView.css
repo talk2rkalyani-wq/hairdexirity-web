@@ -1,0 +1,305 @@
+/* NewBillView.css — Professional Salon POS */
+.pos-screen-layout {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 70px);
+  gap: 0.75rem;
+  overflow: hidden;
+  color: #f1f5f9;
+}
+
+.pos-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.header-meta-left {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.screen-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.pos-screen-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+}
+
+.resuming-draft-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 9999px;
+  color: #fbbf24;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.pos-date-time {
+  font-size: 0.775rem;
+  color: #94a3b8;
+}
+
+.header-controls-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.customer-selection-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.walkin-toggle-btn-group {
+  display: inline-flex;
+  background: #090e1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.walkin-btn {
+  padding: 0.4rem 0.75rem;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.775rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.walkin-btn:hover {
+  color: #f1f5f9;
+}
+
+.walkin-btn.active {
+  background: #7c3aed;
+  color: #ffffff;
+}
+
+.client-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  position: relative;
+}
+
+.search-autocomplete-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-autocomplete-box .search-icon {
+  position: absolute;
+  left: 0.6rem;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.client-search-input {
+  width: 220px;
+  padding: 0.4rem 0.6rem 0.4rem 1.8rem;
+  background: #090e1a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #f8fafc;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.client-search-input:focus {
+  border-color: #8b5cf6;
+}
+
+.client-dropdown-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  margin-top: 4px;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+.client-result-item {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.client-result-item:hover {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.client-result-item .item-name {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.client-result-item .item-phone {
+  font-size: 0.725rem;
+  color: #94a3b8;
+}
+
+.selected-client-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.selected-client-badge .user-icon {
+  color: #a78bfa;
+}
+
+.selected-client-badge .client-name {
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.selected-client-badge .client-phone {
+  color: #cbd5e1;
+  font-size: 0.725rem;
+}
+
+.btn-clear-client {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.btn-clear-client:hover {
+  color: #f87171;
+}
+
+.btn-quick-add-client {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.65rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #cbd5e1;
+  font-size: 0.775rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.btn-quick-add-client:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.appointment-link-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.appointment-link-wrap .appt-icon {
+  position: absolute;
+  left: 0.6rem;
+  color: #8b5cf6;
+  pointer-events: none;
+}
+
+.appt-select {
+  padding: 0.4rem 0.75rem 0.4rem 2rem;
+  background: #090e1a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #f1f5f9;
+  font-size: 0.8rem;
+  outline: none;
+  cursor: pointer;
+  max-width: 260px;
+}
+
+.appt-select:focus {
+  border-color: #8b5cf6;
+}
+
+.pos-main-workspace {
+  display: grid;
+  grid-template-columns: 1.15fr 1.35fr;
+  gap: 0.75rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.pos-column-left {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pos-column-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.cart-pane-top {
+  flex-shrink: 0;
+}
+
+.summary-pane-bottom {
+  flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+  .pos-screen-layout {
+    height: auto;
+    overflow: visible;
+  }
+  .pos-main-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+

@@ -1,0 +1,284 @@
+/* ==========================================================================
+   Delete Confirmation Modal Styles - Luma Salon Luxury Theme
+   ========================================================================== */
+
+.delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10, 8, 18, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  animation: deleteModalFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delete-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(135deg, rgba(30, 24, 45, 0.98), rgba(20, 16, 32, 0.98));
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 20px;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.65),
+    0 0 35px rgba(239, 68, 68, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  padding: 2rem 1.75rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+  animation: deleteModalCardPop 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delete-modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-modal-close-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.delete-modal-close-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Destructive Badge Wrap */
+.delete-modal-icon-wrap {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(185, 28, 28, 0.35));
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
+}
+
+.delete-icon-pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 22px;
+  border: 1.5px solid rgba(239, 68, 68, 0.4);
+  animation: deletePulseRing 2.2s infinite ease-out;
+  pointer-events: none;
+}
+
+.delete-modal-icon {
+  color: #ef4444;
+  filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.4));
+}
+
+/* Modal Content */
+.delete-modal-body {
+  width: 100%;
+}
+
+.delete-modal-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #f9fafb;
+  letter-spacing: -0.02em;
+}
+
+.delete-modal-desc {
+  margin: 0 0 1rem 0;
+  font-size: 0.93rem;
+  line-height: 1.45;
+  color: #d1d5db;
+}
+
+.delete-modal-warning-callout {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fca5a5;
+  margin-bottom: 1rem;
+}
+
+.warning-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+}
+
+.delete-modal-error-banner {
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  background: rgba(185, 28, 28, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: left;
+  font-size: 0.84rem;
+  color: #fecaca;
+}
+
+/* Modal Actions */
+.delete-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.delete-btn-cancel,
+.delete-btn-confirm {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.delete-btn-cancel {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e5e7eb;
+}
+
+.delete-btn-cancel:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.delete-btn-confirm {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: 1px solid rgba(239, 68, 68, 0.6);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+}
+
+.delete-btn-confirm:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f87171, #ef4444);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.55);
+  transform: translateY(-1px);
+}
+
+.delete-btn-cancel:disabled,
+.delete-btn-confirm:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Spinner */
+.delete-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: deleteSpin 0.7s linear infinite;
+}
+
+@keyframes deleteModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes deleteModalCardPop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes deletePulseRing {
+  0% {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+@keyframes deleteSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .delete-modal-overlay {
+    padding: 0.75rem;
+  }
+
+  .delete-modal-card {
+    padding: 1.5rem 1.25rem 1.25rem;
+    border-radius: 16px;
+    max-width: 100%;
+  }
+
+  .delete-modal-title {
+    font-size: 1.2rem;
+  }
+
+  .delete-modal-desc {
+    font-size: 0.86rem;
+  }
+
+  .delete-modal-actions {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .delete-btn-cancel,
+  .delete-btn-confirm {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}

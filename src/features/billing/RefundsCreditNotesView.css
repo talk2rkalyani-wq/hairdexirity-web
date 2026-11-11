@@ -1,0 +1,280 @@
+.refunds-credit-notes-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.rc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.rc-header-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #c5a059;
+  letter-spacing: 0.05em;
+}
+
+.rc-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c5a059;
+}
+
+.rc-header h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1a202c;
+  margin: 0;
+}
+
+.rc-subtitle {
+  font-size: 0.9rem;
+  color: #718096;
+  margin: 0;
+}
+
+.rc-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rc-tabs-bar {
+  display: flex;
+  border-bottom: 2px solid #edf2f7;
+  gap: 8px;
+}
+
+.rc-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 12px 18px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #718096;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: -2px;
+}
+
+.rc-tab-btn:hover {
+  color: #1a202c;
+}
+
+.rc-tab-btn.active {
+  color: #c5a059;
+  border-bottom-color: #c5a059;
+}
+
+.rc-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.rc-metrics-grid.four-col {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.rc-metric-card {
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.rc-metric-card.highlight-danger {
+  border-color: #feb2b2;
+  background: #fffafa;
+}
+
+.rc-metric-card.highlight-gold {
+  border-color: rgba(197, 160, 89, 0.4);
+  background: #fdfbf7;
+}
+
+.text-danger {
+  color: #e53e3e;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.rc-toolbar {
+  display: flex;
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.rc-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 400px;
+}
+
+.rc-search-bar input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.88rem;
+  color: #1a202c;
+  outline: none;
+}
+
+.rc-table-container {
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.rc-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rc-table th {
+  background: #f8fafc;
+  padding: 12px 18px;
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: #64748b;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.rc-table td {
+  padding: 14px 18px;
+  font-size: 0.88rem;
+  color: #2d3748;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.rc-table tr:hover td {
+  background-color: #fafbfc;
+}
+
+.mono-ref {
+  font-family: monospace;
+  font-size: 0.82rem;
+  color: #4a5568;
+}
+
+.method-pill {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #edf2f7;
+  color: #4a5568;
+}
+
+.reason-text {
+  font-size: 0.82rem;
+  color: #4a5568;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.status-completed,
+.status-active {
+  background: #f0fff4;
+  color: #276749;
+}
+
+.status-fully_applied {
+  background: #ebf8ff;
+  color: #2b6cb0;
+}
+
+.status-pending_approval {
+  background: #fefcbf;
+  color: #744210;
+}
+
+.status-rejected,
+.status-cancelled {
+  background: #fff5f5;
+  color: #c53030;
+}
+
+.btn-apply-credit {
+  background: #c5a059;
+  color: #ffffff;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-apply-credit:hover {
+  background: #b38f49;
+}
+
+.rc-loading-state,
+.rc-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 20px;
+  gap: 12px;
+  color: #a0aec0;
+}
+
+.rc-empty-state h3 {
+  margin: 0;
+  color: #4a5568;
+}
+
+.rc-empty-state p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+

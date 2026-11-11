@@ -1,0 +1,225 @@
+/* ==========================================================================
+   Luma Salon — Booking Preview Card Styling
+   ========================================================================== */
+
+.booking-preview-card {
+  background: rgba(13, 19, 34, 0.9);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 1px rgba(168, 85, 247, 0.4);
+  max-width: 520px;
+  animation: previewFadeIn 0.25s ease-out;
+}
+
+@keyframes previewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding-bottom: 12px;
+}
+
+.preview-kicker {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #c084fc;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+}
+
+.preview-title {
+  margin: 2px 0 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #f8fafc;
+}
+
+.preview-status-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Grid */
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 16px;
+}
+
+.preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.preview-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.preview-value {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.preview-value.highlight {
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.preview-value.time-val {
+  color: #818cf8;
+  font-weight: 600;
+}
+
+.preview-value.price-val {
+  color: #34d399;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.preview-value.status-val {
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+/* Safety Note */
+.preview-safety-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.76rem;
+  color: #94a3b8;
+}
+
+.preview-safety-note svg {
+  color: #c084fc;
+  flex-shrink: 0;
+}
+
+/* Actions */
+.preview-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.btn-confirm-booking {
+  flex: 1.5;
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);
+  transition: all 0.15s ease;
+}
+
+.btn-confirm-booking:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.45);
+  opacity: 0.95;
+}
+
+.btn-confirm-booking:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-cancel-booking {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-cancel-booking:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.09);
+  color: #f8fafc;
+}
+
+.btn-cancel-booking:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .booking-preview-card {
+    padding: 14px 14px;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .preview-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+  }
+
+  .preview-title {
+    font-size: 0.95rem;
+  }
+
+  .btn-confirm-booking,
+  .btn-cancel-booking {
+    padding: 10px 12px;
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-actions {
+    flex-direction: column;
+  }
+}

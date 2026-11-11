@@ -1,0 +1,388 @@
+/* ==============================================================================
+   Luma Salon — Invoice History Register Styles (`billing/invoices`)
+   ============================================================================== */
+
+.invoice-history-view-container {
+  padding: 24px;
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.history-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-icon {
+  color: #c5a059;
+}
+
+.screen-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #1a1d20;
+  margin: 0;
+}
+
+.screen-subtext {
+  font-size: 0.84rem;
+  color: #64748b;
+  margin-top: 3px;
+  display: block;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-refresh-history {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-refresh-history:hover {
+  background: #f8fafc;
+}
+
+.btn-refresh-history .spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.btn-new-bill-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #c5a059;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1a1d20;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-new-bill-shortcut:hover {
+  background: #b08d46;
+}
+
+/* KPI Cards Grid */
+.history-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.history-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.history-kpi-card .kpi-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.history-kpi-card .kpi-value {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #1a1d20;
+  margin: 6px 0 2px;
+}
+
+.history-kpi-card .kpi-value.collected {
+  color: #16a34a;
+}
+
+.history-kpi-card .kpi-value.receivables {
+  color: #d97706;
+}
+
+.history-kpi-card .kpi-sub {
+  font-size: 0.74rem;
+  color: #94a3b8;
+}
+
+/* Filter and Search Bar */
+.history-filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 18px;
+  gap: 16px;
+}
+
+.search-box-wrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-box-wrap .search-icon {
+  position: absolute;
+  left: 12px;
+  color: #94a3b8;
+}
+
+.search-input {
+  width: 100%;
+  padding: 9px 36px 9px 38px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #c5a059;
+  box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.15);
+}
+
+.btn-clear-search {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.filter-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.filter-pill {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.filter-pill:hover {
+  background: #e2e8f0;
+}
+
+.filter-pill.active {
+  background: #1a1d20;
+  color: #ffffff;
+  border-color: #1a1d20;
+}
+
+.tender-select {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #334155;
+  outline: none;
+}
+
+/* Table Card */
+.history-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.invoices-register-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.invoices-register-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.invoices-register-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.invoices-register-table tbody tr:hover {
+  background: #fafbfc;
+}
+
+.inv-num-btn {
+  background: none;
+  border: none;
+  color: #c5a059;
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.inv-num-btn:hover {
+  color: #9e7d3b;
+}
+
+.cust-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.tender-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.tender-badge.cash { background: #dcfce7; color: #15803d; }
+.tender-badge.upi { background: #e0e7ff; color: #4338ca; }
+.tender-badge.card { background: #fef3c7; color: #b45309; }
+.tender-badge.bank { background: #f3e8ff; color: #7e22ce; }
+.tender-badge.split { background: #ffedd5; color: #c2410c; }
+
+.balance-due-text {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.balance-zero-text {
+  color: #94a3b8;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.status-badge.paid { background: #dcfce7; color: #15803d; }
+.status-badge.partial,
+.status-badge.partially_paid { background: #fef3c7; color: #b45309; }
+.status-badge.unpaid { background: #fee2e2; color: #b91c1c; }
+
+.action-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px 7px;
+  border-radius: 4px;
+  margin-left: 2px;
+  transition: background 0.12s ease;
+}
+
+.action-icon-btn:hover {
+  background: #f1f5f9;
+}
+
+.action-icon-btn.download { color: #1a1d20; }
+.action-icon-btn.share { color: #c5a059; }
+.action-icon-btn.preview { color: #64748b; }
+
+.empty-history-state {
+  padding: 48px 24px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.empty-history-state h4 {
+  font-size: 1.05rem;
+  color: #475569;
+  margin: 12px 0 6px;
+}
+
+.empty-history-state p {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .history-kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .history-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-pills-row {
+    flex-wrap: wrap;
+  }
+}
+

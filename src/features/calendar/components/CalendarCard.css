@@ -1,0 +1,210 @@
+/* Calendar Appointment Card Styles - Luma Luxury Dark Design System */
+
+.cal-appointment-card {
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.65rem 0.75rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.cal-appointment-card:hover {
+  transform: translateY(-1px) scale(1.01);
+  z-index: 10;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5);
+}
+
+.cal-appointment-card:focus-visible {
+  outline: 2px solid #c084fc;
+  outline-offset: 2px;
+}
+
+.cal-card-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+/* Header Row: Time & Status Pill */
+.cal-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.cal-time-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #cbd5e1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-status-pill {
+  font-size: 0.66rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* Status Themes */
+/* Checked In */
+.theme-checkedin {
+  border-left: 3px solid #eab308;
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.16) 0%, rgba(15, 23, 42, 0.9) 100%);
+}
+.theme-checkedin .pill-checked_in {
+  background: rgba(234, 179, 8, 0.22);
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.35);
+}
+
+/* In Progress */
+.theme-inprogress {
+  border-left: 3px solid #a855f7;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.18) 0%, rgba(15, 23, 42, 0.9) 100%);
+}
+.theme-inprogress .pill-in_progress {
+  background: rgba(168, 85, 247, 0.25);
+  color: #d8b4fe;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+/* Confirmed */
+.theme-confirmed {
+  border-left: 3px solid #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(15, 23, 42, 0.9) 100%);
+}
+.theme-confirmed .pill-confirmed {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Scheduled */
+.theme-scheduled {
+  border-left: 3px solid #6366f1;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.14) 0%, rgba(15, 23, 42, 0.9) 100%);
+}
+.theme-scheduled .pill-scheduled {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+/* Completed */
+.theme-completed {
+  border-left: 3px solid #06b6d4;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(15, 23, 42, 0.9) 100%);
+}
+.theme-completed .pill-completed {
+  background: rgba(6, 182, 212, 0.2);
+  color: #67e8f9;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+/* Cancelled */
+.theme-cancelled {
+  border-left: 3px solid #f43f5e;
+  border-style: dashed;
+  opacity: 0.72;
+  background: rgba(15, 23, 42, 0.7);
+}
+.theme-cancelled .pill-cancelled {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fda4af;
+  border: 1px solid rgba(244, 63, 94, 0.25);
+}
+
+/* No-show */
+.theme-noshow {
+  border-left: 3px solid #f59e0b;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(15, 23, 42, 0.9) 100%);
+}
+.theme-noshow .pill-no-show {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Body: Client & Service */
+.cal-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.cal-client-name {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-service-name {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Footer: Stylist & Price */
+.cal-card-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.74rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cal-staff-name {
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-price-text {
+  color: #f1f5f9;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* Compact layout for week column */
+.card-compact {
+  padding: 0.45rem 0.55rem;
+}
+
+.card-compact .cal-client-name {
+  font-size: 0.82rem;
+}
+
+.card-compact .cal-service-name {
+  font-size: 0.72rem;
+}
+
+.card-compact .cal-time-badge {
+  font-size: 0.68rem;
+}

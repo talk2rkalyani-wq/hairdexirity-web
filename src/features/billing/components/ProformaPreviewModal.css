@@ -1,0 +1,252 @@
+.proforma-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 650px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.proforma-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+}
+
+.proforma-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.proforma-modal-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.proforma-modal-subtitle {
+  margin: 0.2rem 0 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.proforma-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 0.25rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.proforma-close-btn:hover {
+  color: #1e293b;
+  background-color: #e2e8f0;
+}
+
+.proforma-not-invoice-banner {
+  background-color: #fff7ed;
+  border-bottom: 1px solid #fed7aa;
+  color: #c2410c;
+  padding: 0.65rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+}
+
+.proforma-alert {
+  margin: 1rem 1.5rem 0 1.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.proforma-modal-body {
+  padding: 1.25rem 1.5rem;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.proforma-loading {
+  text-align: center;
+  padding: 2.5rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.proforma-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.meta-lbl {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+
+.meta-val {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.meta-val.gold {
+  color: #c5a059;
+}
+
+.proforma-table-wrap {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.proforma-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.proforma-table th {
+  background-color: #f1f5f9;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  font-weight: 700;
+  color: #475569;
+}
+
+.proforma-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.sub-desc {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin-top: 0.15rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.bold {
+  font-weight: 700;
+}
+
+.proforma-totals-panel {
+  margin-left: auto;
+  width: 260px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+}
+
+.proforma-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.proforma-total-row.grand-total {
+  border-top: 1px solid #cbd5e1;
+  margin-top: 0.35rem;
+  padding-top: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.text-red {
+  color: #dc2626;
+}
+
+.proforma-modal-footer {
+  padding: 1rem 1.5rem;
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.btn-close-proforma {
+  padding: 0.6rem 1.25rem;
+  background-color: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-close-proforma:hover {
+  background-color: #f1f5f9;
+}
+
+.btn-download-proforma {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  background-color: #c5a059;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-download-proforma:hover:not(:disabled) {
+  background-color: #b38f47;
+}
+
+.btn-download-proforma:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

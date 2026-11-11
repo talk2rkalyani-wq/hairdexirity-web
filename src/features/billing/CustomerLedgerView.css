@@ -1,0 +1,424 @@
+.customer-ledger-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.cl-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.cl-header-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #c5a059;
+  letter-spacing: 0.05em;
+}
+
+.cl-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c5a059;
+}
+
+.cl-header h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1a202c;
+  margin: 0;
+}
+
+.cl-subtitle {
+  font-size: 0.9rem;
+  color: #718096;
+  margin: 0;
+}
+
+.cl-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cl-client-selector-card {
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.selector-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 300px;
+}
+
+.selector-field label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cl-client-select {
+  padding: 9px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a202c;
+  background: #f8fafc;
+  outline: none;
+}
+
+.cl-client-select:focus {
+  border-color: #c5a059;
+  box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.15);
+}
+
+.selected-client-profile {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.profile-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #a0aec0;
+}
+
+.detail-val {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.detail-val.mono {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+}
+
+.btn-reminder {
+  background: #fefcbf;
+  border: 1px solid #ecc94b;
+  color: #744210;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-reminder:hover {
+  background: #faf089;
+}
+
+.cl-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+
+.cl-summary-card {
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.cl-summary-card.highlight {
+  grid-column: span 1;
+}
+
+.sum-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #718096;
+  letter-spacing: 0.04em;
+}
+
+.sum-val {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1a202c;
+}
+
+.text-gold {
+  color: #c5a059;
+}
+
+.text-info {
+  color: #3182ce;
+}
+
+.balance-due {
+  border-color: #feb2b2;
+  background: #fff5f5;
+}
+
+.balance-due .balance-grand {
+  color: #e53e3e;
+}
+
+.balance-settled {
+  border-color: #c6f6d5;
+  background: #f0fff4;
+}
+
+.balance-settled .balance-grand {
+  color: #276749;
+}
+
+.sum-sub {
+  font-size: 0.75rem;
+  color: #a0aec0;
+}
+
+.cl-filter-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  padding: 12px 18px;
+}
+
+.cl-filter-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.filter-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #4a5568;
+}
+
+.date-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+.date-input {
+  padding: 6px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #2d3748;
+}
+
+.btn-clear-date {
+  background: #edf2f7;
+  border: none;
+  font-size: 0.78rem;
+  color: #4a5568;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-clear-date:hover {
+  background: #e2e8f0;
+}
+
+.tx-count {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #718096;
+}
+
+.cl-table-container {
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.cl-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cl-table th {
+  background: #f8fafc;
+  padding: 12px 18px;
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: #64748b;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.cl-table td {
+  padding: 14px 18px;
+  font-size: 0.88rem;
+  color: #2d3748;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cl-table tr:hover td {
+  background-color: #fafbfc;
+}
+
+.tx-date {
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.tx-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.tx-invoice {
+  background: #ebf8ff;
+  color: #2b6cb0;
+}
+
+.tx-payment {
+  background: #f0fff4;
+  color: #276749;
+}
+
+.tx-advance_received {
+  background: #fefcbf;
+  color: #744210;
+}
+
+.tx-refund {
+  background: #fff5f5;
+  color: #c53030;
+}
+
+.tx-credit_note {
+  background: #faf5ff;
+  color: #6b46c1;
+}
+
+.tx-ref {
+  font-family: monospace;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.tx-desc {
+  color: #4a5568;
+  font-size: 0.85rem;
+}
+
+.text-debit {
+  color: #c53030;
+  font-weight: 700;
+}
+
+.text-credit {
+  color: #276749;
+  font-weight: 700;
+}
+
+.text-muted {
+  color: #cbd5e0;
+}
+
+.text-balance {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.bal-positive {
+  color: #e53e3e;
+}
+
+.bal-negative {
+  color: #2f855a;
+}
+
+.bal-zero {
+  color: #718096;
+}
+
+.cl-loading-state,
+.cl-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 20px;
+  gap: 12px;
+  color: #a0aec0;
+}
+
+.cl-empty-state h3 {
+  margin: 0;
+  color: #4a5568;
+}
+
+.cl-empty-state p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+

@@ -1,0 +1,422 @@
+/* ==============================================================================
+   Luma Salon — Receptionist Check-In & Check-Out Desk Styles
+   ============================================================================== */
+
+.checkin-desk-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* KPI Summary Bar */
+.checkin-kpi-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.checkin-kpi-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  backdrop-filter: blur(8px);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.checkin-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.checkin-kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.checkin-kpi-icon.icon-waiting {
+  background: rgba(234, 179, 8, 0.15);
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.checkin-kpi-icon.icon-in-service {
+  background: rgba(6, 182, 212, 0.15);
+  color: #67e8f9;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+.checkin-kpi-icon.icon-expected {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.checkin-kpi-icon.icon-completed {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.checkin-kpi-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkin-kpi-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #f8fafc;
+  line-height: 1.1;
+}
+
+.checkin-kpi-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #94a3b8;
+  margin-top: 0.2rem;
+}
+
+/* Desk Controls Toolbar */
+.checkin-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.checkin-tabs-group {
+  display: flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.checkin-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 7px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.checkin-tab-btn:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.checkin-tab-btn.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.checkin-tab-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
+.checkin-tab-btn.active .checkin-tab-badge {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.checkin-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 12px;
+  min-width: 260px;
+}
+
+.checkin-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f8fafc;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.checkin-search-input::placeholder {
+  color: #64748b;
+}
+
+/* Appointment Queue Grid */
+.checkin-queue-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.25rem;
+}
+
+.checkin-item-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  backdrop-filter: blur(8px);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.checkin-item-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+.checkin-item-card.card-waiting {
+  border-left: 4px solid #eab308;
+}
+
+.checkin-item-card.card-in-progress {
+  border-left: 4px solid #06b6d4;
+}
+
+.checkin-item-card.card-expected {
+  border-left: 4px solid #6366f1;
+}
+
+.checkin-item-card.card-completed {
+  border-left: 4px solid #10b981;
+}
+
+/* Card Header */
+.checkin-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.checkin-client-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.checkin-client-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkin-client-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.checkin-vip-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(212, 175, 55, 0.2);
+  color: #f6d066;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.checkin-client-phone {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.checkin-time-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+/* Card Details */
+.checkin-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.025);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.checkin-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+}
+
+.checkin-detail-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.checkin-detail-value {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.checkin-stylist-assigned {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #38bdf8;
+}
+
+/* Status Alert / Timer Badge */
+.checkin-timer-alert {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.checkin-timer-alert.timer-waiting {
+  background: rgba(234, 179, 8, 0.12);
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.25);
+}
+
+.checkin-timer-alert.timer-inprogress {
+  background: rgba(6, 182, 212, 0.12);
+  color: #67e8f9;
+  border: 1px solid rgba(6, 182, 212, 0.25);
+}
+
+/* Card Actions */
+.checkin-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.btn-checkin-primary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+}
+
+.btn-checkin-primary.action-checkin {
+  background: #eab308;
+  color: #0f172a;
+}
+
+.btn-checkin-primary.action-checkin:hover {
+  background: #facc15;
+  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.35);
+}
+
+.btn-checkin-primary.action-startservice {
+  background: #06b6d4;
+  color: #0f172a;
+}
+
+.btn-checkin-primary.action-startservice:hover {
+  background: #22d3ee;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35);
+}
+
+.btn-checkin-primary.action-complete {
+  background: #10b981;
+  color: #0f172a;
+}
+
+.btn-checkin-primary.action-complete:hover {
+  background: #34d399;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.btn-checkin-secondary {
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-checkin-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+/* Empty Queue State */
+.checkin-empty-queue {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  text-align: center;
+  color: #64748b;
+  gap: 0.75rem;
+}
+
+.checkin-empty-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.checkin-empty-desc {
+  font-size: 0.85rem;
+  color: #64748b;
+  max-width: 380px;
+}
+

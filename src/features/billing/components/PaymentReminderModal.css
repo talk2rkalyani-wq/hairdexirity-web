@@ -1,0 +1,100 @@
+.reminder-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalScaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reminder-invoice-info {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.info-label {
+  color: #718096;
+}
+
+.info-val {
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.text-due {
+  color: #e53e3e;
+  font-weight: 700;
+}
+
+.channel-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.channel-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  background: #f7fafc;
+  color: #4a5568;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.channel-tab-btn.active {
+  background: #c5a059;
+  border-color: #c5a059;
+  color: #ffffff;
+}
+
+.reminder-preview-box {
+  background: #edf2f7;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.preview-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #718096;
+  font-weight: 700;
+}
+
+.preview-text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #2d3748;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.modal-alert-success {
+  background: #f0fff4;
+  color: #22543d;
+  border: 1px solid #9ae6b4;
+}
+

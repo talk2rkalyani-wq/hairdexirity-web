@@ -1,0 +1,1544 @@
+{
+  "exportedAt": "2026-10-31T10:45:33.018Z",
+  "projectRef": "ktlzrezhiopwwlzmycdw",
+  "targetUrl": "https://ktlzrezhiopwwlzmycdw.supabase.co",
+  "tables": {
+    "salons": {
+      "rowCount": 1,
+      "rows": [
+        {
+          "id": "salon-luma-01",
+          "name": "Luma Salon",
+          "owner_name": "Mia",
+          "phone": "+91 98765 43210",
+          "email": "contact@lumasalon.example.com",
+          "address": {},
+          "timezone": "Asia/Kolkata",
+          "currency": "INR",
+          "currency_symbol": "₹",
+          "language": "en",
+          "working_hours": {},
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        }
+      ]
+    },
+    "staff": {
+      "rowCount": 20,
+      "rows": [
+        {
+          "id": "staff-01",
+          "salon_id": "salon-luma-01",
+          "name": "Mia Vance",
+          "phone": "+91 98111 22334",
+          "email": "mia@lumasalon.example.com",
+          "role": "owner",
+          "skills": [
+            "Precision Cut",
+            "Balayage Specialist",
+            "Bridal Styling",
+            "Color Correction"
+          ],
+          "experience": "11 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-02",
+          "salon_id": "salon-luma-01",
+          "name": "Rohan Sen",
+          "phone": "+91 98111 33445",
+          "email": "rohan@lumasalon.example.com",
+          "role": "senior_stylist",
+          "skills": [
+            "Balayage & Foils",
+            "Blonde & Toning",
+            "Haircut",
+            "Smoothening"
+          ],
+          "experience": "7 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-03",
+          "salon_id": "salon-luma-01",
+          "name": "Ananya Roy",
+          "phone": "+91 98111 44556",
+          "email": "ananya@lumasalon.example.com",
+          "role": "colorist",
+          "skills": [
+            "Global Hair Color",
+            "Radiance Facial",
+            "Scalp Therapy",
+            "Keratin Treatment"
+          ],
+          "experience": "6 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-04",
+          "salon_id": "salon-luma-01",
+          "name": "Kabir Sharma",
+          "phone": "+91 98111 55667",
+          "email": "kabir@lumasalon.example.com",
+          "role": "junior_stylist",
+          "skills": [
+            "Hair Spa Rituals",
+            "Texture Styling",
+            "Classic Manicure",
+            "Pedicure"
+          ],
+          "experience": "4 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-05",
+          "salon_id": "salon-luma-01",
+          "name": "Pooja Patel",
+          "phone": "+91 98111 66778",
+          "email": "pooja@lumasalon.example.com",
+          "role": "senior_stylist",
+          "skills": [
+            "Haircut & Blowdry",
+            "Balayage & Toning",
+            "Hair Spa"
+          ],
+          "experience": "5 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-06",
+          "salon_id": "salon-luma-01",
+          "name": "Vikram Malhotra",
+          "phone": "+91 98111 77889",
+          "email": "vikram@lumasalon.example.com",
+          "role": "master_stylist",
+          "skills": [
+            "Precision Cut",
+            "Global Hair Color",
+            "Keratin Treatment"
+          ],
+          "experience": "8 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-07",
+          "salon_id": "salon-luma-01",
+          "name": "Sneha Reddy",
+          "phone": "+91 98111 88990",
+          "email": "sneha@lumasalon.example.com",
+          "role": "colorist",
+          "skills": [
+            "Radiance Facial",
+            "Scalp Therapy",
+            "Skin Glow"
+          ],
+          "experience": "4 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-08",
+          "salon_id": "salon-luma-01",
+          "name": "Arjun Kapoor",
+          "phone": "+91 98111 99001",
+          "email": "arjun@lumasalon.example.com",
+          "role": "senior_stylist",
+          "skills": [
+            "Haircut & Blowdry",
+            "Texture Styling",
+            "Balayage"
+          ],
+          "experience": "6 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-09",
+          "salon_id": "salon-luma-01",
+          "name": "Divya Nair",
+          "phone": "+91 98112 00112",
+          "email": "divya@lumasalon.example.com",
+          "role": "junior_stylist",
+          "skills": [
+            "Classic Manicure",
+            "Pedicure",
+            "Nail Art",
+            "Gel Polish"
+          ],
+          "experience": "3 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-10",
+          "salon_id": "salon-luma-01",
+          "name": "Karan Verma",
+          "phone": "+91 98112 11223",
+          "email": "karan@lumasalon.example.com",
+          "role": "senior_stylist",
+          "skills": [
+            "Balayage & Foils",
+            "Blonde & Toning",
+            "Haircut"
+          ],
+          "experience": "5 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-11",
+          "salon_id": "salon-luma-01",
+          "name": "Meera Joshi",
+          "phone": "+91 98112 22334",
+          "email": "meera@lumasalon.example.com",
+          "role": "colorist",
+          "skills": [
+            "Radiance Facial",
+            "Deep Cleansing",
+            "Scalp Therapy"
+          ],
+          "experience": "5 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-12",
+          "salon_id": "salon-luma-01",
+          "name": "Siddharth Rao",
+          "phone": "+91 98112 33445",
+          "email": "siddharth@lumasalon.example.com",
+          "role": "master_stylist",
+          "skills": [
+            "Haircut & Blowdry",
+            "Keratin Treatment",
+            "Balayage Specialist"
+          ],
+          "experience": "7 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-13",
+          "salon_id": "salon-luma-01",
+          "name": "Riya Sen",
+          "phone": "+91 98112 44556",
+          "email": "riya@lumasalon.example.com",
+          "role": "junior_stylist",
+          "skills": [
+            "Classic Manicure",
+            "Pedicure",
+            "Nail Art"
+          ],
+          "experience": "2 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-14",
+          "salon_id": "salon-luma-01",
+          "name": "Aditya Singhania",
+          "phone": "+91 98112 55667",
+          "email": "aditya@lumasalon.example.com",
+          "role": "senior_stylist",
+          "skills": [
+            "Global Hair Color",
+            "Hair Spa & Deep Conditioning",
+            "Haircut"
+          ],
+          "experience": "5 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-15",
+          "salon_id": "salon-luma-01",
+          "name": "Tanvi Deshmukh",
+          "phone": "+91 98112 66778",
+          "email": "tanvi@lumasalon.example.com",
+          "role": "colorist",
+          "skills": [
+            "Radiance Facial",
+            "Skin Glow",
+            "Ayurvedic Rituals"
+          ],
+          "experience": "4 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-16",
+          "salon_id": "salon-luma-01",
+          "name": "Manish Gupta",
+          "phone": "+91 98112 77889",
+          "email": "manish@lumasalon.example.com",
+          "role": "junior_stylist",
+          "skills": [
+            "Hair Spa Rituals",
+            "Texture Styling",
+            "Haircut & Blowdry"
+          ],
+          "experience": "3 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-17",
+          "salon_id": "salon-luma-01",
+          "name": "Kavita Iyer",
+          "phone": "+91 98112 88990",
+          "email": "kavita@lumasalon.example.com",
+          "role": "senior_stylist",
+          "skills": [
+            "Classic Manicure",
+            "Pedicure",
+            "Gel Extensions"
+          ],
+          "experience": "6 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-18",
+          "salon_id": "salon-luma-01",
+          "name": "Nikhil Bhatia",
+          "phone": "+91 98112 99001",
+          "email": "nikhil@lumasalon.example.com",
+          "role": "senior_stylist",
+          "skills": [
+            "Haircut & Blowdry",
+            "Balayage & Toning",
+            "Smoothening"
+          ],
+          "experience": "5 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-19",
+          "salon_id": "salon-luma-01",
+          "name": "Ishita Dutta",
+          "phone": "+91 98113 00112",
+          "email": "ishita@lumasalon.example.com",
+          "role": "colorist",
+          "skills": [
+            "Scalp Therapy",
+            "Radiance Facial",
+            "Ayurvedic Rituals"
+          ],
+          "experience": "4 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "staff-20",
+          "salon_id": "salon-luma-01",
+          "name": "Varun Dhawan",
+          "phone": "+91 98113 11223",
+          "email": "varun@lumasalon.example.com",
+          "role": "junior_stylist",
+          "skills": [
+            "Haircut & Blowdry",
+            "Texture Styling",
+            "Hair Spa"
+          ],
+          "experience": "2 years",
+          "active": true,
+          "working_hours": {
+            "friday": {
+              "open": "10:00",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "monday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "sunday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "tuesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "saturday": {
+              "open": "09:30",
+              "close": "21:00",
+              "isOpen": true
+            },
+            "thursday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            },
+            "wednesday": {
+              "open": "10:00",
+              "close": "20:00",
+              "isOpen": true
+            }
+          },
+          "avatar_url": null,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        }
+      ]
+    },
+    "services": {
+      "rowCount": 10,
+      "rows": [
+        {
+          "id": "srv-01",
+          "salon_id": "salon-luma-01",
+          "name": "Haircut & Blowdry",
+          "description": "Personalized consultation, scalp cleanse, precision haircut tailored to hair texture, and signature blowout.",
+          "duration": 45,
+          "price": 600,
+          "category": "haircut",
+          "active": true,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "srv-02",
+          "salon_id": "salon-luma-01",
+          "name": "Hair Spa & Deep Conditioning",
+          "description": "Intense steam hydration mask, Ayurvedic scalp revitalization, and deep moisture repair.",
+          "duration": 60,
+          "price": 1200,
+          "category": "treatment",
+          "active": true,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "srv-03",
+          "salon_id": "salon-luma-01",
+          "name": "Global Hair Color",
+          "description": "Complete rich root-to-tip permanent or demi-permanent color formulation with luminous gloss glaze.",
+          "duration": 90,
+          "price": 2500,
+          "category": "color",
+          "active": true,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "srv-04",
+          "salon_id": "salon-luma-01",
+          "name": "Balayage & Toning",
+          "description": "Hand-painted dimensional highlights customized to facial contours with balancing gloss and bonding shield.",
+          "duration": 180,
+          "price": 4500,
+          "category": "color",
+          "active": true,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "srv-05",
+          "salon_id": "salon-luma-01",
+          "name": "Keratin Treatment",
+          "description": "Deep anti-frizz protein bonding therapy that aligns the hair cuticle for silky, frizz-free texture.",
+          "duration": 150,
+          "price": 5500,
+          "category": "treatment",
+          "active": true,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "srv-06",
+          "salon_id": "salon-luma-01",
+          "name": "Hair Smoothening",
+          "description": "Thermal cuticle restructuring and shine sealing for long-lasting, pin-straight, glossy hair.",
+          "duration": 150,
+          "price": 4500,
+          "category": "treatment",
+          "active": true,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "srv-07",
+          "salon_id": "salon-luma-01",
+          "name": "Radiance Facial Ritual",
+          "description": "Gentle clarifying steam, enzymatic scrub, lymphatic facial massage, and brightening botanical mask.",
+          "duration": 60,
+          "price": 1500,
+          "category": "styling",
+          "active": true,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "srv-08",
+          "salon_id": "salon-luma-01",
+          "name": "Classic Manicure",
+          "description": "Nail shaping, cuticle treatment, gentle exfoliating scrub, hand massage, and professional lacquer finish.",
+          "duration": 40,
+          "price": 700,
+          "category": "styling",
+          "active": true,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "srv-09",
+          "salon_id": "salon-luma-01",
+          "name": "Deluxe Pedicure",
+          "description": "Aromatherapy foot soak, callus softening, exfoliating scrub, massage, and long-wear nail polish.",
+          "duration": 45,
+          "price": 800,
+          "category": "styling",
+          "active": true,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "srv-10",
+          "salon_id": "salon-luma-01",
+          "name": "Hair Extensions Application",
+          "description": "Premium seamless weft or tape-in extensions adjustment, natural blending cut, and thermal styling.",
+          "duration": 120,
+          "price": 6000,
+          "category": "extensions",
+          "active": true,
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        }
+      ]
+    },
+    "clients": {
+      "rowCount": 14,
+      "rows": [
+        {
+          "id": "cli-01",
+          "salon_id": "salon-luma-01",
+          "name": "Priya Sharma",
+          "phone": "+91 98765 11001",
+          "email": "priya.sharma@example.com",
+          "date_of_birth": "1992-04-18",
+          "preferences": {
+            "notes": "Loves caramel balayage; prefers quiet morning appointments.",
+            "hairType": "Thick, wavy, color-treated",
+            "allergies": "None",
+            "preferredBeverage": "Masala Chai",
+            "preferredStylistId": "staff-01"
+          },
+          "notes": "Loyal VIP client for 3 years. Books regular maintenance every 6 weeks.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-10-11T00:00:00+00:00",
+          "total_spend": 18500,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-02",
+          "salon_id": "salon-luma-01",
+          "name": "Rahul Sethi",
+          "phone": "+91 98765 11002",
+          "email": "rahul.sethi@example.com",
+          "date_of_birth": "1988-11-23",
+          "preferences": {
+            "notes": "Fade cut on sides, scissor trim on top. Always punctual.",
+            "hairType": "Thick, straight",
+            "preferredBeverage": "Green Tea",
+            "preferredStylistId": "staff-04"
+          },
+          "notes": "Visits every 3 weeks for grooming and haircut.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-10-05T00:00:00+00:00",
+          "total_spend": 4800,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-03",
+          "salon_id": "salon-luma-01",
+          "name": "Simran Kaur",
+          "phone": "+91 98765 11003",
+          "email": "simran.kaur@example.com",
+          "date_of_birth": "1995-08-04",
+          "preferences": {
+            "notes": "Regular hair spa client; prefers gentle scalp pressure.",
+            "hairType": "Dense, long, naturally wavy",
+            "preferredBeverage": "Ginger Lemon Tea",
+            "preferredStylistId": "staff-04"
+          },
+          "notes": "High attention to organic and ammonia-free products.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-09-29T00:00:00+00:00",
+          "total_spend": 9200,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-04",
+          "salon_id": "salon-luma-01",
+          "name": "Ananya Kapoor",
+          "phone": "+91 98765 11004",
+          "email": "ananya.kapoor@example.com",
+          "date_of_birth": "1984-02-14",
+          "preferences": {
+            "notes": "Keratin smoothing enthusiast; likes cool ash tone balayage.",
+            "hairType": "Medium density, frizzy, colored",
+            "allergies": "Mild lavender fragrance sensitivity",
+            "preferredBeverage": "Cold Coffee",
+            "preferredStylistId": "staff-02"
+          },
+          "notes": "VIP client. Has not visited in over 2 months. Primary candidate for rebooking.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-08-06T00:00:00+00:00",
+          "total_spend": 24000,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-05",
+          "salon_id": "salon-luma-01",
+          "name": "Aarav Singh",
+          "phone": "+91 98765 11005",
+          "email": "aarav.singh@example.com",
+          "date_of_birth": "1979-09-30",
+          "preferences": {
+            "hairType": "Coarse, graying at temples",
+            "preferredBeverage": "Espresso",
+            "preferredStylistId": "staff-04"
+          },
+          "notes": "Executive haircut; usually schedules after 6 PM.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-08-13T00:00:00+00:00",
+          "total_spend": 3600,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-06",
+          "salon_id": "salon-luma-01",
+          "name": "Riya Malhotra",
+          "phone": "+91 98765 11006",
+          "email": "riya.malhotra@example.com",
+          "date_of_birth": "1998-12-10",
+          "preferences": {
+            "notes": "Vivid toner and gloss melts; asks for post-color protein mask.",
+            "hairType": "Fine, bleached, long",
+            "preferredBeverage": "Iced Green Tea",
+            "preferredStylistId": "staff-03"
+          },
+          "notes": "Regularly shares salon reviews and stories on social media.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-09-19T00:00:00+00:00",
+          "total_spend": 16200,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-07",
+          "salon_id": "salon-luma-01",
+          "name": "Neha Verma",
+          "phone": "+91 98765 11007",
+          "email": "neha.verma@example.com",
+          "date_of_birth": "1976-06-17",
+          "preferences": {
+            "notes": "Requires gentle blowdry with heat shield.",
+            "hairType": "Fine texture, prone to breakage",
+            "preferredBeverage": "Hot Water with Honey and Lemon",
+            "preferredStylistId": "staff-01"
+          },
+          "notes": "Senior corporate client. Has not booked in 85 days.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-07-24T00:00:00+00:00",
+          "total_spend": 28500,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-08",
+          "salon_id": "salon-luma-01",
+          "name": "Mehak Arora",
+          "phone": "+91 98765 11008",
+          "email": "mehak.arora@example.com",
+          "date_of_birth": "1991-03-25",
+          "preferences": {
+            "hairType": "Silky, straight",
+            "preferredBeverage": "Filter Coffee",
+            "preferredStylistId": "staff-04"
+          },
+          "notes": "Prefers quick haircut sessions during weekday afternoons.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-07-14T00:00:00+00:00",
+          "total_spend": 5400,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-09",
+          "salon_id": "salon-luma-01",
+          "name": "Kavya Mehta",
+          "phone": "+91 98765 11009",
+          "email": "kavya.mehta@example.com",
+          "date_of_birth": "2001-07-09",
+          "preferences": {
+            "notes": "Loves golden honey tones.",
+            "hairType": "Wavy, medium, highlights",
+            "preferredBeverage": "Lemon Ice Tea",
+            "preferredStylistId": "staff-03"
+          },
+          "notes": "College student, usually visits on weekends.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-09-12T00:00:00+00:00",
+          "total_spend": 8100,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-10",
+          "salon_id": "salon-luma-01",
+          "name": "Ishita Bansal",
+          "phone": "+91 98765 11010",
+          "email": "ishita.bansal@example.com",
+          "date_of_birth": "1985-05-12",
+          "preferences": {
+            "hairType": "Medium curly, dry ends",
+            "preferredBeverage": "Sparkling Water",
+            "preferredStylistId": "staff-01"
+          },
+          "notes": "Always books haircut with deep hair spa.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-10-03T00:00:00+00:00",
+          "total_spend": 6700,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-11",
+          "salon_id": "salon-luma-01",
+          "name": "Pooja Khanna",
+          "phone": "+91 98765 11011",
+          "email": "pooja.khanna@example.com",
+          "date_of_birth": "1993-10-28",
+          "preferences": {
+            "notes": "Subtle chocolate brown global color with gloss.",
+            "hairType": "Long, straight, thick",
+            "preferredBeverage": "Cappuccino",
+            "preferredStylistId": "staff-02"
+          },
+          "notes": "Referred by Priya Sharma.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-09-05T00:00:00+00:00",
+          "total_spend": 7900,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-12",
+          "salon_id": "salon-luma-01",
+          "name": "Nisha Gupta",
+          "phone": "+91 98765 11012",
+          "email": "nisha.gupta@example.com",
+          "date_of_birth": "1990-01-19",
+          "preferences": {
+            "hairType": "Shoulder length, straight",
+            "preferredBeverage": "Warm Water",
+            "preferredStylistId": "staff-01"
+          },
+          "notes": "Prefers curtain bangs and volume round-brush styling.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-10-14T00:00:00+00:00",
+          "total_spend": 2400,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-13",
+          "salon_id": "salon-luma-01",
+          "name": "Aditi Chawla",
+          "phone": "+91 98765 11013",
+          "email": "aditi.chawla@example.com",
+          "date_of_birth": "1987-08-16",
+          "preferences": {
+            "hairType": "Curly, coarse",
+            "preferredBeverage": "Peach Iced Tea",
+            "preferredStylistId": "staff-04"
+          },
+          "notes": "Interested in seasonal scalp detox treatments.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": "2026-10-16T00:00:00+00:00",
+          "total_spend": 1500,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        },
+        {
+          "id": "cli-14",
+          "salon_id": "salon-luma-01",
+          "name": "Sakshi Arora",
+          "phone": "+91 98765 11014",
+          "email": "sakshi.arora@example.com",
+          "date_of_birth": "1996-12-03",
+          "preferences": {
+            "hairType": "Wavy, fine, blonde highlights",
+            "preferredBeverage": "Cold Coffee with Almond Milk",
+            "preferredStylistId": "staff-01"
+          },
+          "notes": "First time booking online. Inquired about global color & gloss.",
+          "created_at": "2026-10-17T14:22:45.766267+00:00",
+          "last_visit_at": null,
+          "total_spend": 0,
+          "updated_at": "2026-10-17T14:22:45.766267+00:00"
+        }
+      ]
+    },
+    "administrators": {
+      "rowCount": 1,
+      "rows": [
+        {
+          "id": "admin-root-01",
+          "auth_user_id": "a4394f85-461d-40b8-bc60-a4515c2c6f1e",
+          "email": "talk2rkalyani@gmail.com",
+          "name": "Kalyani",
+          "role": "ADMIN",
+          "active": true,
+          "created_at": "2026-10-29T20:15:18.179766+00:00",
+          "updated_at": "2026-10-29T20:15:18.179766+00:00"
+        }
+      ]
+    }
+  }
+}

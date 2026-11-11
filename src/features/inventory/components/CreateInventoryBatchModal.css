@@ -1,0 +1,171 @@
+/* Create Inventory Batch Modal Styles - Luma Luxury Theme */
+
+.create-batch-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 15, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.create-batch-modal-content {
+  background: #161a23;
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(197, 160, 89, 0.2);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 540px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.create-batch-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.create-batch-modal-header .header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.create-batch-modal-header .icon-batch {
+  color: #c5a059;
+}
+
+.create-batch-modal-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.create-batch-modal-header .btn-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.create-batch-modal-header .btn-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.create-batch-form {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.batch-error-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.create-batch-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.create-batch-form .form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.create-batch-form .flex-1 {
+  flex: 1;
+}
+
+.create-batch-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.create-batch-form select,
+.create-batch-form input,
+.create-batch-form textarea {
+  background: #0f1218;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  color: #f8fafc;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.create-batch-form select:focus,
+.create-batch-form input:focus,
+.create-batch-form textarea:focus {
+  outline: none;
+  border-color: #c5a059;
+}
+
+.create-batch-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.create-batch-modal-footer .btn-secondary {
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-batch-modal-footer .btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.create-batch-modal-footer .btn-primary {
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #c5a059, #b08d48);
+  border: none;
+  color: #0c0e14;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-batch-modal-footer .btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.create-batch-modal-footer button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

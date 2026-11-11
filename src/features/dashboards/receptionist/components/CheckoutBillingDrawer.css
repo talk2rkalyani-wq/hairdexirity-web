@@ -1,0 +1,457 @@
+/* ==============================================================================
+   Luma Salon — Checkout Billing Drawer Styling (Phase 7)
+   Obsidian Dark Palette with Gold & Purple Accent Highlights
+   ============================================================================== */
+
+.billing-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.billing-drawer-container {
+  background: #14141d;
+  width: 100%;
+  max-width: 540px;
+  height: 100%;
+  border-left: 1px solid #2e2e42;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideDrawerIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDrawerIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.billing-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: #181824;
+  border-bottom: 1px solid #272738;
+}
+
+.drawer-pretitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a855f7;
+}
+
+.drawer-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0.2rem 0 0 0;
+}
+
+.drawer-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.drawer-close-btn:hover {
+  color: #fff;
+  background: #272738;
+}
+
+.billing-drawer-form {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1;
+}
+
+/* Summary Card */
+.checkout-summary-card {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  background: #101017;
+  border: 1px solid #272738;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+}
+
+.summary-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.summary-field {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #f8fafc;
+}
+
+.summary-field .field-icon {
+  color: #94a3b8;
+}
+
+.field-subtext {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.summary-divider {
+  width: 1px;
+  height: 32px;
+  background: #272738;
+  margin: 0 0.5rem;
+}
+
+/* Billing Section Box */
+.billing-section-box {
+  background: #181824;
+  border: 1px solid #272738;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.section-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #cbd5e1;
+}
+
+.section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.section-micro-heading {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+/* Switch */
+.toggle-switch-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+}
+
+.toggle-switch-label input {
+  display: none;
+}
+
+.toggle-slider {
+  width: 32px;
+  height: 18px;
+  background: #2d2d42;
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.toggle-slider::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #94a3b8;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.toggle-switch-label input:checked + .toggle-slider {
+  background: #7c3aed;
+}
+
+.toggle-switch-label input:checked + .toggle-slider::after {
+  transform: translateX(14px);
+  background: #fff;
+}
+
+/* Discount Inputs */
+.discount-inputs-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 0.65rem;
+  padding-top: 0.25rem;
+}
+
+.discount-type-pills {
+  display: flex;
+  background: #12121a;
+  border: 1px solid #2e2e42;
+  border-radius: 6px;
+  padding: 0.2rem;
+}
+
+.type-pill {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  padding: 0.3rem 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.type-pill.active {
+  background: #2e1065;
+  color: #c4b5fd;
+}
+
+.discount-reason-field {
+  grid-column: span 2;
+}
+
+.billing-text-input {
+  width: 100%;
+  background: #12121a;
+  border: 1px solid #2e2e42;
+  border-radius: 6px;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.8rem;
+  color: #f8fafc;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.billing-text-input:focus {
+  border-color: #8b5cf6;
+}
+
+.tax-breakdown-subtext {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+/* Tender Tabs */
+.tender-mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+}
+
+.tender-tab {
+  background: #12121a;
+  border: 1px solid #2e2e42;
+  border-radius: 8px;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.tender-tab:hover {
+  background: #1e1e2d;
+  color: #fff;
+}
+
+.tender-tab.active {
+  background: #2e1065;
+  border-color: #8b5cf6;
+  color: #f3e8ff;
+}
+
+.tender-input-container {
+  padding-top: 0.25rem;
+}
+
+.tender-detail-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.input-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.input-hint {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+.cash-input-row,
+.split-inputs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.cash-field,
+.split-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.change-due-val {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+.change-due-val.gold {
+  color: #f59e0b;
+}
+
+.split-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  padding-top: 0.25rem;
+  color: #94a3b8;
+}
+
+/* Checkout Total Box */
+.checkout-total-card {
+  background: #181412;
+  border: 1px solid #78350f;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.total-breakdown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.total-divider {
+  width: 100%;
+  height: 1px;
+  background: #78350f;
+  margin: 0.3rem 0;
+}
+
+.total-grand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.grand-val.gold {
+  color: #f59e0b;
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
+}
+
+.checkout-error-alert {
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  color: #fca5a5;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.78rem;
+}
+
+.drawer-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.btn-cancel {
+  flex: 1;
+  background: #1a1a26;
+  border: 1px solid #323247;
+  color: #94a3b8;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  background: #252538;
+  color: #f1f5f9;
+}
+
+.btn-checkout-submit {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-checkout-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+}
+
+.btn-checkout-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

@@ -1,0 +1,176 @@
+.client-table-row {
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.client-table-row:hover {
+  background-color: rgba(99, 102, 241, 0.08);
+}
+
+.client-table-row:focus-visible {
+  background-color: rgba(99, 102, 241, 0.12);
+  outline: 2px solid var(--accent-purple);
+  outline-offset: -2px;
+}
+
+.client-table-row td {
+  padding: 1rem 1.15rem;
+  vertical-align: middle;
+}
+
+/* Identity & Mini Avatar */
+.client-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.client-avatar-mini {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(168, 85, 247, 0.4) 100%);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
+.client-name-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.client-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.client-email {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+}
+
+.phone-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.visit-pill {
+  font-size: 0.8125rem;
+  color: #cbd5e1;
+}
+
+.visit-inactive {
+  color: #94a3b8;
+}
+
+.spend-text {
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status Pills */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.725rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pill-active {
+  background: rgba(16, 185, 129, 0.14);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.pill-active .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.pill-inactive {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.pill-inactive .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #64748b;
+}
+
+.row-inactive .client-name {
+  color: #cbd5e1;
+}
+
+.row-selected {
+  background-color: rgba(212, 175, 55, 0.08) !important;
+}
+
+.cell-checkbox {
+  width: 44px;
+  text-align: center;
+  padding-left: 1.15rem !important;
+  padding-right: 0.5rem !important;
+}
+
+.row-select-checkbox {
+  width: 17px;
+  height: 17px;
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: #d4af37;
+}
+
+.cell-actions {
+  width: 100px;
+  text-align: right;
+  padding-right: 1.15rem !important;
+}
+
+.btn-row-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
+  color: #f87171;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-row-delete:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+

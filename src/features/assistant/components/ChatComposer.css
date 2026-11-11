@@ -1,0 +1,125 @@
+.composer-form {
+  width: 100%;
+  max-width: var(--max-content-width);
+  margin-top: 1.85rem;
+}
+
+.composer-container {
+  display: flex;
+  align-items: center;
+  background: var(--bg-composer);
+  border: 1px solid var(--border-composer);
+  border-radius: var(--radius-xl);
+  padding: 0.45rem 0.55rem 0.45rem 1.15rem;
+  box-shadow: var(--shadow-composer);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all var(--transition-fast);
+  gap: 0.65rem;
+}
+
+.composer-container:focus-within {
+  border-color: rgba(168, 85, 247, 0.65);
+  box-shadow: 0 0 24px rgba(124, 58, 237, 0.28), var(--shadow-composer);
+}
+
+.composer-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.composer-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.plus-btn {
+  margin-right: -0.25rem;
+}
+
+.composer-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.025rem;
+  color: var(--text-primary);
+  background: transparent;
+  padding: 0.5rem 0.25rem;
+}
+
+.composer-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.composer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.send-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  background: var(--send-btn-gradient);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.45);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.send-btn:hover:not(:disabled) {
+  background: var(--send-btn-hover-gradient);
+  transform: scale(1.04);
+  box-shadow: 0 0 22px rgba(124, 58, 237, 0.65);
+}
+
+.send-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.send-btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .composer-form {
+    margin-top: 1.15rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .composer-container {
+    padding: 0.35rem 0.45rem 0.35rem 0.85rem;
+    border-radius: var(--radius-lg);
+    gap: 0.5rem;
+  }
+
+  .composer-input {
+    font-size: 16px;
+    padding: 0.4rem 0.2rem;
+  }
+
+  .composer-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .send-btn {
+    width: 40px;
+    height: 40px;
+  }
+}

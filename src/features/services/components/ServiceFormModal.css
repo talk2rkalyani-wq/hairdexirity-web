@@ -1,0 +1,62 @@
+/* Service Form Modal Styles */
+
+.service-modal-card {
+  background: #0d1322;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 30px rgba(168, 85, 247, 0.1);
+  animation: modalPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  z-index: 101;
+}
+
+/* Input Affixes (prefix ₹ / suffix mins) */
+.input-affix-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 0.85rem;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+.input-suffix {
+  position: absolute;
+  right: 0.85rem;
+  color: #64748b;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.affix-input-prefix {
+  padding-left: 2rem !important;
+}
+
+.affix-input {
+  padding-right: 3rem !important;
+}
+
+@media (max-width: 600px) {
+  .service-modal-card {
+    max-width: 100%;
+    max-height: 94vh;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+  }
+
+  .form-group-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}

@@ -316,10 +316,21 @@ export const userService = {
           const authJson = await authRes.json()
           if (authJson && (authJson.id || authJson.user?.id)) {
             authUserId = authJson.id || authJson.user?.id
+          } else if (authJson?.error_code === 'over_email_send_rate_limit' || authRes.status === 429) {
+            throw new Error(
+              'Supabase email rate limit exceeded. In Supabase Dashboard -> Authentication -> Providers -> Email, please toggle OFF "Confirm email" so owners are registered immediately without sending rate-limited confirmation emails.'
+            )
           } else if (authJson?.error_code || authJson?.msg || authJson?.message) {
-            console.info('[userService] Supabase auth signup status:', authJson.msg || authJson.message)
+            const msg = (authJson.msg || authJson.message) as string
+            if (!msg.toLowerCase().includes('already registered')) {
+              throw new Error(`Supabase Auth creation failed: ${msg}`)
+            }
           }
         } catch (authErr) {
+          const msg = authErr instanceof Error ? authErr.message : 'Auth registration failed.'
+          if (msg.includes('rate limit') || msg.includes('creation failed')) {
+            throw authErr
+          }
           console.warn('[userService] Supabase auth signup notice:', authErr)
         }
       }
@@ -375,6 +386,11 @@ export const userService = {
             .eq('id', existingDbRecord.id)
 
           if (updateErr) {
+            if (updateErr.message.includes('row-level security')) {
+              throw new Error(
+                'Supabase RLS Policy Error: Administrator authority is missing on table "users". Please run the Administrator RLS setup script in your Supabase SQL Editor.'
+              )
+            }
             throw new Error(`Database error updating owner profile: ${updateErr.message}`)
           }
           newUserId = existingDbRecord.id as string
@@ -395,6 +411,11 @@ export const userService = {
             })
 
           if (insertErr) {
+            if (insertErr.message.includes('row-level security')) {
+              throw new Error(
+                'Supabase RLS Policy Error: Administrator authority is missing on table "users". Please run the Administrator RLS setup script in your Supabase SQL Editor.'
+              )
+            }
             throw new Error(`Database error creating owner profile: ${insertErr.message}`)
           }
         }

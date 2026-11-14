@@ -11,8 +11,41 @@ export type AuthMode = 'local_mock' | 'supabase_auth'
 
 const AUTH_MODE_STORAGE_KEY = 'luma_salon_auth_mode'
 
+/**
+ * Reads the explicitly configured VITE_AUTH_MODE from Vite import.meta or Node environment.
+ */
+export function getConfiguredAuthMode(): string {
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+  if (proc?.env?.VITE_AUTH_MODE !== undefined && proc.env.VITE_AUTH_MODE !== '') {
+    return String(proc.env.VITE_AUTH_MODE).trim().toLowerCase()
+  }
+  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_AUTH_MODE) {
+    return String(import.meta.env.VITE_AUTH_MODE).trim().toLowerCase()
+  }
+  return ''
+}
+
+/**
+ * Returns true if the environment explicitly enforces strict Supabase authentication.
+ * When true, mock/demo authentication and localStorage mode overrides are strictly prohibited.
+ */
+export function isStrictSupabaseMode(): boolean {
+  return getConfiguredAuthMode() === 'supabase_auth'
+}
+
 // Current active auth mode. Supports explicit VITE_AUTH_MODE ('supabase_auth' | 'local_mock' | 'local')
 function resolveInitialAuthMode(): AuthMode {
+  // STRICT PRODUCTION ENFORCEMENT:
+  // When VITE_AUTH_MODE === 'supabase_auth':
+  // - Force Supabase authentication.
+  // - Never allow localStorage to override the mode.
+  // - Ignore any previously saved luma_salon_auth_mode.
+  if (isStrictSupabaseMode()) {
+    return 'supabase_auth'
+  }
+
+  // When VITE_AUTH_MODE is NOT 'supabase_auth' (e.g. local_mock or unset):
+  // Check localStorage for saved developer toggle choice
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       const saved = window.localStorage.getItem(AUTH_MODE_STORAGE_KEY)
@@ -22,15 +55,11 @@ function resolveInitialAuthMode(): AuthMode {
     }
   } catch {}
 
-  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_AUTH_MODE) {
-    const mode = String(import.meta.env.VITE_AUTH_MODE).trim().toLowerCase()
-    if (mode === 'supabase_auth') {
-      return 'supabase_auth'
-    }
-    if (mode === 'local_mock' || mode === 'local') {
-      return 'local_mock'
-    }
+  const mode = getConfiguredAuthMode()
+  if (mode === 'local_mock' || mode === 'local') {
+    return 'local_mock'
   }
+
   return isSupabaseConfigured() ? 'supabase_auth' : 'local_mock'
 }
 
@@ -43,6 +72,9 @@ export const authService = {
    * Returns current active authentication mode
    */
   getAuthMode(): AuthMode {
+    if (isStrictSupabaseMode()) {
+      return 'supabase_auth'
+    }
     return currentAuthMode
   },
 
@@ -54,9 +86,27 @@ export const authService = {
   },
 
   /**
-   * Sets authentication mode explicitly (e.g. for testing or controlled cutover)
+   * Returns true if authentication is locked to strict Supabase mode
+   */
+  isStrictSupabaseMode(): boolean {
+    return isStrictSupabaseMode()
+  },
+
+  /**
+   * Sets authentication mode explicitly (e.g. for testing or controlled cutover).
+   * In strict Supabase mode (VITE_AUTH_MODE === 'supabase_auth'), switching to local_mock is strictly prohibited.
    */
   setAuthMode(mode: AuthMode): void {
+    if (isStrictSupabaseMode()) {
+      if (mode !== 'supabase_auth') {
+        console.warn(
+          '[authService] setAuthMode rejected: Mode switching to local_mock is disabled when VITE_AUTH_MODE=supabase_auth.'
+        )
+      }
+      currentAuthMode = 'supabase_auth'
+      return
+    }
+
     currentAuthMode = mode
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
@@ -117,14 +167,23 @@ export const authService = {
     }
 
     // Check existing Supabase session on startup if in supabase_auth mode
-    if (currentAuthMode === 'supabase_auth') {
+    if (currentAuthMode === 'supabase_auth' || isStrictSupabaseMode()) {
       try {
         const { data } = await supabase.auth.getSession()
-        if (data?.session?.user && !sessionService.getCurrentSession()) {
-          await this.resolveAndEstablishSession(data.session.user.id)
+        if (data?.session?.user) {
+          if (!sessionService.getCurrentSession()) {
+            await this.resolveAndEstablishSession(data.session.user.id)
+          }
+        } else {
+          // If in strict Supabase mode or supabase_auth mode without a valid Supabase session,
+          // do not trust leftover mock session in localStorage
+          if (sessionService.getCurrentSession()) {
+            sessionService.logout()
+          }
         }
       } catch (err) {
         console.warn('[authService] Failed to restore initial Supabase session:', err)
+        sessionService.logout()
       } finally {
         isAuthInitialized = true
       }
@@ -272,6 +331,12 @@ export const authService = {
 
     const normalizedEmail = email.trim().toLowerCase()
 
+    // STRICT PRODUCTION ENFORCEMENT:
+    // If strict Supabase mode is configured, enforce supabase_auth unconditionally
+    if (isStrictSupabaseMode()) {
+      currentAuthMode = 'supabase_auth'
+    }
+
     // -------------------------------------------------------------------------
     // PRODUCTION SUPABASE AUTHENTICATION MODE
     // -------------------------------------------------------------------------
@@ -327,6 +392,12 @@ export const authService = {
     // -------------------------------------------------------------------------
     // DEVELOPMENT / DEMO LOCAL MOCK AUTHENTICATION MODE
     // -------------------------------------------------------------------------
+    if (isStrictSupabaseMode()) {
+      throw new Error(
+        'Authentication Error: Mock authentication is strictly prohibited when VITE_AUTH_MODE=supabase_auth.'
+      )
+    }
+
     // 1. Special check for Root Administrator in mock mode
     if (isRootAdminEmail(normalizedEmail)) {
       const isValidAdmin = await credentialService.verifyPassword(normalizedEmail, plainTextPassword)
@@ -490,6 +561,25 @@ export const authService = {
     const session = sessionService.getCurrentSession()
     if (!session || !session.isAuthenticated) {
       return false
+    }
+
+    // In Supabase mode, verify that Supabase client has a live active session
+    // and do not trust localStorage alone as authentication proof
+    if (currentAuthMode === 'supabase_auth' || isStrictSupabaseMode()) {
+      if (!isSupabaseConfigured() || !supabase) {
+        this.logout()
+        return false
+      }
+      try {
+        const { data } = await supabase.auth.getSession()
+        if (!data?.session?.user) {
+          this.logout()
+          return false
+        }
+      } catch {
+        this.logout()
+        return false
+      }
     }
 
     // Check account status in user store

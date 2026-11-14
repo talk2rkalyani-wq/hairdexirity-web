@@ -78,6 +78,10 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
     owners.find((o) => o.ownerDesignation === 'OWNER_2') || (owners.length > 1 && owners[1] !== owner1 ? owners[1] : null)
 
   const handleToggleMode = () => {
+    if (authService.isStrictSupabaseMode()) {
+      showToast('Authentication mode switching is disabled in production.')
+      return
+    }
     const next: AuthMode = authMode === 'local_mock' ? 'supabase_auth' : 'local_mock'
     authService.setAuthMode(next)
     setAuthMode(next)
@@ -213,15 +217,17 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
         </div>
 
         <div className="portal-header-actions">
-          <button
-            type="button"
-            className={`portal-mode-pill ${authMode === 'local_mock' ? 'pill-mock' : 'pill-cloud'}`}
-            onClick={handleToggleMode}
-            title="Click to toggle between Demo Mode and Supabase Cloud"
-          >
-            <span className="mode-status-dot" />
-            <span>{authMode === 'local_mock' ? 'Demo Mode (Offline)' : 'Supabase Auth (Cloud)'}</span>
-          </button>
+          {!authService.isStrictSupabaseMode() && (
+            <button
+              type="button"
+              className={`portal-mode-pill ${authMode === 'local_mock' ? 'pill-mock' : 'pill-cloud'}`}
+              onClick={handleToggleMode}
+              title="Click to toggle between Demo Mode and Supabase Cloud"
+            >
+              <span className="mode-status-dot" />
+              <span>{authMode === 'local_mock' ? 'Demo Mode (Offline)' : 'Supabase Auth (Cloud)'}</span>
+            </button>
+          )}
 
           <div className="portal-admin-profile">
             <div className="admin-avatar">

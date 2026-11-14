@@ -27,21 +27,24 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
   // Sync auth mode state and fetch provisioned demo owners
   useEffect(() => {
     setAuthMode(authService.getAuthMode())
-    void userService.getUsersByRole('OWNER').then((owners) => {
-      setDemoOwners(owners.filter((o) => o.active))
-    })
+    if (!authService.isStrictSupabaseMode()) {
+      void userService.getUsersByRole('OWNER').then((owners) => {
+        setDemoOwners(owners.filter((o) => o.active))
+      })
+    }
   }, [authMode])
 
   const handleToggleMode = () => {
+    if (authService.isStrictSupabaseMode()) return
     const next: AuthMode = authMode === 'local_mock' ? 'supabase_auth' : 'local_mock'
     authService.setAuthMode(next)
     setAuthMode(next)
     resetFormFeedback()
   }
 
-  // Quick 1-click login for demo accounts
+  // Quick 1-click login for demo accounts (strictly disabled in production)
   const handleQuickLogin = async (quickEmail: string, quickPass: string) => {
-    if (isSubmitting) return
+    if (authService.isStrictSupabaseMode() || isSubmitting) return
     resetFormFeedback()
     setEmail(quickEmail)
     setPassword(quickPass)
@@ -193,19 +196,21 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             <span className="brand-salon">Dexirity</span>
           </div>
 
-          <div className="auth-mode-badge-wrap">
-            <button
-              type="button"
-              className={`btn-mode-toggle ${authMode === 'local_mock' ? 'mode-mock' : 'mode-supabase'}`}
-              onClick={handleToggleMode}
-              title="Click to toggle between Demo / Mock Mode and Supabase Cloud Auth"
-              aria-label="Toggle authentication mode"
-            >
-              <span className="mode-dot" aria-hidden="true" />
-              <span>{authMode === 'local_mock' ? 'Demo Mode (Offline / Mock)' : 'Supabase Auth (Cloud)'}</span>
-              <span className="mode-switch-hint">Switch</span>
-            </button>
-          </div>
+          {!authService.isStrictSupabaseMode() && (
+            <div className="auth-mode-badge-wrap">
+              <button
+                type="button"
+                className={`btn-mode-toggle ${authMode === 'local_mock' ? 'mode-mock' : 'mode-supabase'}`}
+                onClick={handleToggleMode}
+                title="Click to toggle between Demo / Mock Mode and Supabase Cloud Auth"
+                aria-label="Toggle authentication mode"
+              >
+                <span className="mode-dot" aria-hidden="true" />
+                <span>{authMode === 'local_mock' ? 'Demo Mode (Offline / Mock)' : 'Supabase Auth (Cloud)'}</span>
+                <span className="mode-switch-hint">Switch</span>
+              </button>
+            </div>
+          )}
 
           {viewMode === 'sign_in' && (
             <>
@@ -245,7 +250,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             </svg>
             <div style={{ flex: 1 }}>
               <span>{errorMessage}</span>
-              {authMode === 'local_mock' && isRootAdminEmail(email) && (
+              {!authService.isStrictSupabaseMode() && authMode === 'local_mock' && isRootAdminEmail(email) && (
                 <button
                   type="button"
                   style={{
@@ -267,7 +272,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                   ⚡ Click to 1-Click Sign In as Administrator
                 </button>
               )}
-              {(errorMessage.includes('Demo Mode') || errorMessage.includes('Load failed')) && (
+              {!authService.isStrictSupabaseMode() && (errorMessage.includes('Demo Mode') || errorMessage.includes('Load failed')) && (
                 <button
                   type="button"
                   style={{
@@ -391,7 +396,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                   )}
                 </button>
               </div>
-              {authMode === 'local_mock' && (
+              {!authService.isStrictSupabaseMode() && authMode === 'local_mock' && (
                 <div style={{ marginTop: '0.45rem', fontSize: '0.8rem', color: '#94a3b8' }}>
                   <span>Demo Mode password: </span>
                   <code style={{ color: '#c5a059', background: 'rgba(197, 160, 89, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
@@ -420,7 +425,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
               )}
             </button>
 
-            {authMode === 'local_mock' && (
+            {!authService.isStrictSupabaseMode() && authMode === 'local_mock' && (
               <div className="demo-accounts-section">
                 <div className="demo-divider">
                   <span>Quick Demo Sign-In</span>
@@ -652,10 +657,10 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
-            {authMode === 'local_mock' ? (
-              <span>Role-Based Access Control &amp; Data Isolation (Demo Password: <code>Hair@2026!</code> or <code>Luma@2026!</code>)</span>
-            ) : (
+            {authService.isStrictSupabaseMode() || authMode === 'supabase_auth' ? (
               <span>Supabase Email-and-Password Authentication &amp; Row Level Security</span>
+            ) : (
+              <span>Role-Based Access Control &amp; Data Isolation (Demo Password: <code>Hair@2026!</code> or <code>Luma@2026!</code>)</span>
             )}
           </div>
         </div>

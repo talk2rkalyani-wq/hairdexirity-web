@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/validate-build.mjs && tsc -b && vite build",
+    "build:prod": "APP_ENV=production npm run build",
     "lint": "oxlint",
     "preview": "vite preview"
   },

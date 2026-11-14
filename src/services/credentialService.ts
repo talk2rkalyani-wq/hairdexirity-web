@@ -7,7 +7,7 @@ export const DEFAULT_TEST_PASSWORD = 'Luma@2026!'
 
 /**
  * Computes a SHA-256 digest using standard Web Crypto API.
- * Used strictly for in-memory fallback comparison in demo/test environments.
+ * Used strictly for in-memory fallback comparison in test environments.
  * NEVER persisted to localStorage.
  */
 async function computeHash(text: string): Promise<string> {
@@ -28,14 +28,14 @@ async function computeHash(text: string): Promise<string> {
 }
 
 /**
- * Generates a salted hash for a password (in-memory demo fallback only)
+ * Generates a salted hash for a password (in-memory fallback only)
  */
 export async function hashPasswordWithSalt(password: string, salt: string): Promise<string> {
   return computeHash(`${password}:${salt}`)
 }
 
 /**
- * Pure in-memory credentials for offline/demo/test environments.
+ * Pure in-memory credentials for test environments.
  * CRITICAL SECURITY COMPLIANCE (Phase 2.2):
  * Passwords, salts, and hashes are STRICTLY FORBIDDEN from being persisted to browser localStorage.
  */
@@ -58,8 +58,8 @@ function purgeLegacyCredentialStorage() {
 }
 
 /**
- * Reads any locally stored demo users from localStorage so their credentials
- * can be verified in offline Demo Mode across page reloads.
+ * Reads any locally stored users from localStorage so their credentials
+ * can be verified in test environments across page reloads.
  */
 function getStoredLocalUsers(): Array<{ id: string; email: string; createdAt?: string }> {
   try {
@@ -112,7 +112,7 @@ async function initializeCredentials(): Promise<CredentialRecord[]> {
     })
   }
 
-  // Also seed any salon owners or employees created via the UI in Demo Mode
+  // Seed any local salon owners or employees
   const localUsers = getStoredLocalUsers()
   for (const u of localUsers) {
     if (u.email && !seeded.some((s) => s.email === u.email.toLowerCase())) {
@@ -148,7 +148,7 @@ export interface OwnerDiscountApprovalResult {
 
 export const credentialService = {
   /**
-   * Retrieves in-memory credential record for an email address (offline demo mode)
+   * Retrieves in-memory credential record for an email address
    */
   async getByEmail(email: string): Promise<CredentialRecord | null> {
     await initializeCredentials()
@@ -174,7 +174,7 @@ export const credentialService = {
   },
 
   /**
-   * Retrieves in-memory credential record by User ID (offline demo mode)
+   * Retrieves in-memory credential record by User ID
    */
   async getByUserId(userId: string): Promise<CredentialRecord | null> {
     await initializeCredentials()
@@ -235,7 +235,7 @@ export const credentialService = {
   },
 
   /**
-   * Registers in-memory credentials for a newly created user/employee (offline demo mode)
+   * Registers in-memory credentials for a newly created user/employee
    */
   async registerUserCredentials(
     userId: string,
@@ -261,7 +261,7 @@ export const credentialService = {
   },
 
   /**
-   * Updates credentials for an existing user (offline demo mode)
+   * Updates credentials for an existing user
    */
   async changePassword(userId: string, newPassword: string): Promise<void> {
     await initializeCredentials()

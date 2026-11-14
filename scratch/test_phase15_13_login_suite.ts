@@ -194,7 +194,7 @@ async function runLoginSuite() {
     try {
       await authService.requestPasswordReset('owner1@lumasalon.example.com')
     } catch (placeholderErr) {
-      rejectedPlaceholder = (placeholderErr as Error).message.includes('placeholder demo accounts')
+      rejectedPlaceholder = (placeholderErr as Error).message.includes('placeholder accounts')
     }
 
     // 3. Valid non-placeholder email submission produces generic message without disclosing existence

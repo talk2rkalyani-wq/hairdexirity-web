@@ -6,8 +6,7 @@ import { credentialService, DEFAULT_TEST_PASSWORD } from './credentialService'
 import { sessionService } from './sessionService'
 import { appointmentStore } from './appointmentStore'
 import { isPlaceholderEmail } from '../utils/authUtils'
-import { isRootAdminEmail } from '../config/adminConfig'
-import { createClient } from '@supabase/supabase-js'
+import { ROOT_ADMIN_EMAIL, isRootAdminEmail } from '../config/adminConfig'
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
 
 function resolveSession(session?: UserSession | null): UserSession | null {
@@ -292,43 +291,49 @@ export const userService = {
 
     // 3. Supabase Cloud Integration (Auth signup + database table synchronization)
     if (isSupabaseConfigured() && supabase) {
-      // Step A: Register auth credentials in Supabase Auth via non-persisting client
-      const sbUrl = import.meta.env.VITE_SUPABASE_URL
+      // Step A: Register auth credentials in Supabase Auth via clean fetch (ZERO session collision)
+      const sbUrl = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '')
       const sbKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY
       if (sbUrl && sbKey) {
         try {
-          const tempAuthClient = createClient(sbUrl, sbKey, {
-            auth: {
-              persistSession: false,
-              autoRefreshToken: false,
-              detectSessionInUrl: false,
+          const authRes = await fetch(`${sbUrl}/auth/v1/signup`, {
+            method: 'POST',
+            headers: {
+              'apikey': sbKey,
+              'Authorization': `Bearer ${sbKey}`,
+              'Content-Type': 'application/json',
             },
-          })
-          const { data: authData, error: authErr } = await tempAuthClient.auth.signUp({
-            email: normalizedEmail,
-            password: data.initialPassword || DEFAULT_TEST_PASSWORD,
-            options: {
+            body: JSON.stringify({
+              email: normalizedEmail,
+              password: data.initialPassword || DEFAULT_TEST_PASSWORD,
               data: {
                 name: data.name.trim(),
                 role: data.role,
                 owner_designation: ownerDesig || null,
               },
-            },
+            }),
           })
-          if (!authErr && authData?.user) {
-            authUserId = authData.user.id
-          } else if (authErr) {
-            if (!authErr.message.toLowerCase().includes('already registered')) {
-              console.warn('[userService] Supabase auth signUp notice:', authErr.message)
-            }
+          const authJson = await authRes.json()
+          if (authJson && (authJson.id || authJson.user?.id)) {
+            authUserId = authJson.id || authJson.user?.id
+          } else if (authJson?.error_code || authJson?.msg || authJson?.message) {
+            console.info('[userService] Supabase auth signup status:', authJson.msg || authJson.message)
           }
         } catch (authErr) {
-          console.warn('[userService] Supabase auth registration notice:', authErr)
+          console.warn('[userService] Supabase auth signup notice:', authErr)
         }
       }
 
       // Step B: Persist to Supabase public.users table
       try {
+        const { data: sbSessionData } = await supabase.auth.getSession()
+        const activeAuthEmail = sbSessionData?.session?.user?.email?.toLowerCase()
+        if (activeAuthEmail && activeAuthEmail !== ROOT_ADMIN_EMAIL.toLowerCase()) {
+          throw new Error(
+            `Session Conflict: Supabase Cloud client is active as "${activeAuthEmail}". Please click Logout in the top-right header and log in again as Root Administrator (${ROOT_ADMIN_EMAIL}) to authorize database changes.`
+          )
+        }
+
         let existingDbRecord: Record<string, unknown> | null = null
         if (ownerDesig) {
           const { data: byDesig } = await supabase
@@ -356,7 +361,7 @@ export const userService = {
         }
 
         if (existingDbRecord) {
-          const { data: updatedRow, error: updateErr } = await supabase
+          const { error: updateErr } = await supabase
             .from('users')
             .update({
               name: data.name.trim(),
@@ -368,17 +373,13 @@ export const userService = {
               updated_at: new Date().toISOString(),
             })
             .eq('id', existingDbRecord.id)
-            .select()
-            .single()
 
           if (updateErr) {
             throw new Error(`Database error updating owner profile: ${updateErr.message}`)
           }
-          if (updatedRow) {
-            newUserId = updatedRow.id
-          }
+          newUserId = existingDbRecord.id as string
         } else {
-          const { data: insertedRow, error: insertErr } = await supabase
+          const { error: insertErr } = await supabase
             .from('users')
             .insert({
               id: newUserId,
@@ -392,14 +393,9 @@ export const userService = {
               auth_user_id: authUserId || null,
               active: true,
             })
-            .select()
-            .single()
 
           if (insertErr) {
             throw new Error(`Database error creating owner profile: ${insertErr.message}`)
-          }
-          if (insertedRow) {
-            newUserId = insertedRow.id
           }
         }
       } catch (dbErr: unknown) {

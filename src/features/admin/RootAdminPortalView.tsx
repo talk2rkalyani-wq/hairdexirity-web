@@ -71,9 +71,9 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
     return () => unsub()
   }, [loadOwners])
 
-  // Slot identification strictly by owner designation
-  const owner1 = owners.find((o) => o.ownerDesignation === 'OWNER_1') || null
-  const owner2 = owners.find((o) => o.ownerDesignation === 'OWNER_2') || null
+  // Slot identification by owner designation or standard ID fallback
+  const owner1 = owners.find((o) => o.ownerDesignation === 'OWNER_1' || o.id === 'user-owner-01') || null
+  const owner2 = owners.find((o) => o.ownerDesignation === 'OWNER_2' || o.id === 'user-owner-02') || null
 
   // Provisioning handler for Slot 1 or Slot 2
   const handleProvisionOwner = async (slot: 'OWNER_1' | 'OWNER_2') => {

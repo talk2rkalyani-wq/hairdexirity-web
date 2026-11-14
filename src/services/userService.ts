@@ -99,21 +99,27 @@ export const userService = {
           .order('created_at', { ascending: true })
 
         if (!error && data) {
-          const remoteUsers: User[] = data.map((row: Record<string, unknown>) => ({
-            id: row.id as string,
-            salonId: (row.salon_id as string) || 'salon-luma-01',
-            name: row.name as string,
-            email: row.email as string,
-            role: row.role as UserRole,
-            ownerDesignation: (row.owner_designation as OwnerDesignation) || undefined,
-            employeeId: (row.employee_id as string) || undefined,
-            specialty: (row.specialty as EmployeeSpecialty) || undefined,
-            active: Boolean(row.active),
-            avatarUrl: (row.avatar_url as string) || undefined,
-            createdAt: (row.created_at as string) || new Date().toISOString(),
-            updatedAt: (row.updated_at as string) || undefined,
-            authUserId: (row.auth_user_id as string) || undefined,
-          }))
+          const remoteUsers: User[] = data.map((row: Record<string, unknown>) => {
+            const cached = canonicalUsers.find(
+              (c) => c.id === row.id || c.email?.toLowerCase() === (row.email as string)?.toLowerCase()
+            )
+            return {
+              id: row.id as string,
+              salonId: (row.salon_id as string) || 'salon-luma-01',
+              name: row.name as string,
+              email: row.email as string,
+              role: row.role as UserRole,
+              phone: cached?.phone || undefined,
+              ownerDesignation: (row.owner_designation as OwnerDesignation) || undefined,
+              employeeId: (row.employee_id as string) || undefined,
+              specialty: (row.specialty as EmployeeSpecialty) || undefined,
+              active: Boolean(row.active),
+              avatarUrl: (row.avatar_url as string) || undefined,
+              createdAt: (row.created_at as string) || new Date().toISOString(),
+              updatedAt: (row.updated_at as string) || undefined,
+              authUserId: (row.auth_user_id as string) || undefined,
+            }
+          })
 
           canonicalUsers = remoteUsers
           persistUsers(canonicalUsers)
@@ -332,6 +338,14 @@ export const userService = {
             .maybeSingle()
           existingDbRecord = byDesig
         }
+        if (!existingDbRecord && newUserId) {
+          const { data: byId } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', newUserId)
+            .maybeSingle()
+          existingDbRecord = byId
+        }
         if (!existingDbRecord) {
           const { data: byEmail } = await supabase
             .from('users')
@@ -347,7 +361,6 @@ export const userService = {
             .update({
               name: data.name.trim(),
               email: normalizedEmail,
-              phone: data.phone?.trim() || null,
               auth_user_id: authUserId || (existingDbRecord.auth_user_id as string) || null,
               role: data.role,
               owner_designation: ownerDesig || (existingDbRecord.owner_designation as string) || null,
@@ -372,7 +385,6 @@ export const userService = {
               salon_id: 'salon-luma-01',
               name: data.name.trim(),
               email: normalizedEmail,
-              phone: data.phone?.trim() || null,
               role: data.role,
               owner_designation: ownerDesig || null,
               employee_id: newStaffId || null,

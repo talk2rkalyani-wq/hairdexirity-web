@@ -1,8 +1,78 @@
 -- Migration: 20261114000022_admin_owner_auth_management.sql
 -- Description: Provides SECURITY DEFINER RPC functions for Platform Root Administrator
--- to manage Supabase Auth users (Release Slot / Delete Auth User, Change Password, Deactivate / Activate).
+-- to manage Supabase Auth users (Release Slot / Delete Auth User, Change Password, Deactivate / Activate)
+-- and updates fn_check_last_owner_protection trigger to allow Root Administrator to release last owner slot.
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+
+-- ==============================================================================
+-- 0. Update Last-Owner Protection trigger to allow Root Administrator management
+-- ==============================================================================
+CREATE OR REPLACE FUNCTION public.fn_check_last_owner_protection()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
+DECLARE
+    remaining_owners INTEGER;
+    salon_now_date DATE := (now() AT TIME ZONE 'Asia/Kolkata')::date;
+    salon_now_time TIME := (now() AT TIME ZONE 'Asia/Kolkata')::time;
+    has_blocking BOOLEAN;
+BEGIN
+    -- The verified Administrator or Admin Override has explicit authority to release and manage owner accounts
+    IF current_setting('app.admin_override', true) = 'true' OR public.is_admin() THEN
+        RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+    END IF;
+
+    IF TG_OP = 'DELETE' THEN
+        -- If user is linked to staff, check appointment protection
+        IF OLD.employee_id IS NOT NULL THEN
+            SELECT EXISTS (
+                SELECT 1 FROM public.appointments
+                WHERE (staff_id = OLD.employee_id OR assigned_employee_id = OLD.employee_id)
+                  AND status IN ('scheduled', 'confirmed')
+                  AND (date > salon_now_date OR (date = salon_now_date AND end_time > salon_now_time))
+            ) INTO has_blocking;
+
+            IF has_blocking THEN
+                RAISE EXCEPTION 'Cannot delete this employee because an upcoming or active appointment exists for this employee.';
+            END IF;
+        END IF;
+
+        -- Check last owner protection with row-level lock against concurrent deletion (for salon staff actions)
+        IF OLD.role = 'OWNER' THEN
+            PERFORM 1 FROM public.users WHERE role = 'OWNER' FOR UPDATE;
+
+            SELECT COUNT(*) INTO remaining_owners
+            FROM public.users
+            WHERE role = 'OWNER' AND active = true AND id != OLD.id;
+
+            IF remaining_owners = 0 THEN
+                RAISE EXCEPTION 'Cannot delete the last owner account.';
+            END IF;
+        END IF;
+
+        RETURN OLD;
+    ELSIF TG_OP = 'UPDATE' THEN
+        IF OLD.role = 'OWNER' AND (NEW.role != 'OWNER' OR NEW.active = false) THEN
+            PERFORM 1 FROM public.users WHERE role = 'OWNER' FOR UPDATE;
+
+            SELECT COUNT(*) INTO remaining_owners
+            FROM public.users
+            WHERE role = 'OWNER' AND active = true AND id != OLD.id;
+
+            IF remaining_owners = 0 THEN
+                RAISE EXCEPTION 'Cannot deactivate or change the role of the last owner account.';
+            END IF;
+        END IF;
+
+        RETURN NEW;
+    END IF;
+
+    RETURN NULL;
+END;
+$$;
 
 -- ==============================================================================
 -- 1. admin_delete_owner: Release slot and delete user from auth.users and public.users
@@ -23,6 +93,9 @@ BEGIN
     IF NOT public.is_admin() THEN
         RAISE EXCEPTION 'Unauthorized: Only platform Root Administrator can release owner slots.';
     END IF;
+
+    -- Set local admin override for this transaction so trigger bypasses last-owner restriction
+    PERFORM set_config('app.admin_override', 'true', true);
 
     -- Lookup auth_user_id from public.users if not provided
     IF v_target_auth_id IS NULL AND p_user_id IS NOT NULL THEN
@@ -117,6 +190,9 @@ BEGIN
     IF NOT public.is_admin() THEN
         RAISE EXCEPTION 'Unauthorized: Only platform Root Administrator can change owner account status.';
     END IF;
+
+    -- Set local admin override for this transaction so trigger bypasses last-owner restriction
+    PERFORM set_config('app.admin_override', 'true', true);
 
     -- Lookup auth_user_id if not provided
     IF v_target_auth_id IS NULL AND p_user_id IS NOT NULL THEN

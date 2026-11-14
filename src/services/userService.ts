@@ -571,6 +571,12 @@ export const userService = {
             rpcSuccess = true
           } else {
             console.warn('[userService] admin_toggle_owner_active RPC notice:', rpcErr.message)
+            if (rpcErr.message.toLowerCase().includes('last owner')) {
+              throw new Error(
+                'Supabase Trigger Policy: Please run the updated Administrator Release Slot script in your Supabase SQL Editor to allow managing the owner account.'
+              )
+            }
+            throw new Error(`Failed to update owner status: ${rpcErr.message}`)
           }
         }
 
@@ -584,6 +590,11 @@ export const userService = {
             .eq('id', id)
 
           if (dbErr) {
+            if (dbErr.message.toLowerCase().includes('last owner')) {
+              throw new Error(
+                'Supabase Trigger Policy: Please run the updated Administrator Release Slot script in your Supabase SQL Editor to allow managing the owner account.'
+              )
+            }
             throw new Error(`Database error updating status: ${dbErr.message}`)
           }
         }
@@ -693,6 +704,12 @@ export const userService = {
             rpcSuccess = true
           } else {
             console.warn('[userService] admin_delete_owner RPC notice:', rpcErr.message)
+            if (rpcErr.message.toLowerCase().includes('last owner')) {
+              throw new Error(
+                'Supabase Trigger Policy: Please run the updated Administrator Release Slot script in your Supabase SQL Editor to allow releasing the last owner slot.'
+              )
+            }
+            throw new Error(`Failed to release owner slot: ${rpcErr.message}`)
           }
         }
 
@@ -703,6 +720,11 @@ export const userService = {
             .eq('id', id)
 
           if (dbErr) {
+            if (dbErr.message.toLowerCase().includes('last owner')) {
+              throw new Error(
+                'Supabase Trigger Policy: Please run the updated Administrator Release Slot script in your Supabase SQL Editor to allow releasing the last owner slot.'
+              )
+            }
             throw new Error(`Database error deleting user: ${dbErr.message}`)
           }
         }

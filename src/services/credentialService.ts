@@ -1,6 +1,6 @@
 import type { CredentialRecord } from '../types/models.ts'
 import { mockUsers } from '../mockData/usersData.ts'
-import { ROOT_ADMIN_CONFIG, isRootAdminEmail } from '../config/adminConfig.ts'
+import { ROOT_ADMIN_CONFIG } from '../config/adminConfig.ts'
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient.ts'
 
 export const DEFAULT_TEST_PASSWORD = 'Luma@2026!'
@@ -183,41 +183,11 @@ export const credentialService = {
   },
 
   /**
-   * Verifies if a given password matches the in-memory salted hash (offline demo mode)
+   * Mock password verification has been removed.
+   * Real-time authentication is strictly handled via Supabase Auth Cloud.
    */
-  async verifyPassword(email: string, plainTextPassword: string): Promise<boolean> {
-    const cred = await this.getByEmail(email)
-    if (!cred) return false
-
-    const computed = await hashPasswordWithSalt(plainTextPassword, cred.salt)
-    if (computed === cred.passwordHash) {
-      return true
-    }
-
-    // Offline Demo Mode: Accept common demo passwords or variants
-    const trimmed = plainTextPassword.trim()
-    const demoVariants = [
-      DEFAULT_TEST_PASSWORD,
-      'Luma@2026!',
-      'Hair@2026!',
-      'HairDexirity@2026!',
-      'HairDexirity',
-      'Hairdexirity',
-      'hairdexirity',
-      'password',
-      'admin',
-      'admin123',
-    ]
-    if (demoVariants.includes(trimmed)) {
-      return true
-    }
-
-    // In local demo mode, permit any entered password (length >= 4) for Root Administrator or locally provisioned users
-    if ((isRootAdminEmail(email) || (cred.userId && cred.userId.startsWith('user-'))) && trimmed.length >= 4) {
-      return true
-    }
-
-    return false
+  async verifyPassword(): Promise<boolean> {
+    throw new Error('Offline mock credential verification has been removed. All authentication must use Supabase Cloud.')
   },
 
   /**
@@ -234,50 +204,33 @@ export const credentialService = {
     discountAmount: number
     discountPercent: number
   }): Promise<OwnerDiscountApprovalResult> {
-    if (isSupabaseConfigured() && supabase) {
-      const { data, error } = await supabase.rpc('rpc_request_owner_discount_approval', {
-        p_salon_id: params.salonId,
-        p_invoice_id: params.invoiceId,
-        p_owner_email: params.ownerEmail,
-        p_owner_password: params.ownerPassword,
-        p_subtotal: params.subtotal,
-        p_discount_amount: params.discountAmount,
-        p_discount_percent: params.discountPercent,
-      })
-
-      if (error || !data) {
-        throw new Error(error?.message || 'Failed to obtain owner authorization for discount.')
-      }
-
-      return {
-        success: true,
-        grantId: data.grant_id,
-        ownerId: data.owner_id,
-        ownerName: data.owner_name,
-        discountPercent: data.discount_percent,
-        discountAmount: data.discount_amount,
-        subtotal: data.subtotal,
-        expiresAt: data.expires_at,
-      }
+    if (!isSupabaseConfigured() || !supabase) {
+      throw new Error('Authentication Error: Supabase Cloud client is required for owner discount authorization.')
     }
 
-    // Offline / Demo Mode Fallback:
-    const normalizedEmail = params.ownerEmail.trim().toLowerCase()
-    const isValid = await this.verifyPassword(normalizedEmail, params.ownerPassword)
-    if (!isValid) {
-      throw new Error('Invalid owner password. Authorization rejected.')
+    const { data, error } = await supabase.rpc('rpc_request_owner_discount_approval', {
+      p_salon_id: params.salonId,
+      p_invoice_id: params.invoiceId,
+      p_owner_email: params.ownerEmail,
+      p_owner_password: params.ownerPassword,
+      p_subtotal: params.subtotal,
+      p_discount_amount: params.discountAmount,
+      p_discount_percent: params.discountPercent,
+    })
+
+    if (error || !data) {
+      throw new Error(error?.message || 'Failed to obtain owner authorization for discount.')
     }
 
-    const grantId = `auth-demo-${Date.now()}`
     return {
       success: true,
-      grantId,
-      ownerId: 'usr-owner',
-      ownerName: 'Ananya Sharma',
-      discountPercent: params.discountPercent,
-      discountAmount: params.discountAmount,
-      subtotal: params.subtotal,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      grantId: data.grant_id,
+      ownerId: data.owner_id,
+      ownerName: data.owner_name,
+      discountPercent: data.discount_percent,
+      discountAmount: data.discount_amount,
+      subtotal: data.subtotal,
+      expiresAt: data.expires_at,
     }
   },
 

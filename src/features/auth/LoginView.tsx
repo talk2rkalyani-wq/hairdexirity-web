@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { authService, type AuthMode } from '../../services/authService'
-import { userService } from '../../services/userService'
-import type { User, UserSession } from '../../types/models'
-import { ROOT_ADMIN_EMAIL, ROOT_ADMIN_CONFIG, isRootAdminEmail } from '../../config/adminConfig'
+import { authService } from '../../services/authService'
+import type { UserSession } from '../../types/models'
 import './LoginView.css'
 
 export type AuthModeView = 'sign_in' | 'forgot_password' | 'update_password'
@@ -13,7 +11,6 @@ interface LoginViewProps {
 
 export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
   const [viewMode, setViewMode] = useState<AuthModeView>('sign_in')
-  const [authMode, setAuthMode] = useState<AuthMode>(() => authService.getAuthMode())
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -22,45 +19,8 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
-  const [demoOwners, setDemoOwners] = useState<User[]>([])
 
-  // Sync auth mode state and fetch provisioned demo owners
-  useEffect(() => {
-    setAuthMode(authService.getAuthMode())
-    if (!authService.isStrictSupabaseMode()) {
-      void userService.getUsersByRole('OWNER').then((owners) => {
-        setDemoOwners(owners.filter((o) => o.active))
-      })
-    }
-  }, [authMode])
 
-  const handleToggleMode = () => {
-    if (authService.isStrictSupabaseMode()) return
-    const next: AuthMode = authMode === 'local_mock' ? 'supabase_auth' : 'local_mock'
-    authService.setAuthMode(next)
-    setAuthMode(next)
-    resetFormFeedback()
-  }
-
-  // Quick 1-click login for demo accounts (strictly disabled in production)
-  const handleQuickLogin = async (quickEmail: string, quickPass: string) => {
-    if (authService.isStrictSupabaseMode() || isSubmitting) return
-    resetFormFeedback()
-    setEmail(quickEmail)
-    setPassword(quickPass)
-    try {
-      setIsSubmitting(true)
-      const session = await authService.login(quickEmail, quickPass)
-      if (onLoginSuccess) {
-        onLoginSuccess(session)
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Invalid credentials. Please try again.'
-      setErrorMessage(msg)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
 
   // Check if opened from password recovery link (#/login?type=recovery or hash tokens)
   useEffect(() => {
@@ -196,22 +156,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             <span className="brand-salon">Dexirity</span>
           </div>
 
-          {!authService.isStrictSupabaseMode() && (
-            <div className="auth-mode-badge-wrap">
-              <button
-                type="button"
-                className={`btn-mode-toggle ${authMode === 'local_mock' ? 'mode-mock' : 'mode-supabase'}`}
-                onClick={handleToggleMode}
-                title="Click to toggle between Demo / Mock Mode and Supabase Cloud Auth"
-                aria-label="Toggle authentication mode"
-              >
-                <span className="mode-dot" aria-hidden="true" />
-                <span>{authMode === 'local_mock' ? 'Demo Mode (Offline / Mock)' : 'Supabase Auth (Cloud)'}</span>
-                <span className="mode-switch-hint">Switch</span>
-              </button>
-            </div>
-          )}
-
           {viewMode === 'sign_in' && (
             <>
               <h1 className="login-title">Sign In to Hair Dexirity</h1>
@@ -248,58 +192,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
-            <div style={{ flex: 1 }}>
-              <span>{errorMessage}</span>
-              {!authService.isStrictSupabaseMode() && authMode === 'local_mock' && isRootAdminEmail(email) && (
-                <button
-                  type="button"
-                  style={{
-                    display: 'block',
-                    marginTop: '8px',
-                    padding: '6px 12px',
-                    background: '#c5a059',
-                    color: '#0d1117',
-                    fontWeight: 600,
-                    fontSize: '0.8rem',
-                    borderRadius: '6px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    void handleQuickLogin(ROOT_ADMIN_EMAIL, 'Luma@2026!')
-                  }}
-                >
-                  ⚡ Click to 1-Click Sign In as Administrator
-                </button>
-              )}
-              {!authService.isStrictSupabaseMode() && (errorMessage.includes('Demo Mode') || errorMessage.includes('Load failed')) && (
-                <button
-                  type="button"
-                  style={{
-                    display: 'block',
-                    marginTop: '8px',
-                    padding: '6px 12px',
-                    background: '#c5a059',
-                    color: '#0d1117',
-                    fontWeight: 600,
-                    fontSize: '0.8rem',
-                    borderRadius: '6px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    authService.setAuthMode('local_mock')
-                    setAuthMode('local_mock')
-                    resetFormFeedback()
-                    if (email && password) {
-                      void handleQuickLogin(email, password)
-                    }
-                  }}
-                >
-                  ⚡ Switch to Demo Mode & Sign In Now
-                </button>
-              )}
-            </div>
+            <span>{errorMessage}</span>
           </div>
         )}
 
@@ -396,18 +289,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                   )}
                 </button>
               </div>
-              {!authService.isStrictSupabaseMode() && authMode === 'local_mock' && (
-                <div style={{ marginTop: '0.45rem', fontSize: '0.8rem', color: '#94a3b8' }}>
-                  <span>Demo Mode password: </span>
-                  <code style={{ color: '#c5a059', background: 'rgba(197, 160, 89, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
-                    Hair@2026!
-                  </code>
-                  <span style={{ margin: '0 4px' }}>or</span>
-                  <code style={{ color: '#c5a059', background: 'rgba(197, 160, 89, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
-                    Luma@2026!
-                  </code>
-                </div>
-              )}
             </div>
 
             <button
@@ -424,53 +305,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                 <span>Sign In</span>
               )}
             </button>
-
-            {!authService.isStrictSupabaseMode() && authMode === 'local_mock' && (
-              <div className="demo-accounts-section">
-                <div className="demo-divider">
-                  <span>Quick Demo Sign-In</span>
-                </div>
-                <div className="demo-pills-grid" style={{ gridTemplateColumns: '1fr', gap: '0.65rem' }}>
-                  {/* Provisioned Salon Owners (1-Click) */}
-                  {demoOwners.map((owner) => (
-                    <button
-                      key={owner.id}
-                      type="button"
-                      className="btn-demo-pill pill-owner"
-                      disabled={isSubmitting}
-                      onClick={() => handleQuickLogin(owner.email, 'Hair@2026!')}
-                      title={`Sign in as Salon Owner: ${owner.name}`}
-                      style={{
-                        alignItems: 'center',
-                        textAlign: 'center',
-                        padding: '0.75rem',
-                        background: 'linear-gradient(135deg, rgba(197, 160, 89, 0.18), rgba(197, 160, 89, 0.06))',
-                        border: '1px solid #c5a059',
-                      }}
-                    >
-                      <span className="pill-role" style={{ fontSize: '0.85rem', color: '#c5a059' }}>
-                        👑 Salon Owner (1-Click)
-                      </span>
-                      <span className="pill-name" style={{ fontSize: '0.95rem', fontWeight: 600 }}>
-                        {owner.name} ({owner.email})
-                      </span>
-                    </button>
-                  ))}
-
-                  <button
-                    type="button"
-                    className="btn-demo-pill pill-admin"
-                    disabled={isSubmitting}
-                    onClick={() => handleQuickLogin(ROOT_ADMIN_EMAIL, 'Luma@2026!')}
-                    title="Sign in as Root Administrator"
-                    style={{ alignItems: 'center', textAlign: 'center', padding: '0.75rem' }}
-                  >
-                    <span className="pill-role" style={{ fontSize: '0.85rem' }}>🛡️ Root Administrator (1-Click)</span>
-                    <span className="pill-name" style={{ fontSize: '0.95rem' }}>{ROOT_ADMIN_CONFIG.name} ({ROOT_ADMIN_EMAIL})</span>
-                  </button>
-                </div>
-              </div>
-            )}
           </form>
         )}
 
@@ -657,11 +491,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
-            {authService.isStrictSupabaseMode() || authMode === 'supabase_auth' ? (
-              <span>Supabase Email-and-Password Authentication &amp; Row Level Security</span>
-            ) : (
-              <span>Role-Based Access Control &amp; Data Isolation (Demo Password: <code>Hair@2026!</code> or <code>Luma@2026!</code>)</span>
-            )}
+            <span>Supabase Email-and-Password Authentication &amp; Row Level Security</span>
           </div>
         </div>
       </main>

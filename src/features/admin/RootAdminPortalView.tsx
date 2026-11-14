@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import type { User, UserSession } from '../../types/models'
 import { userService } from '../../services/userService'
-import { authService, type AuthMode } from '../../services/authService'
 import { credentialService, DEFAULT_TEST_PASSWORD } from '../../services/credentialService'
 import { ROOT_ADMIN_CONFIG, ROOT_ADMIN_EMAIL } from '../../config/adminConfig'
 import './RootAdminPortalView.css'
@@ -30,7 +29,6 @@ const emptyFormState: OwnerSlotFormState = {
 export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ session, onLogout }) => {
   const [owners, setOwners] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [authMode, setAuthMode] = useState<AuthMode>(() => authService.getAuthMode())
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [submittingSlot, setSubmittingSlot] = useState<'OWNER_1' | 'OWNER_2' | null>(null)
@@ -77,16 +75,7 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
   const owner2 =
     owners.find((o) => o.ownerDesignation === 'OWNER_2') || (owners.length > 1 && owners[1] !== owner1 ? owners[1] : null)
 
-  const handleToggleMode = () => {
-    if (authService.isStrictSupabaseMode()) {
-      showToast('Authentication mode switching is disabled in production.')
-      return
-    }
-    const next: AuthMode = authMode === 'local_mock' ? 'supabase_auth' : 'local_mock'
-    authService.setAuthMode(next)
-    setAuthMode(next)
-    showToast(`Switched to ${next === 'local_mock' ? 'Demo Mode (Local Mock)' : 'Supabase Auth (Cloud)'}`)
-  }
+
 
   // Provisioning handler for Slot 1 or Slot 2
   const handleProvisionOwner = async (slot: 'OWNER_1' | 'OWNER_2') => {
@@ -217,18 +206,6 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
         </div>
 
         <div className="portal-header-actions">
-          {!authService.isStrictSupabaseMode() && (
-            <button
-              type="button"
-              className={`portal-mode-pill ${authMode === 'local_mock' ? 'pill-mock' : 'pill-cloud'}`}
-              onClick={handleToggleMode}
-              title="Click to toggle between Demo Mode and Supabase Cloud"
-            >
-              <span className="mode-status-dot" />
-              <span>{authMode === 'local_mock' ? 'Demo Mode (Offline)' : 'Supabase Auth (Cloud)'}</span>
-            </button>
-          )}
-
           <div className="portal-admin-profile">
             <div className="admin-avatar">
               {ROOT_ADMIN_CONFIG.name.charAt(0).toUpperCase()}

@@ -122,43 +122,6 @@
   gap: 1rem;
 }
 
-/* Mode pill */
-.portal-mode-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.85rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #cbd5e1;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.portal-mode-pill:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(197, 160, 89, 0.35);
-}
-
-.mode-status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.pill-mock .mode-status-dot {
-  background: #10b981;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
-}
-
-.pill-cloud .mode-status-dot {
-  background: #3b82f6;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
-}
-
 /* Admin Profile */
 .portal-admin-profile {
   display: flex;

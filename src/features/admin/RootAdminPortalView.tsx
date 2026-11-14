@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import type { User, UserSession } from '../../types/models'
 import { userService } from '../../services/userService'
-import { credentialService, DEFAULT_TEST_PASSWORD } from '../../services/credentialService'
+import { authService } from '../../services/authService'
+import { DEFAULT_TEST_PASSWORD } from '../../services/credentialService'
 import { ROOT_ADMIN_CONFIG, ROOT_ADMIN_EMAIL } from '../../config/adminConfig'
 import './RootAdminPortalView.css'
 
@@ -70,12 +71,9 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
     return () => unsub()
   }, [loadOwners])
 
-  // Slot identification
-  const owner1 = owners.find((o) => o.ownerDesignation === 'OWNER_1') || owners[0] || null
-  const owner2 =
-    owners.find((o) => o.ownerDesignation === 'OWNER_2') || (owners.length > 1 && owners[1] !== owner1 ? owners[1] : null)
-
-
+  // Slot identification strictly by owner designation
+  const owner1 = owners.find((o) => o.ownerDesignation === 'OWNER_1') || null
+  const owner2 = owners.find((o) => o.ownerDesignation === 'OWNER_2') || null
 
   // Provisioning handler for Slot 1 or Slot 2
   const handleProvisionOwner = async (slot: 'OWNER_1' | 'OWNER_2') => {
@@ -88,6 +86,10 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
     }
     if (!form.email.trim() || !form.email.includes('@')) {
       setErrorMessage(`Please enter a valid email address for ${slot === 'OWNER_1' ? 'Owner 1' : 'Owner 2'}.`)
+      return
+    }
+    if (!form.password || form.password.trim().length < 6) {
+      setErrorMessage('Password must be at least 6 characters.')
       return
     }
 
@@ -105,7 +107,7 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
         session
       )
 
-      showToast(`🎉 ${slot === 'OWNER_1' ? 'Owner 1' : 'Owner 2'} (${newOwner.name}) credentials provisioned successfully!`)
+      showToast(`🎉 ${slot === 'OWNER_1' ? 'Owner 1' : 'Owner 2'} (${newOwner.name}) credentials provisioned and registered in Supabase Cloud!`)
       if (slot === 'OWNER_1') {
         setSlot1Form({ ...emptyFormState })
       } else {
@@ -157,19 +159,15 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
 
   const handleConfirmPasswordReset = async () => {
     if (!resetModalOwner) return
-    if (!newPasswordInput || newPasswordInput.trim().length < 6) {
-      alert('Password must be at least 6 characters.')
-      return
-    }
 
     try {
       setIsResettingPassword(true)
-      await credentialService.changePassword(resetModalOwner.id, newPasswordInput.trim())
-      showToast(`Password updated successfully for ${resetModalOwner.name}!`)
+      const res = await authService.requestPasswordReset(resetModalOwner.email)
+      showToast(res.message || `Password recovery link sent to ${resetModalOwner.email}!`)
       setResetModalOwner(null)
       setNewPasswordInput('')
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to change password.'
+      const msg = err instanceof Error ? err.message : 'Failed to send password recovery link.'
       alert(msg)
     } finally {
       setIsResettingPassword(false)
@@ -331,6 +329,12 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
                       <span className="meta-icon">📅</span>
                       <span className="meta-text">
                         Provisioned: {new Date(owner1.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="owner-meta-item">
+                      <span className="meta-icon">{owner1.authUserId ? '⚡' : '☁️'}</span>
+                      <span className="meta-text" style={{ color: owner1.authUserId ? '#38bdf8' : '#94a3b8' }}>
+                        {owner1.authUserId ? 'Supabase Auth Linked' : 'Profile Provisioned (Cloud)'}
                       </span>
                     </div>
                   </div>
@@ -502,6 +506,12 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
                       <span className="meta-icon">📅</span>
                       <span className="meta-text">
                         Provisioned: {new Date(owner2.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="owner-meta-item">
+                      <span className="meta-icon">{owner2.authUserId ? '⚡' : '☁️'}</span>
+                      <span className="meta-text" style={{ color: owner2.authUserId ? '#38bdf8' : '#94a3b8' }}>
+                        {owner2.authUserId ? 'Supabase Auth Linked' : 'Profile Provisioned (Cloud)'}
                       </span>
                     </div>
                   </div>

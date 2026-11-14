@@ -2,11 +2,13 @@ import type { User, EmployeeSpecialty, UserSession, UserRole, OwnerDesignation }
 import { mockUsers } from '../mockData/usersData'
 import { permissionService } from './permissionService'
 import { staffService } from './staffService'
-import { credentialService } from './credentialService'
+import { credentialService, DEFAULT_TEST_PASSWORD } from './credentialService'
 import { sessionService } from './sessionService'
 import { appointmentStore } from './appointmentStore'
 import { isPlaceholderEmail } from '../utils/authUtils'
 import { isRootAdminEmail } from '../config/adminConfig'
+import { createClient } from '@supabase/supabase-js'
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
 
 function resolveSession(session?: UserSession | null): UserSession | null {
   if (session !== undefined) return session
@@ -85,9 +87,42 @@ if (typeof window !== 'undefined') {
 export const userService = {
   /**
    * Retrieves all users in the salon.
+   * Fetches real-time profiles directly from Supabase Cloud when configured.
    * STRICT POLICY: Root Administrator is NEVER listed in the salon user list.
    */
   async getUsers(): Promise<User[]> {
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .order('created_at', { ascending: true })
+
+        if (!error && data) {
+          const remoteUsers: User[] = data.map((row: Record<string, unknown>) => ({
+            id: row.id as string,
+            salonId: (row.salon_id as string) || 'salon-luma-01',
+            name: row.name as string,
+            email: row.email as string,
+            role: row.role as UserRole,
+            ownerDesignation: (row.owner_designation as OwnerDesignation) || undefined,
+            employeeId: (row.employee_id as string) || undefined,
+            specialty: (row.specialty as EmployeeSpecialty) || undefined,
+            active: Boolean(row.active),
+            avatarUrl: (row.avatar_url as string) || undefined,
+            createdAt: (row.created_at as string) || new Date().toISOString(),
+            updatedAt: (row.updated_at as string) || undefined,
+            authUserId: (row.auth_user_id as string) || undefined,
+          }))
+
+          canonicalUsers = remoteUsers
+          persistUsers(canonicalUsers)
+          return remoteUsers.filter((u) => u.role !== 'ADMIN' && !isRootAdminEmail(u.email))
+        }
+      } catch (err) {
+        console.warn('[userService] Failed to load users from Supabase, returning local cache:', err)
+      }
+    }
     return Promise.resolve(canonicalUsers.filter((u) => u.role !== 'ADMIN' && !isRootAdminEmail(u.email)))
   },
 
@@ -96,9 +131,8 @@ export const userService = {
    * Strictly excludes Root Administrator.
    */
   async getActiveUsers(): Promise<User[]> {
-    return Promise.resolve(
-      canonicalUsers.filter((u) => u.active && u.role !== 'ADMIN' && !isRootAdminEmail(u.email))
-    )
+    const all = await this.getUsers()
+    return all.filter((u) => u.active)
   },
 
   /**
@@ -106,18 +140,18 @@ export const userService = {
    * ADMIN is not a salon user role and returns empty.
    */
   async getUsersByRole(role: User['role']): Promise<User[]> {
-    if (role === 'ADMIN') return Promise.resolve([])
-    return Promise.resolve(
-      canonicalUsers.filter((u) => u.role === role && !isRootAdminEmail(u.email))
-    )
+    if (role === 'ADMIN') return []
+    const all = await this.getUsers()
+    return all.filter((u) => u.role === role)
   },
 
   /**
    * Retrieves a user by their user ID
    */
   async getUserById(id: string): Promise<User | null> {
-    const user = canonicalUsers.find((u) => u.id === id && u.role !== 'ADMIN' && !isRootAdminEmail(u.email))
-    return Promise.resolve(user ? { ...user } : null)
+    const all = await this.getUsers()
+    const found = all.find((u) => u.id === id)
+    return found ? { ...found } : null
   },
 
   /**
@@ -126,25 +160,25 @@ export const userService = {
   async getUserByEmail(email: string): Promise<User | null> {
     const normalized = email.trim().toLowerCase()
     if (isRootAdminEmail(normalized)) {
-      return Promise.resolve(null)
+      return null
     }
-    const user = canonicalUsers.find(
-      (u) => u.email.toLowerCase() === normalized && u.role !== 'ADMIN'
-    )
-    return Promise.resolve(user ? { ...user } : null)
+    const all = await this.getUsers()
+    const found = all.find((u) => u.email.toLowerCase() === normalized)
+    return found ? { ...found } : null
   },
 
   /**
    * Retrieves a user by linked employee/staff ID
    */
   async getUserByEmployeeId(employeeId: string): Promise<User | null> {
-    const user = canonicalUsers.find((u) => u.employeeId === employeeId)
-    return Promise.resolve(user ? { ...user } : null)
+    const all = await this.getUsers()
+    const found = all.find((u) => u.employeeId === employeeId)
+    return found ? { ...found } : null
   },
 
   /**
    * Creates a new user account supporting any valid salon role (OWNER, RECEPTIONIST, EMPLOYEE).
-   * Strictly enforces permission: Only OWNER can create user accounts.
+   * Fully integrated with Supabase Auth (Cloud) and public.users PostgreSQL table.
    */
   async createUser(
     data: {
@@ -167,15 +201,15 @@ export const userService = {
     }
 
     // STRICT ROLE SEPARATION:
-    // 1. Root Administrator (talk2rkalyani@gmail.com) can ONLY create Salon Owner credentials (no regular employees or receptionists).
+    // 1. Root Administrator (talk2rkalyani@gmail.com) can ONLY create Salon Owner credentials.
     if (s.role === 'ADMIN') {
       if (data.role !== 'OWNER') {
         return Promise.reject(
           new Error('Forbidden: The Root Administrator can only create Salon Owner credentials.')
         )
       }
-      const existingOwners = canonicalUsers.filter((u) => u.role === 'OWNER')
-      if (existingOwners.length >= 2) {
+      const existingOwners = (await this.getUsers()).filter((u) => u.role === 'OWNER')
+      if (existingOwners.length >= 2 && !existingOwners.some((o) => o.ownerDesignation === data.ownerDesignation)) {
         return Promise.reject(
           new Error('Cannot create owner: Salon already has the maximum allowed 2 owners.')
         )
@@ -212,7 +246,8 @@ export const userService = {
       )
     }
 
-    if (canonicalUsers.some((u) => u.email.toLowerCase() === normalizedEmail)) {
+    const existingUsers = await this.getUsers()
+    if (existingUsers.some((u) => u.email.toLowerCase() === normalizedEmail && u.ownerDesignation !== data.ownerDesignation)) {
       return Promise.reject(
         new Error(`A user with email ${data.email} already exists.`)
       )
@@ -220,8 +255,9 @@ export const userService = {
 
     const timestamp = Date.now()
     const randomSuffix = Math.floor(1000 + Math.random() * 9000)
-    const newUserId = `user-${timestamp}-${randomSuffix}`
+    let newUserId = `user-${timestamp}-${randomSuffix}`
     let newStaffId: string | undefined = undefined
+    let authUserId: string | undefined = undefined
 
     // 1. If role is EMPLOYEE, create matching staff profile in staffService
     if (data.role === 'EMPLOYEE') {
@@ -230,7 +266,7 @@ export const userService = {
         id: newStaffId,
         name: data.name.trim(),
         phone: data.phone?.trim() || '+91 98110 00000',
-        email: data.email.trim(),
+        email: normalizedEmail,
         role: 'junior_stylist',
         skills: data.skills && data.skills.length > 0 ? data.skills : [`${data.specialty || 'Hair'} Specialist`],
         experience: '1 year',
@@ -239,14 +275,134 @@ export const userService = {
     }
 
     // 2. Build canonical user profile
-    const existingOwners = canonicalUsers.filter((u) => u.role === 'OWNER')
-    const ownerDesig = data.role === 'OWNER' ? (existingOwners.length === 0 ? 'OWNER_1' : 'OWNER_2') : undefined
+    const existingOwners = (await this.getUsers()).filter((u) => u.role === 'OWNER')
+    const ownerDesig = data.role === 'OWNER'
+      ? (data.ownerDesignation || (existingOwners.length === 0 ? 'OWNER_1' : 'OWNER_2'))
+      : undefined
 
+    if (data.role === 'OWNER' && ownerDesig) {
+      newUserId = `user-owner-${ownerDesig.toLowerCase().replace('_', '-')}`
+    }
+
+    // 3. Supabase Cloud Integration (Auth signup + database table synchronization)
+    if (isSupabaseConfigured() && supabase) {
+      // Step A: Register auth credentials in Supabase Auth via non-persisting client
+      const sbUrl = import.meta.env.VITE_SUPABASE_URL
+      const sbKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY
+      if (sbUrl && sbKey) {
+        try {
+          const tempAuthClient = createClient(sbUrl, sbKey, {
+            auth: {
+              persistSession: false,
+              autoRefreshToken: false,
+              detectSessionInUrl: false,
+            },
+          })
+          const { data: authData, error: authErr } = await tempAuthClient.auth.signUp({
+            email: normalizedEmail,
+            password: data.initialPassword || DEFAULT_TEST_PASSWORD,
+            options: {
+              data: {
+                name: data.name.trim(),
+                role: data.role,
+                owner_designation: ownerDesig || null,
+              },
+            },
+          })
+          if (!authErr && authData?.user) {
+            authUserId = authData.user.id
+          } else if (authErr) {
+            if (!authErr.message.toLowerCase().includes('already registered')) {
+              console.warn('[userService] Supabase auth signUp notice:', authErr.message)
+            }
+          }
+        } catch (authErr) {
+          console.warn('[userService] Supabase auth registration notice:', authErr)
+        }
+      }
+
+      // Step B: Persist to Supabase public.users table
+      try {
+        let existingDbRecord: Record<string, unknown> | null = null
+        if (ownerDesig) {
+          const { data: byDesig } = await supabase
+            .from('users')
+            .select('*')
+            .eq('owner_designation', ownerDesig)
+            .maybeSingle()
+          existingDbRecord = byDesig
+        }
+        if (!existingDbRecord) {
+          const { data: byEmail } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', normalizedEmail)
+            .maybeSingle()
+          existingDbRecord = byEmail
+        }
+
+        if (existingDbRecord) {
+          const { data: updatedRow, error: updateErr } = await supabase
+            .from('users')
+            .update({
+              name: data.name.trim(),
+              email: normalizedEmail,
+              phone: data.phone?.trim() || null,
+              auth_user_id: authUserId || (existingDbRecord.auth_user_id as string) || null,
+              role: data.role,
+              owner_designation: ownerDesig || (existingDbRecord.owner_designation as string) || null,
+              active: true,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existingDbRecord.id)
+            .select()
+            .single()
+
+          if (updateErr) {
+            throw new Error(`Database error updating owner profile: ${updateErr.message}`)
+          }
+          if (updatedRow) {
+            newUserId = updatedRow.id
+          }
+        } else {
+          const { data: insertedRow, error: insertErr } = await supabase
+            .from('users')
+            .insert({
+              id: newUserId,
+              salon_id: 'salon-luma-01',
+              name: data.name.trim(),
+              email: normalizedEmail,
+              phone: data.phone?.trim() || null,
+              role: data.role,
+              owner_designation: ownerDesig || null,
+              employee_id: newStaffId || null,
+              specialty: data.role === 'EMPLOYEE' ? data.specialty || null : null,
+              auth_user_id: authUserId || null,
+              active: true,
+            })
+            .select()
+            .single()
+
+          if (insertErr) {
+            throw new Error(`Database error creating owner profile: ${insertErr.message}`)
+          }
+          if (insertedRow) {
+            newUserId = insertedRow.id
+          }
+        }
+      } catch (dbErr: unknown) {
+        const msg = dbErr instanceof Error ? dbErr.message : 'Database error while saving user profile.'
+        console.error('[userService] Supabase database error:', msg)
+        throw new Error(msg)
+      }
+    }
+
+    // 4. Build trusted local User model
     const newUser: User = {
       id: newUserId,
       salonId: 'salon-luma-01',
       name: data.name.trim(),
-      email: data.email.trim(),
+      email: normalizedEmail,
       phone: data.phone?.trim() || undefined,
       role: data.role,
       ownerDesignation: ownerDesig,
@@ -254,16 +410,17 @@ export const userService = {
       specialty: data.role === 'EMPLOYEE' ? data.specialty : undefined,
       active: true,
       createdAt: new Date().toISOString(),
+      authUserId,
     }
 
-    // 3. Register secure credentials
-    await credentialService.registerUserCredentials(newUserId, data.email.trim(), data.initialPassword)
+    await credentialService.registerUserCredentials(newUserId, normalizedEmail, data.initialPassword)
 
+    canonicalUsers = canonicalUsers.filter((u) => u.id !== newUserId && u.email.toLowerCase() !== normalizedEmail)
     canonicalUsers.push(newUser)
     persistUsers(canonicalUsers)
     notifyListeners()
 
-    return Promise.resolve({ ...newUser })
+    return newUser
   },
 
   /**
@@ -372,6 +529,26 @@ export const userService = {
       }
     }
 
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error: dbErr } = await supabase
+          .from('users')
+          .update({
+            active,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', id)
+
+        if (dbErr) {
+          throw new Error(`Database error updating status: ${dbErr.message}`)
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Database error updating status.'
+        console.error('[userService] Supabase toggleUserActive error:', msg)
+        throw new Error(msg)
+      }
+    }
+
     canonicalUsers[index].active = active
 
     // Also toggle matching staff record if linked
@@ -458,7 +635,25 @@ export const userService = {
       console.warn('Failed to purge credentials for deleted user:', err)
     }
 
-    // 3. Remove from canonical users list
+    // 3. Delete from Supabase public.users table
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error: dbErr } = await supabase
+          .from('users')
+          .delete()
+          .eq('id', id)
+
+        if (dbErr) {
+          throw new Error(`Database error deleting user: ${dbErr.message}`)
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Database error deleting user.'
+        console.error('[userService] Supabase deleteUser error:', msg)
+        throw new Error(msg)
+      }
+    }
+
+    // 4. Remove from canonical users list
     canonicalUsers.splice(index, 1)
     persistUsers(canonicalUsers)
     notifyListeners()

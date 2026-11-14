@@ -153,7 +153,7 @@ export const authService = {
           if (isRootAdminEmail(adminRecord.email)) {
             if (!adminRecord.active) {
               await supabase.auth.signOut().catch(() => {})
-              throw new Error('User is disabled. Please contact the administrator.')
+              throw new Error('You Are Disabled Plz Contact to Administrator')
             }
 
             const now = new Date()
@@ -178,7 +178,7 @@ export const authService = {
           // Any other identity in administrators is rejected from holding admin role and falls through to users table
         }
       } catch (err) {
-        if (err instanceof Error && err.message === 'User is disabled. Please contact the administrator.') {
+        if (err instanceof Error && err.message === 'You Are Disabled Plz Contact to Administrator') {
           throw err
         }
         // If table doesn't exist yet, continue to users lookup
@@ -214,7 +214,7 @@ export const authService = {
     // 4. Check active status: Reject disabled accounts with exact specified message
     if (dbUser.active === false) {
       if (supabase) await supabase.auth.signOut().catch(() => {})
-      throw new Error('User is disabled. Please contact the administrator.')
+      throw new Error('You Are Disabled Plz Contact to Administrator')
     }
 
     // 5. Validate role: Reject unsupported or inconsistent role
@@ -283,7 +283,35 @@ export const authService = {
 
       if (error || !data.user) {
         const authErrMsg = error?.message || 'Invalid email or password.'
-        if (authErrMsg.toLowerCase().includes('invalid login credentials')) {
+        const lower = authErrMsg.toLowerCase()
+
+        // Check if user is banned or disabled from Supabase backend
+        if (
+          lower.includes('banned') ||
+          lower.includes('disabled') ||
+          lower.includes('deactivated') ||
+          (error as unknown as { error_code?: string })?.error_code === 'user_banned'
+        ) {
+          throw new Error('You Are Disabled Plz Contact to Administrator')
+        }
+
+        // Before reporting invalid login credentials, verify if the user is marked inactive in database
+        try {
+          const { data: dbCheck } = await supabase
+            .from('users')
+            .select('active')
+            .eq('email', normalizedEmail)
+            .maybeSingle()
+          if (dbCheck && dbCheck.active === false) {
+            throw new Error('You Are Disabled Plz Contact to Administrator')
+          }
+        } catch (dbCheckErr) {
+          if (dbCheckErr instanceof Error && dbCheckErr.message === 'You Are Disabled Plz Contact to Administrator') {
+            throw dbCheckErr
+          }
+        }
+
+        if (lower.includes('invalid login credentials')) {
           throw new Error(
             'Invalid login credentials in Supabase Cloud. Please verify your password, or check in Supabase Dashboard (Authentication → Users) that the user is marked "Confirmed".'
           )

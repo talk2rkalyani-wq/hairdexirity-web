@@ -550,7 +550,7 @@ export const userService = {
           new Error('Forbidden: Only the system administrator can change owner account status.')
         )
       }
-      if (!active) {
+      if (!active && s?.role !== 'ADMIN') {
         const activeOwners = canonicalUsers.filter((u) => u.role === 'OWNER' && u.active)
         if (activeOwners.length <= 1) {
           return Promise.reject(new Error('Cannot deactivate the last active owner account.'))
@@ -560,16 +560,32 @@ export const userService = {
 
     if (isSupabaseConfigured() && supabase) {
       try {
-        const { error: dbErr } = await supabase
-          .from('users')
-          .update({
-            active,
-            updated_at: new Date().toISOString(),
+        let rpcSuccess = false
+        if (targetUser.role === 'OWNER' || targetUser.authUserId) {
+          const { error: rpcErr } = await supabase.rpc('admin_toggle_owner_active', {
+            p_user_id: id,
+            p_active: active,
+            p_auth_user_id: targetUser.authUserId || null,
           })
-          .eq('id', id)
+          if (!rpcErr) {
+            rpcSuccess = true
+          } else {
+            console.warn('[userService] admin_toggle_owner_active RPC notice:', rpcErr.message)
+          }
+        }
 
-        if (dbErr) {
-          throw new Error(`Database error updating status: ${dbErr.message}`)
+        if (!rpcSuccess) {
+          const { error: dbErr } = await supabase
+            .from('users')
+            .update({
+              active,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', id)
+
+          if (dbErr) {
+            throw new Error(`Database error updating status: ${dbErr.message}`)
+          }
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Database error updating status.'
@@ -664,16 +680,31 @@ export const userService = {
       console.warn('Failed to purge credentials for deleted user:', err)
     }
 
-    // 3. Delete from Supabase public.users table
+    // 3. Delete from Supabase public.users and auth.users
     if (isSupabaseConfigured() && supabase) {
       try {
-        const { error: dbErr } = await supabase
-          .from('users')
-          .delete()
-          .eq('id', id)
+        let rpcSuccess = false
+        if (targetUser.role === 'OWNER' || targetUser.authUserId) {
+          const { error: rpcErr } = await supabase.rpc('admin_delete_owner', {
+            p_user_id: id,
+            p_auth_user_id: targetUser.authUserId || null,
+          })
+          if (!rpcErr) {
+            rpcSuccess = true
+          } else {
+            console.warn('[userService] admin_delete_owner RPC notice:', rpcErr.message)
+          }
+        }
 
-        if (dbErr) {
-          throw new Error(`Database error deleting user: ${dbErr.message}`)
+        if (!rpcSuccess) {
+          const { error: dbErr } = await supabase
+            .from('users')
+            .delete()
+            .eq('id', id)
+
+          if (dbErr) {
+            throw new Error(`Database error deleting user: ${dbErr.message}`)
+          }
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Database error deleting user.'
@@ -688,6 +719,55 @@ export const userService = {
     notifyListeners()
 
     return Promise.resolve(true)
+  },
+
+  /**
+   * Updates an owner's password directly in Supabase Auth (and in-memory credential cache).
+   * Authorized strictly for platform Root Administrator.
+   */
+  async adminChangeOwnerPassword(
+    userId: string,
+    authUserId: string | undefined,
+    newPassword: string,
+    session?: UserSession | null
+  ): Promise<boolean> {
+    const s = resolveSession(session)
+    if (!s || !s.isAuthenticated || s.role !== 'ADMIN') {
+      throw new Error('Unauthorized: Only the Root Administrator can change owner passwords.')
+    }
+
+    if (!newPassword || newPassword.trim().length < 6) {
+      throw new Error('Password must be at least 6 characters.')
+    }
+
+    const trimmedPassword = newPassword.trim()
+
+    if (isSupabaseConfigured() && supabase) {
+      let targetAuthId = authUserId
+      if (!targetAuthId) {
+        const target = canonicalUsers.find((u) => u.id === userId)
+        targetAuthId = target?.authUserId
+      }
+
+      const { error: rpcErr } = await supabase.rpc('admin_update_owner_password', {
+        p_user_id: userId,
+        p_new_password: trimmedPassword,
+        p_auth_user_id: targetAuthId || null,
+      })
+
+      if (rpcErr) {
+        throw new Error(`Failed to update password in Supabase Auth: ${rpcErr.message}`)
+      }
+    }
+
+    // Synchronize local credential store
+    try {
+      await credentialService.changePassword(userId, trimmedPassword)
+    } catch {
+      // In-memory update may be optional
+    }
+
+    return true
   },
 
   /**

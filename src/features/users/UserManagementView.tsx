@@ -83,21 +83,28 @@ export const UserManagementView: React.FC = () => {
   // Permission Guard Check
   const hasAccess = permissionService.canAccessUserManagement(session)
 
-  // Compute Metrics (strictly excludes Root Administrator from salon team metrics)
+  // Compute Metrics (strictly excludes Root Administrator from salon team metrics, and hides owners when viewed by Salon Owners)
   const stats = useMemo(() => {
-    const salonUsers = users.filter((u) => !isRootAdminEmail(u.email) && u.role !== 'ADMIN')
-    const total = salonUsers.length
-    const owners = salonUsers.filter((u) => u.role === 'OWNER').length
-    const receptionists = salonUsers.filter((u) => u.role === 'RECEPTIONIST').length
-    const employees = salonUsers.filter((u) => u.role === 'EMPLOYEE')
+    const isPlatformAdmin = session?.role === 'ADMIN'
+    const teamUsers = users.filter(
+      (u) => !isRootAdminEmail(u.email) && u.role !== 'ADMIN' && (isPlatformAdmin || u.role !== 'OWNER')
+    )
+    const total = teamUsers.length
+    const owners = users.filter((u) => u.role === 'OWNER').length
+    const receptionists = teamUsers.filter((u) => u.role === 'RECEPTIONIST').length
+    const employees = teamUsers.filter((u) => u.role === 'EMPLOYEE')
     const activeEmployees = employees.filter((e) => e.active).length
+    const specialists = employees.filter((e) => Boolean(e.specialty)).length
 
-    return { total, owners, receptionists, activeEmployees, totalEmployees: employees.length }
-  }, [users])
+    return { total, owners, receptionists, activeEmployees, totalEmployees: employees.length, specialists }
+  }, [users, session?.role])
 
-  // Filtered Users (strictly excludes Root Administrator from User Listing)
+  // Filtered Users (strictly excludes Root Administrator, and hides both owner profiles when viewed by Salon Owners)
   const filteredUsers = useMemo(() => {
-    const salonUsers = users.filter((u) => !isRootAdminEmail(u.email) && u.role !== 'ADMIN')
+    const isPlatformAdmin = session?.role === 'ADMIN'
+    const salonUsers = users.filter(
+      (u) => !isRootAdminEmail(u.email) && u.role !== 'ADMIN' && (isPlatformAdmin || u.role !== 'OWNER')
+    )
     const q = searchQuery.toLowerCase().trim()
     return salonUsers.filter((u) => {
       if (roleFilter !== 'ALL' && u.role !== roleFilter) return false
@@ -111,7 +118,7 @@ export const UserManagementView: React.FC = () => {
       }
       return true
     })
-  }, [users, searchQuery, roleFilter, specialtyFilter])
+  }, [users, searchQuery, roleFilter, specialtyFilter, session?.role])
 
   // Bulk Selection Handlers
   const handleToggleSelect = useCallback((id: string) => {
@@ -299,20 +306,28 @@ export const UserManagementView: React.FC = () => {
       {/* Overview Stat Cards */}
       <section className="user-stats-grid" aria-label="Salon Team Statistics">
         <div className="stat-card">
-          <span className="stat-label">Total Users</span>
+          <span className="stat-label">{session?.role === 'ADMIN' ? 'Total Users' : 'Team Accounts'}</span>
           <span className="stat-value">{stats.total}</span>
-          <span className="stat-note">Across all roles</span>
+          <span className="stat-note">{session?.role === 'ADMIN' ? 'Across all roles' : 'Registered salon team members'}</span>
         </div>
         <div className="stat-card">
           <span className="stat-label">Active Employees</span>
           <span className="stat-value stat-emp">{stats.activeEmployees}</span>
           <span className="stat-note">Out of {stats.totalEmployees} registered</span>
         </div>
-        <div className="stat-card">
-          <span className="stat-label">Salon Owners</span>
-          <span className="stat-value stat-owner">{stats.owners}</span>
-          <span className="stat-note">Full administration</span>
-        </div>
+        {session?.role === 'ADMIN' ? (
+          <div className="stat-card">
+            <span className="stat-label">Salon Owners</span>
+            <span className="stat-value stat-owner">{stats.owners}</span>
+            <span className="stat-note">Full administration</span>
+          </div>
+        ) : (
+          <div className="stat-card">
+            <span className="stat-label">Service Specialists</span>
+            <span className="stat-value stat-owner">{stats.specialists}</span>
+            <span className="stat-note">Hair, Skin &amp; Nail Experts</span>
+          </div>
+        )}
         <div className="stat-card">
           <span className="stat-label">Receptionists</span>
           <span className="stat-value stat-rec">{stats.receptionists}</span>
@@ -353,15 +368,17 @@ export const UserManagementView: React.FC = () => {
               className={`filter-pill ${roleFilter === 'ALL' ? 'active' : ''}`}
               onClick={() => setRoleFilter('ALL')}
             >
-              All Roles
+              All Roles ({stats.total})
             </button>
-            <button
-              type="button"
-              className={`filter-pill ${roleFilter === 'OWNER' ? 'active' : ''}`}
-              onClick={() => setRoleFilter('OWNER')}
-            >
-              Owners ({stats.owners})
-            </button>
+            {session?.role === 'ADMIN' && (
+              <button
+                type="button"
+                className={`filter-pill ${roleFilter === 'OWNER' ? 'active' : ''}`}
+                onClick={() => setRoleFilter('OWNER')}
+              >
+                Owners ({stats.owners})
+              </button>
+            )}
             <button
               type="button"
               className={`filter-pill ${roleFilter === 'RECEPTIONIST' ? 'active' : ''}`}

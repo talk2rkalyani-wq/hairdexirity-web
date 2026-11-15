@@ -3,6 +3,7 @@ import { mockClients } from '../mockData/salonEntities.ts'
 import { appointmentStore } from './appointmentStore.ts'
 import { permissionService } from './permissionService.ts'
 import { sessionService } from './sessionService.ts'
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient.ts'
 
 const CLIENTS_STORAGE_KEY = 'luma_salon_clients_v1'
 
@@ -18,16 +19,12 @@ function loadInitialClients(): Client[] {
         if (Array.isArray(parsed)) {
           return parsed
         }
-      } else {
-        const initial = [...mockClients]
-        window.localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(initial))
-        return initial
       }
     }
   } catch (err) {
     console.warn('Failed to load clients from localStorage:', err)
   }
-  return [...mockClients]
+  return []
 }
 
 let clientsData: Client[] = loadInitialClients()
@@ -76,9 +73,59 @@ function resolveSession(session?: UserSession | null): UserSession | null {
 
 export const clientService = {
   /**
-   * Retrieves all clients
+   * Retrieves all clients with Supabase Cloud real-time sync
    */
   async getClients(): Promise<Client[]> {
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('clients')
+          .select('*')
+          .order('name', { ascending: true })
+
+        if (!error && data) {
+          const remoteClients: Client[] = data.map((row: any) => ({
+            id: row.id,
+            salonId: row.salon_id || 'salon-luma-01',
+            name: row.name,
+            phone: row.phone || '',
+            email: row.email || '',
+            dateOfBirth: row.date_of_birth || undefined,
+            preferences: (row.preferences as any) || {},
+            notes: row.notes || '',
+            createdAt: row.created_at || new Date().toISOString(),
+            lastVisitAt: row.last_visit_at || undefined,
+            totalSpend: Number(row.total_spend) || 0,
+          }))
+
+          // Auto sync local clients to Supabase if remote is currently empty
+          if (remoteClients.length === 0 && clientsData.length > 0) {
+            for (const c of clientsData) {
+              await supabase.from('clients').insert({
+                id: c.id,
+                salon_id: c.salonId || 'salon-luma-01',
+                name: c.name,
+                phone: c.phone || '',
+                email: c.email || '',
+                date_of_birth: c.dateOfBirth || null,
+                preferences: c.preferences || {},
+                notes: c.notes || '',
+                total_spend: c.totalSpend || 0,
+                last_visit_at: c.lastVisitAt || null,
+                updated_at: new Date().toISOString(),
+              })
+            }
+            return [...clientsData]
+          }
+
+          clientsData = remoteClients
+          persistClients(clientsData)
+          return [...clientsData]
+        }
+      } catch (err) {
+        console.warn('Error fetching clients from Supabase:', err)
+      }
+    }
     return Promise.resolve([...clientsData])
   },
 
@@ -91,18 +138,44 @@ export const clientService = {
   },
 
   /**
-   * Creates a new client profile
+   * Creates a new client profile with Supabase Cloud persistence
    */
   async createClient(
     data: Omit<Client, 'id' | 'salonId' | 'createdAt' | 'totalSpend'>
   ): Promise<Client> {
+    const clientId = `cli-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`
+    const currentSession = sessionService.getCurrentSession()
+    const salonId = currentSession?.salonId || 'salon-luma-01'
+
     const newClient: Client = {
       ...data,
-      id: `cli-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
-      salonId: 'salon-luma-01',
+      id: clientId,
+      salonId,
       createdAt: new Date().toISOString(),
       totalSpend: 0,
     }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error } = await supabase.from('clients').insert({
+          id: clientId,
+          salon_id: salonId,
+          name: newClient.name,
+          phone: newClient.phone || '',
+          email: newClient.email || '',
+          date_of_birth: newClient.dateOfBirth || null,
+          preferences: newClient.preferences || {},
+          notes: newClient.notes || '',
+          total_spend: 0,
+          last_visit_at: null,
+          updated_at: new Date().toISOString(),
+        })
+        if (error) console.error('Error inserting client into Supabase:', error)
+      } catch (err) {
+        console.error('Network error creating client in Supabase:', err)
+      }
+    }
+
     clientsData.unshift(newClient)
     persistClients(clientsData)
     notifyListeners()
@@ -118,6 +191,30 @@ export const clientService = {
   ): Promise<Client | null> {
     const index = clientsData.findIndex((c) => c.id === id)
     if (index === -1) return Promise.resolve(null)
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const updatePayload: Record<string, any> = {
+          updated_at: new Date().toISOString(),
+        }
+        if (updates.name !== undefined) updatePayload.name = updates.name
+        if (updates.phone !== undefined) updatePayload.phone = updates.phone
+        if (updates.email !== undefined) updatePayload.email = updates.email
+        if (updates.dateOfBirth !== undefined) updatePayload.date_of_birth = updates.dateOfBirth
+        if (updates.preferences !== undefined) updatePayload.preferences = updates.preferences
+        if (updates.notes !== undefined) updatePayload.notes = updates.notes
+        if (updates.totalSpend !== undefined) updatePayload.total_spend = updates.totalSpend
+        if (updates.lastVisitAt !== undefined) updatePayload.last_visit_at = updates.lastVisitAt
+
+        const { error } = await supabase
+          .from('clients')
+          .update(updatePayload)
+          .eq('id', id)
+        if (error) console.error('Error updating client in Supabase:', error)
+      } catch (err) {
+        console.error('Network error updating client in Supabase:', err)
+      }
+    }
 
     clientsData[index] = { ...clientsData[index], ...updates }
     persistClients(clientsData)
@@ -152,6 +249,15 @@ export const clientService = {
     }
 
     const targetClient = clientsData[index]
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error } = await supabase.from('clients').delete().eq('id', id)
+        if (error) console.error('Error deleting client from Supabase:', error)
+      } catch (err) {
+        console.error('Network error deleting client from Supabase:', err)
+      }
+    }
 
     // Snapshot client details into historical appointments before removing entity
     appointmentStore.snapshotClientDetails(id, {
@@ -196,6 +302,15 @@ export const clientService = {
       return Promise.reject(
         new Error(`Cannot delete clients because upcoming or active appointments exist for: ${names}`)
       )
+    }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error } = await supabase.from('clients').delete().in('id', ids)
+        if (error) console.error('Error bulk deleting clients from Supabase:', error)
+      } catch (err) {
+        console.error('Network error bulk deleting clients from Supabase:', err)
+      }
     }
 
     // Snapshot details for all clients to be deleted

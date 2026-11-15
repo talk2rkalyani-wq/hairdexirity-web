@@ -1,11 +1,23 @@
 import type { Staff, WeeklySchedule } from '../types/models.ts'
 import { mockStaff } from '../mockData/salonEntities.ts'
 import { appointmentStore } from './appointmentStore.ts'
+import { sessionService } from './sessionService.ts'
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient.ts'
 
 const STAFF_STORAGE_KEY = 'staff_v2'
 
 type StaffListener = (staff: Staff[]) => void
 const listeners = new Set<StaffListener>()
+
+const defaultWorkingHours: WeeklySchedule = {
+  monday: { open: '10:00', close: '20:00', isOpen: true },
+  tuesday: { open: '10:00', close: '20:00', isOpen: true },
+  wednesday: { open: '10:00', close: '20:00', isOpen: true },
+  thursday: { open: '10:00', close: '20:00', isOpen: true },
+  friday: { open: '10:00', close: '21:00', isOpen: true },
+  saturday: { open: '09:30', close: '21:00', isOpen: true },
+  sunday: { open: '10:00', close: '20:00', isOpen: true },
+}
 
 function loadInitialStaff(): Staff[] {
   try {
@@ -16,16 +28,12 @@ function loadInitialStaff(): Staff[] {
         if (Array.isArray(parsed)) {
           return parsed
         }
-      } else {
-        const initial = [...mockStaff]
-        window.localStorage.setItem(STAFF_STORAGE_KEY, JSON.stringify(initial))
-        return initial
       }
     }
   } catch (err) {
     console.warn('Failed to load staff from localStorage:', err)
   }
-  return [...mockStaff]
+  return []
 }
 
 let staffData: Staff[] = loadInitialStaff()
@@ -75,9 +83,71 @@ const timeToMinutes = (timeStr: string): number => {
 
 export const staffService = {
   /**
-   * Retrieves all staff members
+   * Retrieves all staff members.
+   * Real-time sync with Supabase Cloud table 'staff'.
    */
   async getStaff(): Promise<Staff[]> {
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('staff')
+          .select('*')
+          .order('created_at', { ascending: true })
+
+        if (!error && data) {
+          const remoteStaff: Staff[] = data.map((row: any) => ({
+            id: row.id,
+            salonId: row.salon_id || 'salon-luma-01',
+            name: row.name,
+            phone: row.phone || '',
+            email: row.email || '',
+            role: row.role,
+            skills: Array.isArray(row.skills) ? row.skills : [],
+            experience: row.experience || '',
+            active: Boolean(row.active),
+            workingHours: row.working_hours || defaultWorkingHours,
+            avatarUrl: row.avatar_url || undefined,
+            gender: row.gender || undefined,
+            jobTitle: row.job_title || undefined,
+          }))
+
+          // If Supabase is currently empty, but localStorage has newly created staff (like Sapna),
+          // automatically push local staff to Supabase Cloud
+          if (remoteStaff.length === 0 && staffData.length > 0) {
+            for (const s of staffData) {
+              const insertRow: Record<string, any> = {
+                id: s.id,
+                salon_id: s.salonId || 'salon-luma-01',
+                name: s.name,
+                phone: s.phone || '',
+                email: s.email || '',
+                role: s.role || 'senior_stylist',
+                skills: s.skills || [],
+                experience: s.experience || '',
+                active: s.active !== undefined ? s.active : true,
+                working_hours: s.workingHours || defaultWorkingHours,
+                avatar_url: s.avatarUrl || null,
+                gender: s.gender || null,
+                job_title: s.jobTitle || null,
+                updated_at: new Date().toISOString(),
+              }
+              const { error: insErr } = await supabase.from('staff').insert(insertRow)
+              if (insErr && (insErr.message?.includes('gender') || insErr.message?.includes('job_title'))) {
+                const { gender, job_title, ...fallback } = insertRow
+                await supabase.from('staff').insert(fallback)
+              }
+            }
+            return [...staffData]
+          }
+
+          staffData = remoteStaff
+          persistStaff(staffData)
+          return [...staffData]
+        }
+      } catch (err) {
+        console.warn('Error fetching staff from Supabase:', err)
+      }
+    }
     return Promise.resolve([...staffData])
   },
 
@@ -85,7 +155,8 @@ export const staffService = {
    * Retrieves only currently active staff members
    */
   async getActiveStaff(): Promise<Staff[]> {
-    return Promise.resolve(staffData.filter((s) => s.active))
+    const all = await this.getStaff()
+    return all.filter((s) => s.active)
   },
 
   /**
@@ -132,7 +203,7 @@ export const staffService = {
   },
 
   /**
-   * Creates a new staff member
+   * Creates a new staff member with real-time Supabase Cloud persistence
    */
   async createStaff(
     newStaff: Omit<Staff, 'id' | 'salonId' | 'workingHours'> & {
@@ -140,25 +211,58 @@ export const staffService = {
       workingHours?: WeeklySchedule
     }
   ): Promise<Staff> {
-    const defaultHours = staffData[0]?.workingHours || {
-      monday: { open: '10:00', close: '20:00', isOpen: true },
-      tuesday: { open: '10:00', close: '20:00', isOpen: true },
-      wednesday: { open: '10:00', close: '20:00', isOpen: true },
-      thursday: { open: '10:00', close: '20:00', isOpen: true },
-      friday: { open: '10:00', close: '21:00', isOpen: true },
-      saturday: { open: '09:30', close: '21:00', isOpen: true },
-      sunday: { open: '10:00', close: '20:00', isOpen: true },
-    }
+    const staffId = newStaff.id || `staff-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`
+    const currentSession = sessionService.getCurrentSession()
+    const salonId = currentSession?.salonId || 'salon-luma-01'
 
     const created: Staff = {
       ...newStaff,
-      id: newStaff.id || `staff-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
-      salonId: 'salon-luma-01',
+      id: staffId,
+      salonId,
       skills: newStaff.skills || [],
       experience: newStaff.experience || '1 year',
       active: newStaff.active !== undefined ? newStaff.active : true,
-      workingHours: newStaff.workingHours || defaultHours,
+      workingHours: newStaff.workingHours || defaultWorkingHours,
     }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const insertPayload: Record<string, any> = {
+          id: staffId,
+          salon_id: salonId,
+          name: created.name,
+          phone: created.phone || '',
+          email: created.email || '',
+          role: created.role || 'senior_stylist',
+          skills: created.skills || [],
+          experience: created.experience || '',
+          active: created.active !== undefined ? created.active : true,
+          working_hours: created.workingHours || defaultWorkingHours,
+          avatar_url: created.avatarUrl || null,
+          gender: created.gender || null,
+          job_title: created.jobTitle || null,
+          updated_at: new Date().toISOString(),
+        }
+
+        const { error } = await supabase
+          .from('staff')
+          .insert(insertPayload)
+
+        if (error) {
+          console.warn('Direct insert to Supabase staff table failed, attempting fallback:', error)
+          if (error.message?.includes('gender') || error.message?.includes('job_title')) {
+            const { gender, job_title, ...fallback } = insertPayload
+            const { error: retryErr } = await supabase.from('staff').insert(fallback)
+            if (retryErr) {
+              console.error('Fallback insert to Supabase staff also failed:', retryErr)
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Network error creating staff in Supabase:', err)
+      }
+    }
+
     staffData.push(created)
     persistStaff(staffData)
     notifyListeners()
@@ -176,6 +280,38 @@ export const staffService = {
     if (index === -1) {
       return Promise.reject(new Error(`Staff member with ID ${id} not found`))
     }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const updatePayload: Record<string, any> = {
+          updated_at: new Date().toISOString(),
+        }
+        if (updates.name !== undefined) updatePayload.name = updates.name
+        if (updates.phone !== undefined) updatePayload.phone = updates.phone
+        if (updates.email !== undefined) updatePayload.email = updates.email
+        if (updates.role !== undefined) updatePayload.role = updates.role
+        if (updates.skills !== undefined) updatePayload.skills = updates.skills
+        if (updates.experience !== undefined) updatePayload.experience = updates.experience
+        if (updates.active !== undefined) updatePayload.active = updates.active
+        if (updates.workingHours !== undefined) updatePayload.working_hours = updates.workingHours
+        if (updates.avatarUrl !== undefined) updatePayload.avatar_url = updates.avatarUrl
+        if (updates.gender !== undefined) updatePayload.gender = updates.gender
+        if (updates.jobTitle !== undefined) updatePayload.job_title = updates.jobTitle
+
+        const { error } = await supabase
+          .from('staff')
+          .update(updatePayload)
+          .eq('id', id)
+
+        if (error && (error.message?.includes('gender') || error.message?.includes('job_title'))) {
+          const { gender, job_title, ...fallback } = updatePayload
+          await supabase.from('staff').update(fallback).eq('id', id)
+        }
+      } catch (err) {
+        console.error('Error updating staff in Supabase:', err)
+      }
+    }
+
     staffData[index] = {
       ...staffData[index],
       ...updates,
@@ -200,7 +336,6 @@ export const staffService = {
 
   /**
    * AI-Ready helper: Finds active stylists capable of performing a specific service.
-   * e.g. "Find an available stylist for balayage"
    */
   async getStaffForService(serviceNameOrKeyword: string): Promise<Staff[]> {
     const activeStaff = await this.getActiveStaff()
@@ -221,6 +356,15 @@ export const staffService = {
 
     const index = staffData.findIndex((s) => s.id === id)
     if (index === -1) return Promise.resolve(false)
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error } = await supabase.from('staff').delete().eq('id', id)
+        if (error) console.error('Error deleting staff from Supabase:', error)
+      } catch (err) {
+        console.error('Network error deleting staff from Supabase:', err)
+      }
+    }
 
     // Snapshot staff details into historical appointments before removing entity
     appointmentStore.snapshotStaffDetails(id, {
@@ -247,6 +391,15 @@ export const staffService = {
       return Promise.reject(
         new Error(`Cannot delete employees because upcoming or active appointments exist for: ${names}`)
       )
+    }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error } = await supabase.from('staff').delete().in('id', ids)
+        if (error) console.error('Error batch deleting staff from Supabase:', error)
+      } catch (err) {
+        console.error('Network error batch deleting staff from Supabase:', err)
+      }
     }
 
     // Snapshot details for all staff to be deleted

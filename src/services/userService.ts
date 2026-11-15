@@ -264,19 +264,40 @@ export const userService = {
     let newStaffId: string | undefined = undefined
     let authUserId: string | undefined = undefined
 
-    // 1. If role is EMPLOYEE, create matching staff profile in staffService
+    // 1. If role is EMPLOYEE, link to existing staff or create matching staff profile in staffService
     if (data.role === 'EMPLOYEE') {
-      newStaffId = `staff-${timestamp}-${randomSuffix}`
-      await staffService.createStaff({
-        id: newStaffId,
-        name: data.name.trim(),
-        phone: data.phone?.trim() || '+91 98110 00000',
-        email: normalizedEmail,
-        role: 'junior_stylist',
-        skills: data.skills && data.skills.length > 0 ? data.skills : [`${data.specialty || 'Hair'} Specialist`],
-        experience: '1 year',
-        active: true,
-      })
+      const allStaff = await staffService.getStaff()
+      const existingStaff = allStaff.find(
+        (st) =>
+          (st.email && st.email.toLowerCase() === normalizedEmail) ||
+          (st.name && st.name.trim().toLowerCase() === data.name.trim().toLowerCase())
+      )
+
+      if (existingStaff) {
+        newStaffId = existingStaff.id
+        try {
+          await staffService.updateStaff(existingStaff.id, {
+            phone: data.phone?.trim() || existingStaff.phone,
+            email: normalizedEmail,
+            skills: data.skills && data.skills.length > 0 ? data.skills : existingStaff.skills,
+            active: true,
+          })
+        } catch (e) {
+          console.warn('[userService] Failed to link existing staff:', e)
+        }
+      } else {
+        newStaffId = `staff-${timestamp}-${randomSuffix}`
+        await staffService.createStaff({
+          id: newStaffId,
+          name: data.name.trim(),
+          phone: data.phone?.trim() || '+91 98110 00000',
+          email: normalizedEmail,
+          role: 'junior_stylist',
+          skills: data.skills && data.skills.length > 0 ? data.skills : [`${data.specialty || 'Hair'} Specialist`],
+          experience: '1 year',
+          active: true,
+        })
+      }
     }
 
     // 2. Build canonical user profile
@@ -339,10 +360,16 @@ export const userService = {
       try {
         const { data: sbSessionData } = await supabase.auth.getSession()
         const activeAuthEmail = sbSessionData?.session?.user?.email?.toLowerCase()
-        if (activeAuthEmail && activeAuthEmail !== ROOT_ADMIN_EMAIL.toLowerCase()) {
-          throw new Error(
-            `Session Conflict: Supabase Cloud client is active as "${activeAuthEmail}". Please click Logout in the top-right header and log in again as Root Administrator (${ROOT_ADMIN_EMAIL}) to authorize database changes.`
-          )
+
+        // STRICT ROLE SEPARATION:
+        // Root Administrator (talk2rkalyani@gmail.com) provisions and governs Salon Owners exclusively.
+        // Salon Owners (e.g. Raman, Manish) onboard and create their salon's Employees & Receptionists.
+        if (data.role === 'OWNER') {
+          if (activeAuthEmail && activeAuthEmail !== ROOT_ADMIN_EMAIL.toLowerCase()) {
+            throw new Error(
+              `Session Conflict: Supabase Cloud client is active as "${activeAuthEmail}". Please click Logout in the top-right header and log in again as Root Administrator (${ROOT_ADMIN_EMAIL}) to authorize creating Salon Owner credentials.`
+            )
+          }
         }
 
         let existingDbRecord: Record<string, unknown> | null = null
@@ -371,52 +398,73 @@ export const userService = {
           existingDbRecord = byEmail
         }
 
+        const targetSalonId = s?.salonId || 'salon-luma-01'
+
         if (existingDbRecord) {
+          const updatePayload: Record<string, unknown> = {
+            salon_id: targetSalonId,
+            name: data.name.trim(),
+            email: normalizedEmail,
+            auth_user_id: authUserId || (existingDbRecord.auth_user_id as string) || null,
+            role: data.role,
+            owner_designation: ownerDesig || (existingDbRecord.owner_designation as string) || null,
+            employee_id: newStaffId || (existingDbRecord.employee_id as string) || null,
+            specialty: data.role === 'EMPLOYEE' ? data.specialty || (existingDbRecord.specialty as string) || null : null,
+            active: true,
+            updated_at: new Date().toISOString(),
+          }
+
           const { error: updateErr } = await supabase
             .from('users')
-            .update({
-              name: data.name.trim(),
-              email: normalizedEmail,
-              auth_user_id: authUserId || (existingDbRecord.auth_user_id as string) || null,
-              role: data.role,
-              owner_designation: ownerDesig || (existingDbRecord.owner_designation as string) || null,
-              active: true,
-              updated_at: new Date().toISOString(),
-            })
+            .update(updatePayload)
             .eq('id', existingDbRecord.id)
 
           if (updateErr) {
             if (updateErr.message.includes('row-level security')) {
               throw new Error(
-                'Supabase RLS Policy Error: Administrator authority is missing on table "users". Please run the Administrator RLS setup script in your Supabase SQL Editor.'
+                data.role === 'OWNER'
+                  ? 'Supabase RLS Policy Error: Administrator authority is required to update Owner accounts.'
+                  : 'Supabase RLS Policy Error: Owner authority is required to update employee accounts. Please run migration 20261115000027 in your Supabase SQL Editor.'
               )
             }
-            throw new Error(`Database error updating owner profile: ${updateErr.message}`)
+            throw new Error(`Database error updating user profile: ${updateErr.message}`)
           }
           newUserId = existingDbRecord.id as string
         } else {
-          const { error: insertErr } = await supabase
+          const insertPayload: Record<string, unknown> = {
+            id: newUserId,
+            salon_id: targetSalonId,
+            name: data.name.trim(),
+            email: normalizedEmail,
+            role: data.role,
+            owner_designation: ownerDesig || null,
+            employee_id: newStaffId || null,
+            specialty: data.role === 'EMPLOYEE' ? data.specialty || null : null,
+            auth_user_id: authUserId || null,
+            active: true,
+          }
+
+          let { error: insertErr } = await supabase
             .from('users')
-            .insert({
-              id: newUserId,
-              salon_id: 'salon-luma-01',
-              name: data.name.trim(),
-              email: normalizedEmail,
-              role: data.role,
-              owner_designation: ownerDesig || null,
-              employee_id: newStaffId || null,
-              specialty: data.role === 'EMPLOYEE' ? data.specialty || null : null,
-              auth_user_id: authUserId || null,
-              active: true,
-            })
+            .insert(insertPayload)
+
+          // Fallback if foreign key constraint on staff table triggers
+          if (insertErr && (insertErr.message.includes('foreign key') || insertErr.message.includes('employee_id'))) {
+            console.warn('[userService] Retrying user insert without employee_id foreign key constraint:', insertErr.message)
+            const { employee_id, ...fallbackInsert } = insertPayload
+            const retryRes = await supabase.from('users').insert(fallbackInsert)
+            insertErr = retryRes.error
+          }
 
           if (insertErr) {
             if (insertErr.message.includes('row-level security')) {
               throw new Error(
-                'Supabase RLS Policy Error: Administrator authority is missing on table "users". Please run the Administrator RLS setup script in your Supabase SQL Editor.'
+                data.role === 'OWNER'
+                  ? 'Supabase RLS Policy Error: Administrator authority is missing on table "users". Please run the Administrator RLS setup script in your Supabase SQL Editor.'
+                  : 'Supabase RLS Policy Error: Owner authority is required to create employee accounts. Please run migration 20261115000027 in your Supabase SQL Editor.'
               )
             }
-            throw new Error(`Database error creating owner profile: ${insertErr.message}`)
+            throw new Error(`Database error creating ${data.role.toLowerCase()} profile: ${insertErr.message}`)
           }
         }
       } catch (dbErr: unknown) {
@@ -429,7 +477,7 @@ export const userService = {
     // 4. Build trusted local User model
     const newUser: User = {
       id: newUserId,
-      salonId: 'salon-luma-01',
+      salonId: s?.salonId || 'salon-luma-01',
       name: data.name.trim(),
       email: normalizedEmail,
       phone: data.phone?.trim() || undefined,

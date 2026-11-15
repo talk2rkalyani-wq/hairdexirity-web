@@ -2,11 +2,12 @@ import type { User, EmployeeSpecialty, UserSession, UserRole, OwnerDesignation }
 import { mockUsers } from '../mockData/usersData'
 import { permissionService } from './permissionService'
 import { staffService } from './staffService'
-import { credentialService } from './credentialService'
+import { credentialService, DEFAULT_TEST_PASSWORD } from './credentialService'
 import { sessionService } from './sessionService'
 import { appointmentStore } from './appointmentStore'
 import { isPlaceholderEmail } from '../utils/authUtils'
-import { isRootAdminEmail } from '../config/adminConfig'
+import { ROOT_ADMIN_EMAIL, isRootAdminEmail } from '../config/adminConfig'
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
 
 function resolveSession(session?: UserSession | null): UserSession | null {
   if (session !== undefined) return session
@@ -85,9 +86,48 @@ if (typeof window !== 'undefined') {
 export const userService = {
   /**
    * Retrieves all users in the salon.
+   * Fetches real-time profiles directly from Supabase Cloud when configured.
    * STRICT POLICY: Root Administrator is NEVER listed in the salon user list.
    */
   async getUsers(): Promise<User[]> {
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .order('created_at', { ascending: true })
+
+        if (!error && data) {
+          const remoteUsers: User[] = data.map((row: Record<string, unknown>) => {
+            const cached = canonicalUsers.find(
+              (c) => c.id === row.id || c.email?.toLowerCase() === (row.email as string)?.toLowerCase()
+            )
+            return {
+              id: row.id as string,
+              salonId: (row.salon_id as string) || 'salon-luma-01',
+              name: row.name as string,
+              email: row.email as string,
+              role: row.role as UserRole,
+              phone: cached?.phone || undefined,
+              ownerDesignation: (row.owner_designation as OwnerDesignation) || undefined,
+              employeeId: (row.employee_id as string) || undefined,
+              specialty: (row.specialty as EmployeeSpecialty) || undefined,
+              active: Boolean(row.active),
+              avatarUrl: (row.avatar_url as string) || undefined,
+              createdAt: (row.created_at as string) || new Date().toISOString(),
+              updatedAt: (row.updated_at as string) || undefined,
+              authUserId: (row.auth_user_id as string) || undefined,
+            }
+          })
+
+          canonicalUsers = remoteUsers
+          persistUsers(canonicalUsers)
+          return remoteUsers.filter((u) => u.role !== 'ADMIN' && !isRootAdminEmail(u.email))
+        }
+      } catch (err) {
+        console.warn('[userService] Failed to load users from Supabase, returning local cache:', err)
+      }
+    }
     return Promise.resolve(canonicalUsers.filter((u) => u.role !== 'ADMIN' && !isRootAdminEmail(u.email)))
   },
 
@@ -96,9 +136,8 @@ export const userService = {
    * Strictly excludes Root Administrator.
    */
   async getActiveUsers(): Promise<User[]> {
-    return Promise.resolve(
-      canonicalUsers.filter((u) => u.active && u.role !== 'ADMIN' && !isRootAdminEmail(u.email))
-    )
+    const all = await this.getUsers()
+    return all.filter((u) => u.active)
   },
 
   /**
@@ -106,18 +145,18 @@ export const userService = {
    * ADMIN is not a salon user role and returns empty.
    */
   async getUsersByRole(role: User['role']): Promise<User[]> {
-    if (role === 'ADMIN') return Promise.resolve([])
-    return Promise.resolve(
-      canonicalUsers.filter((u) => u.role === role && !isRootAdminEmail(u.email))
-    )
+    if (role === 'ADMIN') return []
+    const all = await this.getUsers()
+    return all.filter((u) => u.role === role)
   },
 
   /**
    * Retrieves a user by their user ID
    */
   async getUserById(id: string): Promise<User | null> {
-    const user = canonicalUsers.find((u) => u.id === id && u.role !== 'ADMIN' && !isRootAdminEmail(u.email))
-    return Promise.resolve(user ? { ...user } : null)
+    const all = await this.getUsers()
+    const found = all.find((u) => u.id === id)
+    return found ? { ...found } : null
   },
 
   /**
@@ -126,25 +165,25 @@ export const userService = {
   async getUserByEmail(email: string): Promise<User | null> {
     const normalized = email.trim().toLowerCase()
     if (isRootAdminEmail(normalized)) {
-      return Promise.resolve(null)
+      return null
     }
-    const user = canonicalUsers.find(
-      (u) => u.email.toLowerCase() === normalized && u.role !== 'ADMIN'
-    )
-    return Promise.resolve(user ? { ...user } : null)
+    const all = await this.getUsers()
+    const found = all.find((u) => u.email.toLowerCase() === normalized)
+    return found ? { ...found } : null
   },
 
   /**
    * Retrieves a user by linked employee/staff ID
    */
   async getUserByEmployeeId(employeeId: string): Promise<User | null> {
-    const user = canonicalUsers.find((u) => u.employeeId === employeeId)
-    return Promise.resolve(user ? { ...user } : null)
+    const all = await this.getUsers()
+    const found = all.find((u) => u.employeeId === employeeId)
+    return found ? { ...found } : null
   },
 
   /**
    * Creates a new user account supporting any valid salon role (OWNER, RECEPTIONIST, EMPLOYEE).
-   * Strictly enforces permission: Only OWNER can create user accounts.
+   * Fully integrated with Supabase Auth (Cloud) and public.users PostgreSQL table.
    */
   async createUser(
     data: {
@@ -167,15 +206,15 @@ export const userService = {
     }
 
     // STRICT ROLE SEPARATION:
-    // 1. Root Administrator (talk2rkalyani@gmail.com) can ONLY create Salon Owner credentials (no regular employees or receptionists).
+    // 1. Root Administrator (talk2rkalyani@gmail.com) can ONLY create Salon Owner credentials.
     if (s.role === 'ADMIN') {
       if (data.role !== 'OWNER') {
         return Promise.reject(
           new Error('Forbidden: The Root Administrator can only create Salon Owner credentials.')
         )
       }
-      const existingOwners = canonicalUsers.filter((u) => u.role === 'OWNER')
-      if (existingOwners.length >= 2) {
+      const existingOwners = (await this.getUsers()).filter((u) => u.role === 'OWNER')
+      if (existingOwners.length >= 2 && !existingOwners.some((o) => o.ownerDesignation === data.ownerDesignation)) {
         return Promise.reject(
           new Error('Cannot create owner: Salon already has the maximum allowed 2 owners.')
         )
@@ -212,7 +251,8 @@ export const userService = {
       )
     }
 
-    if (canonicalUsers.some((u) => u.email.toLowerCase() === normalizedEmail)) {
+    const existingUsers = await this.getUsers()
+    if (existingUsers.some((u) => u.email.toLowerCase() === normalizedEmail && u.ownerDesignation !== data.ownerDesignation)) {
       return Promise.reject(
         new Error(`A user with email ${data.email} already exists.`)
       )
@@ -220,33 +260,251 @@ export const userService = {
 
     const timestamp = Date.now()
     const randomSuffix = Math.floor(1000 + Math.random() * 9000)
-    const newUserId = `user-${timestamp}-${randomSuffix}`
+    let newUserId = `user-${timestamp}-${randomSuffix}`
     let newStaffId: string | undefined = undefined
+    let authUserId: string | undefined = undefined
 
-    // 1. If role is EMPLOYEE, create matching staff profile in staffService
+    // 1. If role is EMPLOYEE, link to existing staff or create matching staff profile in staffService
     if (data.role === 'EMPLOYEE') {
-      newStaffId = `staff-${timestamp}-${randomSuffix}`
-      await staffService.createStaff({
-        id: newStaffId,
-        name: data.name.trim(),
-        phone: data.phone?.trim() || '+91 98110 00000',
-        email: data.email.trim(),
-        role: 'junior_stylist',
-        skills: data.skills && data.skills.length > 0 ? data.skills : [`${data.specialty || 'Hair'} Specialist`],
-        experience: '1 year',
-        active: true,
-      })
+      const allStaff = await staffService.getStaff()
+      const existingStaff = allStaff.find(
+        (st) =>
+          (st.email && st.email.toLowerCase() === normalizedEmail) ||
+          (st.name && st.name.trim().toLowerCase() === data.name.trim().toLowerCase())
+      )
+
+      if (existingStaff) {
+        newStaffId = existingStaff.id
+        try {
+          await staffService.updateStaff(existingStaff.id, {
+            phone: data.phone?.trim() || existingStaff.phone,
+            email: normalizedEmail,
+            skills: data.skills && data.skills.length > 0 ? data.skills : existingStaff.skills,
+            active: true,
+          })
+        } catch (e) {
+          console.warn('[userService] Failed to link existing staff:', e)
+        }
+      } else {
+        newStaffId = `staff-${timestamp}-${randomSuffix}`
+        await staffService.createStaff({
+          id: newStaffId,
+          name: data.name.trim(),
+          phone: data.phone?.trim() || '+91 98110 00000',
+          email: normalizedEmail,
+          role: 'junior_stylist',
+          skills: data.skills && data.skills.length > 0 ? data.skills : [`${data.specialty || 'Hair'} Specialist`],
+          experience: '1 year',
+          active: true,
+        })
+      }
     }
 
     // 2. Build canonical user profile
-    const existingOwners = canonicalUsers.filter((u) => u.role === 'OWNER')
-    const ownerDesig = data.role === 'OWNER' ? (existingOwners.length === 0 ? 'OWNER_1' : 'OWNER_2') : undefined
+    const existingOwners = (await this.getUsers()).filter((u) => u.role === 'OWNER')
+    const ownerDesig = data.role === 'OWNER'
+      ? (data.ownerDesignation || (existingOwners.length === 0 ? 'OWNER_1' : 'OWNER_2'))
+      : undefined
 
+    if (data.role === 'OWNER' && ownerDesig) {
+      newUserId = `user-owner-${ownerDesig.toLowerCase().replace('_', '-')}`
+    }
+
+    // 3. Supabase Cloud Integration (Auth signup + database table synchronization)
+    if (isSupabaseConfigured() && supabase) {
+      // Step A: Register auth credentials in Supabase Auth via clean fetch (ZERO session collision)
+      const sbUrl = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '')
+      const sbKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY
+      if (sbUrl && sbKey) {
+        try {
+          const authRes = await fetch(`${sbUrl}/auth/v1/signup`, {
+            method: 'POST',
+            headers: {
+              'apikey': sbKey,
+              'Authorization': `Bearer ${sbKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: normalizedEmail,
+              password: data.initialPassword || DEFAULT_TEST_PASSWORD,
+              data: {
+                name: data.name.trim(),
+                role: data.role,
+                owner_designation: ownerDesig || null,
+              },
+            }),
+          })
+          const authJson = await authRes.json()
+          if (authJson && (authJson.id || authJson.user?.id)) {
+            authUserId = authJson.id || authJson.user?.id
+          } else if (authJson?.error_code === 'over_email_send_rate_limit' || authRes.status === 429) {
+            throw new Error(
+              'Supabase email rate limit exceeded. In Supabase Dashboard -> Authentication -> Providers -> Email, please toggle OFF "Confirm email" so owners are registered immediately without sending rate-limited confirmation emails.'
+            )
+          } else if (authJson?.error_code || authJson?.msg || authJson?.message) {
+            const msg = (authJson.msg || authJson.message) as string
+            if (!msg.toLowerCase().includes('already registered')) {
+              throw new Error(`Supabase Auth creation failed: ${msg}`)
+            }
+          }
+
+          // If authUserId was not returned by /signup (e.g. user already registered in Supabase Auth),
+          // authenticate via clean fetch with initial password to retrieve their auth_user_id without session collision
+          if (!authUserId) {
+            try {
+              const tokenRes = await fetch(`${sbUrl}/auth/v1/token?grant_type=password`, {
+                method: 'POST',
+                headers: {
+                  'apikey': sbKey,
+                  'Authorization': `Bearer ${sbKey}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  email: normalizedEmail,
+                  password: data.initialPassword || DEFAULT_TEST_PASSWORD,
+                }),
+              })
+              const tokenJson = await tokenRes.json()
+              if (tokenJson?.user?.id) {
+                authUserId = tokenJson.user.id
+              }
+            } catch (tokenErr) {
+              console.warn('[userService] Notice retrieving existing auth user id:', tokenErr)
+            }
+          }
+        } catch (authErr) {
+          const msg = authErr instanceof Error ? authErr.message : 'Auth registration failed.'
+          if (msg.includes('rate limit') || msg.includes('creation failed')) {
+            throw authErr
+          }
+          console.warn('[userService] Supabase auth signup notice:', authErr)
+        }
+      }
+
+      // Step B: Persist to Supabase public.users table
+      try {
+        const { data: sbSessionData } = await supabase.auth.getSession()
+        const activeAuthEmail = sbSessionData?.session?.user?.email?.toLowerCase()
+
+        // STRICT ROLE SEPARATION:
+        // Root Administrator (talk2rkalyani@gmail.com) provisions and governs Salon Owners exclusively.
+        // Salon Owners (e.g. Raman, Manish) onboard and create their salon's Employees & Receptionists.
+        if (data.role === 'OWNER') {
+          if (activeAuthEmail && activeAuthEmail !== ROOT_ADMIN_EMAIL.toLowerCase()) {
+            throw new Error(
+              `Session Conflict: Supabase Cloud client is active as "${activeAuthEmail}". Please click Logout in the top-right header and log in again as Root Administrator (${ROOT_ADMIN_EMAIL}) to authorize creating Salon Owner credentials.`
+            )
+          }
+        }
+
+        let existingDbRecord: Record<string, unknown> | null = null
+        if (ownerDesig) {
+          const { data: byDesig } = await supabase
+            .from('users')
+            .select('*')
+            .eq('owner_designation', ownerDesig)
+            .maybeSingle()
+          existingDbRecord = byDesig
+        }
+        if (!existingDbRecord && newUserId) {
+          const { data: byId } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', newUserId)
+            .maybeSingle()
+          existingDbRecord = byId
+        }
+        if (!existingDbRecord) {
+          const { data: byEmail } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', normalizedEmail)
+            .maybeSingle()
+          existingDbRecord = byEmail
+        }
+
+        const targetSalonId = s?.salonId || 'salon-luma-01'
+
+        if (existingDbRecord) {
+          const updatePayload: Record<string, unknown> = {
+            salon_id: targetSalonId,
+            name: data.name.trim(),
+            email: normalizedEmail,
+            auth_user_id: authUserId || (existingDbRecord.auth_user_id as string) || null,
+            role: data.role,
+            owner_designation: ownerDesig || (existingDbRecord.owner_designation as string) || null,
+            employee_id: newStaffId || (existingDbRecord.employee_id as string) || null,
+            specialty: data.role === 'EMPLOYEE' ? data.specialty || (existingDbRecord.specialty as string) || null : null,
+            active: true,
+            updated_at: new Date().toISOString(),
+          }
+
+          const { error: updateErr } = await supabase
+            .from('users')
+            .update(updatePayload)
+            .eq('id', existingDbRecord.id)
+
+          if (updateErr) {
+            if (updateErr.message.includes('row-level security')) {
+              throw new Error(
+                data.role === 'OWNER'
+                  ? 'Supabase RLS Policy Error: Administrator authority is required to update Owner accounts.'
+                  : 'Supabase RLS Policy Error: Owner authority is required to update employee accounts. Please run migration 20261115000027 in your Supabase SQL Editor.'
+              )
+            }
+            throw new Error(`Database error updating user profile: ${updateErr.message}`)
+          }
+          newUserId = existingDbRecord.id as string
+        } else {
+          const insertPayload: Record<string, unknown> = {
+            id: newUserId,
+            salon_id: targetSalonId,
+            name: data.name.trim(),
+            email: normalizedEmail,
+            role: data.role,
+            owner_designation: ownerDesig || null,
+            employee_id: newStaffId || null,
+            specialty: data.role === 'EMPLOYEE' ? data.specialty || null : null,
+            auth_user_id: authUserId || null,
+            active: true,
+          }
+
+          let { error: insertErr } = await supabase
+            .from('users')
+            .insert(insertPayload)
+
+          // Fallback if foreign key constraint on staff table triggers
+          if (insertErr && (insertErr.message.includes('foreign key') || insertErr.message.includes('employee_id'))) {
+            console.warn('[userService] Retrying user insert without employee_id foreign key constraint:', insertErr.message)
+            const { employee_id, ...fallbackInsert } = insertPayload
+            const retryRes = await supabase.from('users').insert(fallbackInsert)
+            insertErr = retryRes.error
+          }
+
+          if (insertErr) {
+            if (insertErr.message.includes('row-level security')) {
+              throw new Error(
+                data.role === 'OWNER'
+                  ? 'Supabase RLS Policy Error: Administrator authority is missing on table "users". Please run the Administrator RLS setup script in your Supabase SQL Editor.'
+                  : 'Supabase RLS Policy Error: Owner authority is required to create employee accounts. Please run migration 20261115000027 in your Supabase SQL Editor.'
+              )
+            }
+            throw new Error(`Database error creating ${data.role.toLowerCase()} profile: ${insertErr.message}`)
+          }
+        }
+      } catch (dbErr: unknown) {
+        const msg = dbErr instanceof Error ? dbErr.message : 'Database error while saving user profile.'
+        console.error('[userService] Supabase database error:', msg)
+        throw new Error(msg)
+      }
+    }
+
+    // 4. Build trusted local User model
     const newUser: User = {
       id: newUserId,
-      salonId: 'salon-luma-01',
+      salonId: s?.salonId || 'salon-luma-01',
       name: data.name.trim(),
-      email: data.email.trim(),
+      email: normalizedEmail,
       phone: data.phone?.trim() || undefined,
       role: data.role,
       ownerDesignation: ownerDesig,
@@ -254,16 +512,17 @@ export const userService = {
       specialty: data.role === 'EMPLOYEE' ? data.specialty : undefined,
       active: true,
       createdAt: new Date().toISOString(),
+      authUserId,
     }
 
-    // 3. Register secure credentials
-    await credentialService.registerUserCredentials(newUserId, data.email.trim(), data.initialPassword)
+    await credentialService.registerUserCredentials(newUserId, normalizedEmail, data.initialPassword)
 
+    canonicalUsers = canonicalUsers.filter((u) => u.id !== newUserId && u.email.toLowerCase() !== normalizedEmail)
     canonicalUsers.push(newUser)
     persistUsers(canonicalUsers)
     notifyListeners()
 
-    return Promise.resolve({ ...newUser })
+    return newUser
   },
 
   /**
@@ -364,11 +623,58 @@ export const userService = {
           new Error('Forbidden: Only the system administrator can change owner account status.')
         )
       }
-      if (!active) {
+      if (!active && s?.role !== 'ADMIN') {
         const activeOwners = canonicalUsers.filter((u) => u.role === 'OWNER' && u.active)
         if (activeOwners.length <= 1) {
           return Promise.reject(new Error('Cannot deactivate the last active owner account.'))
         }
+      }
+    }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        let rpcSuccess = false
+        if (targetUser.role === 'OWNER' || targetUser.authUserId) {
+          const { error: rpcErr } = await supabase.rpc('admin_toggle_owner_active', {
+            p_user_id: id,
+            p_active: active,
+            p_auth_user_id: targetUser.authUserId || null,
+          })
+          if (!rpcErr) {
+            rpcSuccess = true
+          } else {
+            console.warn('[userService] admin_toggle_owner_active RPC notice:', rpcErr.message)
+            if (rpcErr.message.toLowerCase().includes('last owner')) {
+              throw new Error(
+                'Supabase Trigger Policy: Please run the updated Administrator Release Slot script in your Supabase SQL Editor to allow managing the owner account.'
+              )
+            }
+            throw new Error(`Failed to update owner status: ${rpcErr.message}`)
+          }
+        }
+
+        if (!rpcSuccess) {
+          const { error: dbErr } = await supabase
+            .from('users')
+            .update({
+              active,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', id)
+
+          if (dbErr) {
+            if (dbErr.message.toLowerCase().includes('last owner')) {
+              throw new Error(
+                'Supabase Trigger Policy: Please run the updated Administrator Release Slot script in your Supabase SQL Editor to allow managing the owner account.'
+              )
+            }
+            throw new Error(`Database error updating status: ${dbErr.message}`)
+          }
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Database error updating status.'
+        console.error('[userService] Supabase toggleUserActive error:', msg)
+        throw new Error(msg)
       }
     }
 
@@ -458,12 +764,105 @@ export const userService = {
       console.warn('Failed to purge credentials for deleted user:', err)
     }
 
-    // 3. Remove from canonical users list
+    // 3. Delete from Supabase public.users and auth.users
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        let rpcSuccess = false
+        if (targetUser.role === 'OWNER' || targetUser.authUserId) {
+          const { error: rpcErr } = await supabase.rpc('admin_delete_owner', {
+            p_user_id: id,
+            p_auth_user_id: targetUser.authUserId || null,
+          })
+          if (!rpcErr) {
+            rpcSuccess = true
+          } else {
+            console.warn('[userService] admin_delete_owner RPC notice:', rpcErr.message)
+            if (rpcErr.message.toLowerCase().includes('last owner')) {
+              throw new Error(
+                'Supabase Trigger Policy: Please run the updated Administrator Release Slot script in your Supabase SQL Editor to allow releasing the last owner slot.'
+              )
+            }
+            throw new Error(`Failed to release owner slot: ${rpcErr.message}`)
+          }
+        }
+
+        if (!rpcSuccess) {
+          const { error: dbErr } = await supabase
+            .from('users')
+            .delete()
+            .eq('id', id)
+
+          if (dbErr) {
+            if (dbErr.message.toLowerCase().includes('last owner')) {
+              throw new Error(
+                'Supabase Trigger Policy: Please run the updated Administrator Release Slot script in your Supabase SQL Editor to allow releasing the last owner slot.'
+              )
+            }
+            throw new Error(`Database error deleting user: ${dbErr.message}`)
+          }
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Database error deleting user.'
+        console.error('[userService] Supabase deleteUser error:', msg)
+        throw new Error(msg)
+      }
+    }
+
+    // 4. Remove from canonical users list
     canonicalUsers.splice(index, 1)
     persistUsers(canonicalUsers)
     notifyListeners()
 
     return Promise.resolve(true)
+  },
+
+  /**
+   * Updates an owner's password directly in Supabase Auth (and in-memory credential cache).
+   * Authorized strictly for platform Root Administrator.
+   */
+  async adminChangeOwnerPassword(
+    userId: string,
+    authUserId: string | undefined,
+    newPassword: string,
+    session?: UserSession | null
+  ): Promise<boolean> {
+    const s = resolveSession(session)
+    if (!s || !s.isAuthenticated || s.role !== 'ADMIN') {
+      throw new Error('Unauthorized: Only the Root Administrator can change owner passwords.')
+    }
+
+    if (!newPassword || newPassword.trim().length < 6) {
+      throw new Error('Password must be at least 6 characters.')
+    }
+
+    const trimmedPassword = newPassword.trim()
+
+    if (isSupabaseConfigured() && supabase) {
+      let targetAuthId = authUserId
+      if (!targetAuthId) {
+        const target = canonicalUsers.find((u) => u.id === userId)
+        targetAuthId = target?.authUserId
+      }
+
+      const { error: rpcErr } = await supabase.rpc('admin_update_owner_password', {
+        p_user_id: userId,
+        p_new_password: trimmedPassword,
+        p_auth_user_id: targetAuthId || null,
+      })
+
+      if (rpcErr) {
+        throw new Error(`Failed to update password in Supabase Auth: ${rpcErr.message}`)
+      }
+    }
+
+    // Synchronize local credential store
+    try {
+      await credentialService.changePassword(userId, trimmedPassword)
+    } catch {
+      // In-memory update may be optional
+    }
+
+    return true
   },
 
   /**

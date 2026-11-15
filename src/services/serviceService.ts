@@ -3,6 +3,7 @@ import { mockServices } from '../mockData/salonEntities.ts'
 import { appointmentStore } from './appointmentStore.ts'
 import { permissionService } from './permissionService.ts'
 import { sessionService } from './sessionService.ts'
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient.ts'
 
 const SERVICES_STORAGE_KEY = 'luma_salon_services_v1'
 
@@ -18,16 +19,12 @@ function loadInitialServices(): Service[] {
         if (Array.isArray(parsed)) {
           return parsed
         }
-      } else {
-        const initial = [...mockServices]
-        window.localStorage.setItem(SERVICES_STORAGE_KEY, JSON.stringify(initial))
-        return initial
       }
     }
   } catch (err) {
     console.warn('Failed to load services from localStorage:', err)
   }
-  return [...mockServices]
+  return []
 }
 
 let servicesData: Service[] = loadInitialServices()
@@ -76,9 +73,54 @@ function resolveSession(session?: UserSession | null): UserSession | null {
 
 export const serviceService = {
   /**
-   * Retrieves all available services
+   * Retrieves all available services with Supabase Cloud real-time sync
    */
   async getServices(): Promise<Service[]> {
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('services')
+          .select('*')
+          .order('name', { ascending: true })
+
+        if (!error && data) {
+          const remoteServices: Service[] = data.map((row: any) => ({
+            id: row.id,
+            salonId: row.salon_id || 'salon-luma-01',
+            name: row.name,
+            description: row.description || '',
+            duration: Number(row.duration) || 30,
+            price: Number(row.price) || 0,
+            category: row.category as ServiceCategory,
+            active: Boolean(row.active),
+          }))
+
+          // Auto sync local services to Supabase if remote is currently empty
+          if (remoteServices.length === 0 && servicesData.length > 0) {
+            for (const s of servicesData) {
+              await supabase.from('services').insert({
+                id: s.id,
+                salon_id: s.salonId || 'salon-luma-01',
+                name: s.name,
+                description: s.description || '',
+                duration: s.duration,
+                price: s.price,
+                category: s.category,
+                active: s.active !== undefined ? s.active : true,
+                updated_at: new Date().toISOString(),
+              })
+            }
+            return [...servicesData]
+          }
+
+          servicesData = remoteServices
+          persistServices(servicesData)
+          return [...servicesData]
+        }
+      } catch (err) {
+        console.warn('Error fetching services from Supabase:', err)
+      }
+    }
     return Promise.resolve([...servicesData])
   },
 
@@ -86,7 +128,8 @@ export const serviceService = {
    * Retrieves active services only
    */
   async getActiveServices(): Promise<Service[]> {
-    return Promise.resolve(servicesData.filter((s) => s.active))
+    const all = await this.getServices()
+    return all.filter((s) => s.active)
   },
 
   /**
@@ -101,22 +144,45 @@ export const serviceService = {
    * Retrieves services by category
    */
   async getServicesByCategory(category: ServiceCategory): Promise<Service[]> {
-    return Promise.resolve(
-      servicesData.filter((s) => s.category === category && s.active)
-    )
+    const all = await this.getServices()
+    return all.filter((s) => s.category === category && s.active)
   },
 
   /**
-   * Creates a new service
+   * Creates a new service with Supabase Cloud persistence
    */
   async createService(
     newService: Omit<Service, 'id' | 'salonId'>
   ): Promise<Service> {
+    const srvId = `srv-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`
+    const currentSession = sessionService.getCurrentSession()
+    const salonId = currentSession?.salonId || 'salon-luma-01'
+
     const created: Service = {
       ...newService,
-      id: `srv-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
-      salonId: 'salon-luma-01',
+      id: srvId,
+      salonId,
     }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error } = await supabase.from('services').insert({
+          id: srvId,
+          salon_id: salonId,
+          name: created.name,
+          description: created.description || '',
+          duration: created.duration,
+          price: created.price,
+          category: created.category,
+          active: created.active !== undefined ? created.active : true,
+          updated_at: new Date().toISOString(),
+        })
+        if (error) console.error('Error inserting service into Supabase:', error)
+      } catch (err) {
+        console.error('Network error creating service in Supabase:', err)
+      }
+    }
+
     servicesData.push(created)
     persistServices(servicesData)
     notifyListeners()
@@ -134,6 +200,29 @@ export const serviceService = {
     if (index === -1) {
       return Promise.reject(new Error(`Service with ID ${id} not found`))
     }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const updatePayload: Record<string, any> = {
+          updated_at: new Date().toISOString(),
+        }
+        if (updates.name !== undefined) updatePayload.name = updates.name
+        if (updates.description !== undefined) updatePayload.description = updates.description
+        if (updates.duration !== undefined) updatePayload.duration = updates.duration
+        if (updates.price !== undefined) updatePayload.price = updates.price
+        if (updates.category !== undefined) updatePayload.category = updates.category
+        if (updates.active !== undefined) updatePayload.active = updates.active
+
+        const { error } = await supabase
+          .from('services')
+          .update(updatePayload)
+          .eq('id', id)
+        if (error) console.error('Error updating service in Supabase:', error)
+      } catch (err) {
+        console.error('Network error updating service in Supabase:', err)
+      }
+    }
+
     servicesData[index] = {
       ...servicesData[index],
       ...updates,
@@ -170,6 +259,15 @@ export const serviceService = {
     }
 
     const targetService = servicesData[index]
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error } = await supabase.from('services').delete().eq('id', id)
+        if (error) console.error('Error deleting service from Supabase:', error)
+      } catch (err) {
+        console.error('Network error deleting service from Supabase:', err)
+      }
+    }
 
     // Snapshot service details into historical appointments before removing entity
     appointmentStore.snapshotServiceDetails(id, {
@@ -212,6 +310,15 @@ export const serviceService = {
       return Promise.reject(
         new Error(`Cannot delete services because upcoming or active appointments exist for: ${names}`)
       )
+    }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { error } = await supabase.from('services').delete().in('id', ids)
+        if (error) console.error('Error bulk deleting services from Supabase:', error)
+      } catch (err) {
+        console.error('Network error bulk deleting services from Supabase:', err)
+      }
     }
 
     // Snapshot details for all services to be deleted

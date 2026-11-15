@@ -1344,37 +1344,170 @@ export const inventoryService = {
     const targetSalonId = resolveSalonId(salonId)
 
     if (isSupabaseConfigured() && supabase) {
-      const { data, error } = await supabase.rpc('rpc_record_consumable_usage', {
-        p_salon_id: targetSalonId,
-        p_product_id: usageData.productId,
-        p_quantity: usageData.quantity,
-        p_unit: usageData.unit || null,
-        p_appointment_id: usageData.appointmentId || null,
-        p_service_id: usageData.serviceId || null,
-        p_staff_id: usageData.staffId || null,
-        p_batch_id: usageData.batchId || null,
-        p_reason: usageData.reason || 'Service usage',
-        p_notes: usageData.notes || null,
-      })
+      try {
+        const { data, error } = await supabase.rpc('rpc_record_consumable_usage', {
+          p_salon_id: targetSalonId,
+          p_product_id: usageData.productId,
+          p_quantity: usageData.quantity,
+          p_unit: usageData.unit || null,
+          p_appointment_id: usageData.appointmentId || null,
+          p_service_id: usageData.serviceId || null,
+          p_staff_id: usageData.staffId || null,
+          p_batch_id: usageData.batchId || null,
+          p_reason: usageData.reason || 'Service usage',
+          p_notes: usageData.notes || null,
+        })
 
-      if (error) {
-        console.error('[InventoryService] rpc_record_consumable_usage error:', error.message)
-        throw new Error(`Failed to record consumable usage: ${error.message}`)
+        if (!error && data) {
+          return {
+            id: data.usage_id,
+            salonId: targetSalonId,
+            usageNumber: data.usage_number,
+            productId: data.product_id,
+            quantity: Number(data.quantity),
+            unit: usageData.unit || 'units',
+            appointmentId: usageData.appointmentId,
+            serviceId: usageData.serviceId,
+            staffId: usageData.staffId,
+            batchId: usageData.batchId,
+            unitCost: 0,
+            totalCost: 0,
+            reason: usageData.reason,
+            notes: usageData.notes,
+            createdAt: new Date().toISOString(),
+          }
+        }
+
+        console.warn(
+          '[InventoryService] rpc_record_consumable_usage RPC failed or missing, executing direct database stock deduction fallback:',
+          error?.message
+        )
+      } catch (rpcErr: any) {
+        console.warn(
+          '[InventoryService] rpc_record_consumable_usage call threw exception, executing direct fallback:',
+          rpcErr?.message
+        )
+      }
+
+      // Fallback: Perform direct stock deduction on inventory_products and record movement
+      const { data: prodData, error: prodErr } = await supabase
+        .from('inventory_products')
+        .select('*')
+        .eq('id', usageData.productId)
+        .single()
+
+      if (prodErr || !prodData) {
+        throw new Error(`Product not found: ${prodErr?.message || 'unknown product'}`)
+      }
+
+      const currentStock = Number(prodData.current_stock) || 0
+      if (currentStock < usageData.quantity) {
+        throw new Error(
+          `Insufficient stock: Item "${prodData.name}" only has ${currentStock} units available (requested ${usageData.quantity})`
+        )
+      }
+
+      const newStock = Math.max(0, currentStock - usageData.quantity)
+      const minThreshold = Number(prodData.min_stock_threshold) || 5
+      const newStatus =
+        newStock <= 0 ? 'out_of_stock' : newStock <= minThreshold ? 'low_stock' : 'active'
+
+      // 1. Deduct stock on inventory_products
+      const { error: updErr } = await supabase
+        .from('inventory_products')
+        .update({
+          current_stock: newStock,
+          status: newStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', usageData.productId)
+
+      if (updErr) {
+        throw new Error(`Failed to update product stock: ${updErr.message}`)
+      }
+
+      const usageNum = `USE-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
+      const usageId = `use-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`
+
+      // 2. Insert stock movement into inventory_stock_movements
+      try {
+        const { error: movErr } = await supabase.from('inventory_stock_movements').insert({
+          salon_id: targetSalonId,
+          product_id: usageData.productId,
+          movement_type: 'CONSUMABLE_USAGE',
+          quantity: usageData.quantity,
+          previous_stock: currentStock,
+          new_stock: newStock,
+          reference_id: usageNum,
+          notes: `Consumable usage: ${usageData.reason || 'Service usage'}`,
+          created_at: new Date().toISOString(),
+        })
+
+        // If 'CONSUMABLE_USAGE' constraint fails on older schema, retry with 'STOCK_ADJUSTMENT_OUT'
+        if (movErr && (movErr.message?.includes('check') || movErr.code === '23514')) {
+          await supabase.from('inventory_stock_movements').insert({
+            salon_id: targetSalonId,
+            product_id: usageData.productId,
+            movement_type: 'STOCK_ADJUSTMENT_OUT',
+            quantity: usageData.quantity,
+            previous_stock: currentStock,
+            new_stock: newStock,
+            reference_id: usageNum,
+            notes: `Consumable usage: ${usageData.reason || 'Service usage'}`,
+            created_at: new Date().toISOString(),
+          })
+        }
+      } catch (movEx) {
+        console.warn('[InventoryService] Stock movement insert non-blocking notice:', movEx)
+      }
+
+      // 3. Insert into consumable_usages table if present
+      try {
+        await supabase.from('consumable_usages').insert({
+          id: usageId,
+          salon_id: targetSalonId,
+          usage_number: usageNum,
+          product_id: usageData.productId,
+          quantity: usageData.quantity,
+          unit: usageData.unit || prodData.unit || 'units',
+          appointment_id: usageData.appointmentId || null,
+          service_id: usageData.serviceId || null,
+          staff_id: usageData.staffId || null,
+          reason: usageData.reason || 'Service usage',
+          notes: usageData.notes || null,
+          created_at: new Date().toISOString(),
+        })
+      } catch {
+        // Non-blocking if table is still pending creation
+      }
+
+      // Notify reactive UI listeners so product lists and cards update immediately
+      try {
+        const updatedProducts = await this.fetchInventoryProducts(targetSalonId, true)
+        listeners.forEach((fn) => {
+          try {
+            fn(updatedProducts)
+          } catch (e) {
+            console.error('Error in inventory listener:', e)
+          }
+        })
+      } catch (refetchErr) {
+        console.warn('Post-usage product refetch non-fatal warning:', refetchErr)
       }
 
       return {
-        id: data.usage_id,
+        id: usageId,
         salonId: targetSalonId,
-        usageNumber: data.usage_number,
-        productId: data.product_id,
-        quantity: Number(data.quantity),
-        unit: usageData.unit || 'units',
+        usageNumber: usageNum,
+        productId: usageData.productId,
+        quantity: usageData.quantity,
+        unit: usageData.unit || prodData.unit || 'units',
         appointmentId: usageData.appointmentId,
         serviceId: usageData.serviceId,
         staffId: usageData.staffId,
         batchId: usageData.batchId,
-        unitCost: 0,
-        totalCost: 0,
+        unitCost: Number(prodData.purchase_price) || 0,
+        totalCost: (Number(prodData.purchase_price) || 0) * usageData.quantity,
         reason: usageData.reason,
         notes: usageData.notes,
         createdAt: new Date().toISOString(),

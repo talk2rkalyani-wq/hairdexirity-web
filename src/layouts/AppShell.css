@@ -1,11 +1,13 @@
 .luma-app-shell {
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-app);
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
   width: 100%;
   max-width: 100vw;
 }
@@ -25,16 +27,20 @@
 .shell-body {
   display: flex;
   flex: 1;
+  min-height: 0;
+  height: calc(100vh - var(--header-height));
+  height: calc(100dvh - var(--header-height));
   width: 100%;
   max-width: 100vw;
   position: relative;
   z-index: 1;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .shell-main {
   flex: 1;
   min-width: 0;
+  height: 100%;
   width: 100%;
   max-width: 100vw;
   display: flex;

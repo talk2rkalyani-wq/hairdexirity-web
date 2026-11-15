@@ -1,49 +1,36 @@
 import type { UserSession, User, UserRole } from '../types/models'
 import { userService } from './userService'
-import { credentialService } from './credentialService'
 import { sessionService } from './sessionService'
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
 import { isPlaceholderEmail } from '../utils/authUtils'
 import { ROOT_ADMIN_CONFIG, ROOT_ADMIN_EMAIL, isRootAdminEmail } from '../config/adminConfig'
 
 export { isPlaceholderEmail }
-export type AuthMode = 'local_mock' | 'supabase_auth'
+export type AuthMode = 'supabase_auth'
 
-const AUTH_MODE_STORAGE_KEY = 'luma_salon_auth_mode'
-
-// Current active auth mode. Supports explicit VITE_AUTH_MODE ('supabase_auth' | 'local_mock' | 'local')
-function resolveInitialAuthMode(): AuthMode {
-  try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const saved = window.localStorage.getItem(AUTH_MODE_STORAGE_KEY)
-      if (saved === 'local_mock' || saved === 'supabase_auth') {
-        return saved
-      }
-    }
-  } catch {}
-
-  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_AUTH_MODE) {
-    const mode = String(import.meta.env.VITE_AUTH_MODE).trim().toLowerCase()
-    if (mode === 'supabase_auth') {
-      return 'supabase_auth'
-    }
-    if (mode === 'local_mock' || mode === 'local') {
-      return 'local_mock'
-    }
-  }
-  return isSupabaseConfigured() ? 'supabase_auth' : 'local_mock'
+/**
+ * Returns the active authentication mode ('supabase_auth' only)
+ */
+export function getConfiguredAuthMode(): string {
+  return 'supabase_auth'
 }
 
-let currentAuthMode: AuthMode = resolveInitialAuthMode()
+/**
+ * Returns true indicating authentication is exclusively Supabase Cloud Auth.
+ */
+export function isStrictSupabaseMode(): boolean {
+  return true
+}
+
 let isAuthInitialized = false
 let authListenerUnsubscribe: (() => void) | null = null
 
 export const authService = {
   /**
-   * Returns current active authentication mode
+   * Returns current active authentication mode (strictly Supabase Cloud Auth)
    */
   getAuthMode(): AuthMode {
-    return currentAuthMode
+    return 'supabase_auth'
   },
 
   /**
@@ -54,15 +41,17 @@ export const authService = {
   },
 
   /**
-   * Sets authentication mode explicitly (e.g. for testing or controlled cutover)
+   * Returns true (Supabase Cloud Auth only)
    */
-  setAuthMode(mode: AuthMode): void {
-    currentAuthMode = mode
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.setItem(AUTH_MODE_STORAGE_KEY, mode)
-      }
-    } catch {}
+  isStrictSupabaseMode(): boolean {
+    return true
+  },
+
+  /**
+   * Sets authentication mode explicitly (noop: Supabase Cloud Auth is the sole provider)
+   */
+  setAuthMode(_mode: AuthMode): void {
+    // No-op: Supabase Cloud Auth is strictly enforced
   },
 
   /**
@@ -89,9 +78,7 @@ export const authService = {
     // Set up auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, sbSession) => {
       if (event === 'SIGNED_OUT' || !sbSession) {
-        if (currentAuthMode === 'supabase_auth') {
-          sessionService.logout()
-        }
+        sessionService.logout()
       } else if (event === 'PASSWORD_RECOVERY') {
         if (typeof window !== 'undefined') {
           window.location.hash = '#/login?type=recovery'
@@ -99,9 +86,9 @@ export const authService = {
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         const currentLocal = sessionService.getCurrentSession()
         if (!currentLocal && sbSession.user) {
-          // Restore session strictly from database profile linked to auth_user_id
+          // Restore session from database profile linked to auth_user_id or verified email
           try {
-            await this.resolveAndEstablishSession(sbSession.user.id)
+            await this.resolveAndEstablishSession(sbSession.user.id, sbSession.user.email)
           } catch (err) {
             console.warn('[authService] Failed to restore session from auth state change:', err)
           }
@@ -116,19 +103,23 @@ export const authService = {
       }
     }
 
-    // Check existing Supabase session on startup if in supabase_auth mode
-    if (currentAuthMode === 'supabase_auth') {
-      try {
-        const { data } = await supabase.auth.getSession()
-        if (data?.session?.user && !sessionService.getCurrentSession()) {
-          await this.resolveAndEstablishSession(data.session.user.id)
+    // Check existing Supabase session on startup
+    try {
+      const { data } = await supabase.auth.getSession()
+      if (data?.session?.user) {
+        if (!sessionService.getCurrentSession()) {
+          await this.resolveAndEstablishSession(data.session.user.id, data.session.user.email)
         }
-      } catch (err) {
-        console.warn('[authService] Failed to restore initial Supabase session:', err)
-      } finally {
-        isAuthInitialized = true
+      } else {
+        // No live Supabase session -> clear any stale local session
+        if (sessionService.getCurrentSession()) {
+          sessionService.logout()
+        }
       }
-    } else {
+    } catch (err) {
+      console.warn('[authService] Failed to restore initial Supabase session:', err)
+      sessionService.logout()
+    } finally {
       isAuthInitialized = true
     }
   },
@@ -142,7 +133,7 @@ export const authService = {
    * - Administrator privilege is granted ONLY via a verified record in public.administrators.
    * - Active status is enforced: inactive users receive "User is disabled. Please contact the administrator."
    */
-  async resolveAndEstablishSession(authUserId: string): Promise<UserSession> {
+  async resolveAndEstablishSession(authUserId: string, authUserEmail?: string): Promise<UserSession> {
     if (!authUserId) {
       if (supabase) await supabase.auth.signOut().catch(() => {})
       throw new Error('Authentication error: Missing authenticated identity.')
@@ -162,7 +153,7 @@ export const authService = {
           if (isRootAdminEmail(adminRecord.email)) {
             if (!adminRecord.active) {
               await supabase.auth.signOut().catch(() => {})
-              throw new Error('User is disabled. Please contact the administrator.')
+              throw new Error('You Are Disabled Plz Contact to Administrator')
             }
 
             const now = new Date()
@@ -187,16 +178,17 @@ export const authService = {
           // Any other identity in administrators is rejected from holding admin role and falls through to users table
         }
       } catch (err) {
-        if (err instanceof Error && err.message === 'User is disabled. Please contact the administrator.') {
+        if (err instanceof Error && err.message === 'You Are Disabled Plz Contact to Administrator') {
           throw err
         }
         // If table doesn't exist yet, continue to users lookup
       }
     }
 
-    // 2. Check Salon Users table (public.users) strictly by auth_user_id
+    // 2. Check Salon Users table (public.users)
     let dbUser: Record<string, unknown> | null = null
     if (supabase) {
+      // A. Check strictly by auth_user_id
       try {
         const { data: userData, error: userErr } = await supabase
           .from('users')
@@ -209,6 +201,77 @@ export const authService = {
         }
       } catch {
         // Handled below
+      }
+
+      // B. If not found by auth_user_id, try database RPC link helper
+      if (!dbUser) {
+        try {
+          const { data: rpcUser, error: rpcErr } = await supabase.rpc('rpc_link_authenticated_user')
+          if (!rpcErr && rpcUser) {
+            dbUser = rpcUser
+          }
+        } catch {
+          // Handled below
+        }
+      }
+
+      // C. If still not found, match by verified email in public.users
+      if (!dbUser && authUserEmail) {
+        const cleanEmail = authUserEmail.trim().toLowerCase()
+        try {
+          const { data: byEmail, error: emailErr } = await supabase
+            .from('users')
+            .select('*')
+            .ilike('email', cleanEmail)
+            .maybeSingle()
+
+          if (!emailErr && byEmail) {
+            dbUser = byEmail
+            // Link auth_user_id in Supabase if not yet set
+            if (!byEmail.auth_user_id || byEmail.auth_user_id !== authUserId) {
+              try {
+                await supabase
+                  .from('users')
+                  .update({ auth_user_id: authUserId, updated_at: new Date().toISOString() })
+                  .eq('id', byEmail.id)
+              } catch {
+                // Handled safely
+              }
+            }
+          }
+        } catch {
+          // Handled below
+        }
+      }
+
+      // D. Fallback: match from trusted local canonical user store if Supabase RLS hid unlinked user
+      if (!dbUser && authUserEmail) {
+        const cleanEmail = authUserEmail.trim().toLowerCase()
+        const localUser = await userService.getUserByEmail(cleanEmail)
+        if (localUser && localUser.role !== 'ADMIN' && !isRootAdminEmail(localUser.email)) {
+          dbUser = {
+            id: localUser.id,
+            salon_id: localUser.salonId || 'salon-luma-01',
+            name: localUser.name,
+            email: localUser.email,
+            role: localUser.role,
+            owner_designation: localUser.ownerDesignation || null,
+            employee_id: localUser.employeeId || null,
+            specialty: localUser.specialty || null,
+            active: localUser.active !== undefined ? localUser.active : true,
+            auth_user_id: authUserId,
+          }
+
+          // Link auth_user_id in Supabase public.users now that identity is verified
+          try {
+            await supabase
+              .from('users')
+              .update({ auth_user_id: authUserId, updated_at: new Date().toISOString() })
+              .eq('id', localUser.id)
+          } catch {
+            // Handled safely
+          }
+        }
       }
     }
 
@@ -223,7 +286,7 @@ export const authService = {
     // 4. Check active status: Reject disabled accounts with exact specified message
     if (dbUser.active === false) {
       if (supabase) await supabase.auth.signOut().catch(() => {})
-      throw new Error('User is disabled. Please contact the administrator.')
+      throw new Error('You Are Disabled Plz Contact to Administrator')
     }
 
     // 5. Validate role: Reject unsupported or inconsistent role
@@ -252,11 +315,8 @@ export const authService = {
   },
 
   /**
-   * Authenticates a user with email and password.
-   * In 'supabase_auth' mode: Strictly requires Supabase Auth.
-   *   CRITICAL: Never silently falls back to mock credentials on failure.
-   * In 'local_mock' mode: Compares against salted SHA-256 password hash.
-   * On success, establishes an isolated, time-bounded session.
+   * Authenticates a user with email and password strictly via Supabase Cloud Auth.
+   * On success, establishes an isolated, time-bounded session from database tables.
    */
   async login(email: string, plainTextPassword: string): Promise<UserSession> {
     if (!email || !email.trim()) {
@@ -272,112 +332,84 @@ export const authService = {
 
     const normalizedEmail = email.trim().toLowerCase()
 
-    // -------------------------------------------------------------------------
-    // PRODUCTION SUPABASE AUTHENTICATION MODE
-    // -------------------------------------------------------------------------
-    if (currentAuthMode === 'supabase_auth') {
-      // 1. Verify email is not an unverified placeholder address
-      if (isPlaceholderEmail(normalizedEmail)) {
-        throw new Error(
-          'Placeholder email addresses (@hairdexirity.example.com) cannot be used for production Supabase authentication. A verified production email address is required.'
-        )
-      }
+    // 1. Verify email is not an unverified placeholder address
+    if (isPlaceholderEmail(normalizedEmail)) {
+      throw new Error(
+        'Placeholder email addresses (@hairdexirity.example.com) cannot be used for Supabase authentication. A verified email address is required.'
+      )
+    }
 
-      // 2. Verify Supabase client configuration is available
-      if (!isSupabaseConfigured() || !supabase) {
-        throw new Error(
-          'Authentication Error: Supabase client is not configured for production authentication. Fallback to mock credentials is strictly prohibited.'
-        )
-      }
+    // 2. Verify Supabase client configuration is available
+    if (!isSupabaseConfigured() || !supabase) {
+      throw new Error(
+        'Authentication Error: Supabase client is not configured for cloud authentication.'
+      )
+    }
 
-      try {
-        // 3. Authenticate with Supabase Auth
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: normalizedEmail,
-          password: plainTextPassword,
-        })
+    try {
+      // 3. Authenticate directly with Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password: plainTextPassword,
+      })
 
-        if (error || !data.user) {
-          const authErrMsg = error?.message || 'Invalid email or password.'
-          if (authErrMsg.toLowerCase().includes('invalid login credentials')) {
-            throw new Error(
-              'Invalid login credentials in Supabase Cloud. Please verify your password, or check in Supabase Dashboard (Authentication → Users) that the user is marked "Confirmed".'
-            )
-          }
-          throw new Error(authErrMsg)
+      if (error || !data.user) {
+        const authErrMsg = error?.message || 'Invalid email or password.'
+        const lower = authErrMsg.toLowerCase()
+
+        // Check if user is banned or disabled from Supabase backend
+        if (
+          lower.includes('banned') ||
+          lower.includes('disabled') ||
+          lower.includes('deactivated') ||
+          (error as unknown as { error_code?: string })?.error_code === 'user_banned'
+        ) {
+          throw new Error('You Are Disabled Plz Contact to Administrator')
         }
 
-        // 4. Resolve trusted application profile strictly by auth_user_id
-        const session = await this.resolveAndEstablishSession(data.user.id)
-        return session
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          const lower = err.message.toLowerCase()
-          if (lower.includes('load failed') || lower.includes('failed to fetch')) {
-            throw new Error(
-              'Connection to Supabase Cloud failed ("Load failed"). Please check your network connection.'
-            )
+        // Before reporting invalid login credentials, verify if the user is marked inactive in database
+        try {
+          const { data: dbCheck } = await supabase
+            .from('users')
+            .select('active')
+            .eq('email', normalizedEmail)
+            .maybeSingle()
+          if (dbCheck && dbCheck.active === false) {
+            throw new Error('You Are Disabled Plz Contact to Administrator')
           }
-          throw err
+        } catch (dbCheckErr) {
+          if (dbCheckErr instanceof Error && dbCheckErr.message === 'You Are Disabled Plz Contact to Administrator') {
+            throw dbCheckErr
+          }
         }
-        throw new Error('Authentication failed. Please try again.')
+
+        if (lower.includes('invalid login credentials')) {
+          throw new Error(
+            'Invalid login credentials in Supabase Cloud. Please verify your password, or check in Supabase Dashboard (Authentication → Users) that the user is marked "Confirmed".'
+          )
+        }
+        throw new Error(authErrMsg)
       }
-    }
 
-    // -------------------------------------------------------------------------
-    // DEVELOPMENT / DEMO LOCAL MOCK AUTHENTICATION MODE
-    // -------------------------------------------------------------------------
-    // 1. Special check for Root Administrator in mock mode
-    if (isRootAdminEmail(normalizedEmail)) {
-      const isValidAdmin = await credentialService.verifyPassword(normalizedEmail, plainTextPassword)
-      if (!isValidAdmin) {
-        throw new Error('Invalid email or password.')
+      // 4. Resolve trusted application profile with fallback linking
+      const session = await this.resolveAndEstablishSession(data.user.id, data.user.email || normalizedEmail)
+      return session
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        const lower = err.message.toLowerCase()
+        if (lower.includes('load failed') || lower.includes('failed to fetch')) {
+          throw new Error(
+            'Connection to Supabase Cloud failed ("Load failed"). Please check your network connection.'
+          )
+        }
+        throw err
       }
-      const now = new Date()
-      const adminSession: UserSession = {
-        sessionId: `sess-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        userId: ROOT_ADMIN_CONFIG.id,
-        name: `${ROOT_ADMIN_CONFIG.name} (Root Administrator)`,
-        email: ROOT_ADMIN_EMAIL,
-        role: 'ADMIN',
-        ownerDesignation: null,
-        employeeId: undefined,
-        specialty: undefined,
-        isAuthenticated: true,
-        avatarUrl: undefined,
-        createdAt: now.toISOString(),
-        expiresAt: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
-      }
-      sessionService.setSession(adminSession)
-      return adminSession
+      throw new Error('Authentication failed. Please try again.')
     }
-
-    // 2. Look up user account in canonical users
-    const user = await userService.getUserByEmail(normalizedEmail)
-    if (!user) {
-      throw new Error('Invalid email or password.')
-    }
-
-    // 3. Check if user is active: Deny with exact specified message
-    if (!user.active) {
-      throw new Error('User is disabled. Please contact the administrator.')
-    }
-
-    // 4. Cryptographically verify password against salted hash
-    const isValidPassword = await credentialService.verifyPassword(normalizedEmail, plainTextPassword)
-    if (!isValidPassword) {
-      throw new Error('Invalid email or password.')
-    }
-
-    // 5. Establish isolated authenticated session
-    const session = sessionService.loginWithUser(user)
-    return session
   },
 
   /**
-   * Requests a password-reset email.
-   * In 'supabase_auth' mode: Uses supabase.auth.resetPasswordForEmail with an allowlisted redirect.
-   * Never leaks whether an unverified or nonexistent email exists.
+   * Requests a password-reset email strictly via Supabase Auth.
    */
   async requestPasswordReset(email: string): Promise<{ success: boolean; message: string }> {
     if (!email || !email.trim()) {
@@ -392,34 +424,26 @@ export const authService = {
     const normalizedEmail = email.trim().toLowerCase()
 
     if (isPlaceholderEmail(normalizedEmail)) {
-      throw new Error('Cannot request password reset for placeholder demo accounts (@hairdexirity.example.com).')
+      throw new Error('Cannot request password reset for placeholder accounts (@hairdexirity.example.com).')
     }
 
-    if (currentAuthMode === 'supabase_auth') {
-      if (!isSupabaseConfigured() || !supabase) {
-        throw new Error('Supabase client is not configured for password reset.')
-      }
-
-      const redirectUrl =
-        typeof window !== 'undefined'
-          ? `${window.location.origin}${window.location.pathname}#/login?type=recovery`
-          : undefined
-
-      const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-        redirectTo: redirectUrl,
-      })
-
-      if (error) {
-        throw new Error(error.message)
-      }
-
-      return {
-        success: true,
-        message: 'If an account exists with this email address, password reset instructions have been sent.',
-      }
+    if (!isSupabaseConfigured() || !supabase) {
+      throw new Error('Supabase client is not configured for password reset.')
     }
 
-    // Mock mode response
+    const redirectUrl =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}${window.location.pathname}#/login?type=recovery`
+        : undefined
+
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: redirectUrl,
+    })
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
     return {
       success: true,
       message: 'If an account exists with this email address, password reset instructions have been sent.',
@@ -427,33 +451,23 @@ export const authService = {
   },
 
   /**
-   * Updates user password after recovery.
-   * In 'supabase_auth' mode: Calls supabase.auth.updateUser({ password: newPassword }).
+   * Updates user password after recovery strictly via Supabase Auth.
    */
   async updatePassword(newPassword: string): Promise<void> {
     if (!newPassword || newPassword.length < 8) {
       throw new Error('Password must be at least 8 characters long.')
     }
 
-    if (currentAuthMode === 'supabase_auth') {
-      if (!isSupabaseConfigured() || !supabase) {
-        throw new Error('Supabase client is not configured for password update.')
-      }
-
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      })
-
-      if (error) {
-        throw new Error(error.message)
-      }
-      return
+    if (!isSupabaseConfigured() || !supabase) {
+      throw new Error('Supabase client is not configured for password update.')
     }
 
-    // Mock mode password update
-    const session = sessionService.getCurrentSession()
-    if (session) {
-      await credentialService.changePassword(session.userId, newPassword)
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    })
+
+    if (error) {
+      throw new Error(error.message)
     }
   },
 
@@ -461,7 +475,7 @@ export const authService = {
    * Terminates active session and clears authentication state
    */
   logout(): void {
-    if (currentAuthMode === 'supabase_auth' && supabase) {
+    if (supabase) {
       void supabase.auth.signOut().catch((err) => {
         console.warn('Error during Supabase Auth signOut:', err)
       })
@@ -484,11 +498,27 @@ export const authService = {
   },
 
   /**
-   * Validates active session against user registry and expiry
+   * Validates active session against user registry, expiry, and Supabase Auth
    */
   async validateSession(): Promise<boolean> {
     const session = sessionService.getCurrentSession()
     if (!session || !session.isAuthenticated) {
+      return false
+    }
+
+    // Verify that Supabase client has a live active session
+    if (!isSupabaseConfigured() || !supabase) {
+      this.logout()
+      return false
+    }
+    try {
+      const { data } = await supabase.auth.getSession()
+      if (!data?.session?.user) {
+        this.logout()
+        return false
+      }
+    } catch {
+      this.logout()
       return false
     }
 

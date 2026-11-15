@@ -1,13 +1,13 @@
 import type { CredentialRecord } from '../types/models.ts'
 import { mockUsers } from '../mockData/usersData.ts'
-import { ROOT_ADMIN_CONFIG, isRootAdminEmail } from '../config/adminConfig.ts'
+import { ROOT_ADMIN_CONFIG } from '../config/adminConfig.ts'
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient.ts'
 
 export const DEFAULT_TEST_PASSWORD = 'Luma@2026!'
 
 /**
  * Computes a SHA-256 digest using standard Web Crypto API.
- * Used strictly for in-memory fallback comparison in demo/test environments.
+ * Used strictly for in-memory fallback comparison in test environments.
  * NEVER persisted to localStorage.
  */
 async function computeHash(text: string): Promise<string> {
@@ -28,14 +28,14 @@ async function computeHash(text: string): Promise<string> {
 }
 
 /**
- * Generates a salted hash for a password (in-memory demo fallback only)
+ * Generates a salted hash for a password (in-memory fallback only)
  */
 export async function hashPasswordWithSalt(password: string, salt: string): Promise<string> {
   return computeHash(`${password}:${salt}`)
 }
 
 /**
- * Pure in-memory credentials for offline/demo/test environments.
+ * Pure in-memory credentials for test environments.
  * CRITICAL SECURITY COMPLIANCE (Phase 2.2):
  * Passwords, salts, and hashes are STRICTLY FORBIDDEN from being persisted to browser localStorage.
  */
@@ -58,8 +58,8 @@ function purgeLegacyCredentialStorage() {
 }
 
 /**
- * Reads any locally stored demo users from localStorage so their credentials
- * can be verified in offline Demo Mode across page reloads.
+ * Reads any locally stored users from localStorage so their credentials
+ * can be verified in test environments across page reloads.
  */
 function getStoredLocalUsers(): Array<{ id: string; email: string; createdAt?: string }> {
   try {
@@ -112,7 +112,7 @@ async function initializeCredentials(): Promise<CredentialRecord[]> {
     })
   }
 
-  // Also seed any salon owners or employees created via the UI in Demo Mode
+  // Seed any local salon owners or employees
   const localUsers = getStoredLocalUsers()
   for (const u of localUsers) {
     if (u.email && !seeded.some((s) => s.email === u.email.toLowerCase())) {
@@ -148,7 +148,7 @@ export interface OwnerDiscountApprovalResult {
 
 export const credentialService = {
   /**
-   * Retrieves in-memory credential record for an email address (offline demo mode)
+   * Retrieves in-memory credential record for an email address
    */
   async getByEmail(email: string): Promise<CredentialRecord | null> {
     await initializeCredentials()
@@ -174,7 +174,7 @@ export const credentialService = {
   },
 
   /**
-   * Retrieves in-memory credential record by User ID (offline demo mode)
+   * Retrieves in-memory credential record by User ID
    */
   async getByUserId(userId: string): Promise<CredentialRecord | null> {
     await initializeCredentials()
@@ -183,41 +183,11 @@ export const credentialService = {
   },
 
   /**
-   * Verifies if a given password matches the in-memory salted hash (offline demo mode)
+   * Mock password verification has been removed.
+   * Real-time authentication is strictly handled via Supabase Auth Cloud.
    */
-  async verifyPassword(email: string, plainTextPassword: string): Promise<boolean> {
-    const cred = await this.getByEmail(email)
-    if (!cred) return false
-
-    const computed = await hashPasswordWithSalt(plainTextPassword, cred.salt)
-    if (computed === cred.passwordHash) {
-      return true
-    }
-
-    // Offline Demo Mode: Accept common demo passwords or variants
-    const trimmed = plainTextPassword.trim()
-    const demoVariants = [
-      DEFAULT_TEST_PASSWORD,
-      'Luma@2026!',
-      'Hair@2026!',
-      'HairDexirity@2026!',
-      'HairDexirity',
-      'Hairdexirity',
-      'hairdexirity',
-      'password',
-      'admin',
-      'admin123',
-    ]
-    if (demoVariants.includes(trimmed)) {
-      return true
-    }
-
-    // In local demo mode, permit any entered password (length >= 4) for Root Administrator or locally provisioned users
-    if ((isRootAdminEmail(email) || (cred.userId && cred.userId.startsWith('user-'))) && trimmed.length >= 4) {
-      return true
-    }
-
-    return false
+  async verifyPassword(): Promise<boolean> {
+    throw new Error('Offline mock credential verification has been removed. All authentication must use Supabase Cloud.')
   },
 
   /**
@@ -234,55 +204,38 @@ export const credentialService = {
     discountAmount: number
     discountPercent: number
   }): Promise<OwnerDiscountApprovalResult> {
-    if (isSupabaseConfigured() && supabase) {
-      const { data, error } = await supabase.rpc('rpc_request_owner_discount_approval', {
-        p_salon_id: params.salonId,
-        p_invoice_id: params.invoiceId,
-        p_owner_email: params.ownerEmail,
-        p_owner_password: params.ownerPassword,
-        p_subtotal: params.subtotal,
-        p_discount_amount: params.discountAmount,
-        p_discount_percent: params.discountPercent,
-      })
-
-      if (error || !data) {
-        throw new Error(error?.message || 'Failed to obtain owner authorization for discount.')
-      }
-
-      return {
-        success: true,
-        grantId: data.grant_id,
-        ownerId: data.owner_id,
-        ownerName: data.owner_name,
-        discountPercent: data.discount_percent,
-        discountAmount: data.discount_amount,
-        subtotal: data.subtotal,
-        expiresAt: data.expires_at,
-      }
+    if (!isSupabaseConfigured() || !supabase) {
+      throw new Error('Authentication Error: Supabase Cloud client is required for owner discount authorization.')
     }
 
-    // Offline / Demo Mode Fallback:
-    const normalizedEmail = params.ownerEmail.trim().toLowerCase()
-    const isValid = await this.verifyPassword(normalizedEmail, params.ownerPassword)
-    if (!isValid) {
-      throw new Error('Invalid owner password. Authorization rejected.')
+    const { data, error } = await supabase.rpc('rpc_request_owner_discount_approval', {
+      p_salon_id: params.salonId,
+      p_invoice_id: params.invoiceId,
+      p_owner_email: params.ownerEmail,
+      p_owner_password: params.ownerPassword,
+      p_subtotal: params.subtotal,
+      p_discount_amount: params.discountAmount,
+      p_discount_percent: params.discountPercent,
+    })
+
+    if (error || !data) {
+      throw new Error(error?.message || 'Failed to obtain owner authorization for discount.')
     }
 
-    const grantId = `auth-demo-${Date.now()}`
     return {
       success: true,
-      grantId,
-      ownerId: 'usr-owner',
-      ownerName: 'Ananya Sharma',
-      discountPercent: params.discountPercent,
-      discountAmount: params.discountAmount,
-      subtotal: params.subtotal,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      grantId: data.grant_id,
+      ownerId: data.owner_id,
+      ownerName: data.owner_name,
+      discountPercent: data.discount_percent,
+      discountAmount: data.discount_amount,
+      subtotal: data.subtotal,
+      expiresAt: data.expires_at,
     }
   },
 
   /**
-   * Registers in-memory credentials for a newly created user/employee (offline demo mode)
+   * Registers in-memory credentials for a newly created user/employee
    */
   async registerUserCredentials(
     userId: string,
@@ -308,7 +261,7 @@ export const credentialService = {
   },
 
   /**
-   * Updates credentials for an existing user (offline demo mode)
+   * Updates credentials for an existing user
    */
   async changePassword(userId: string, newPassword: string): Promise<void> {
     await initializeCredentials()

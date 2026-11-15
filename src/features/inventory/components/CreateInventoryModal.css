@@ -210,7 +210,7 @@
 .form-label {
   font-size: 0.82rem;
   font-weight: 600;
-  color: #cbd5e1;
+  color: #e2e8f0;
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -219,10 +219,11 @@
 .form-label .req {
   color: #f87171;
   font-weight: 700;
+  margin-left: 2px;
 }
 
 .form-label .opt {
-  color: #64748b;
+  color: #94a3b8;
   font-weight: 400;
   font-size: 0.75rem;
 }
@@ -230,23 +231,30 @@
 .form-input,
 .form-select,
 .form-textarea {
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
   border-radius: 8px;
   padding: 0.65rem 0.875rem;
-  color: #ffffff;
-  font-size: 0.88rem;
+  color: #ffffff !important;
+  font-size: 0.9rem;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   box-sizing: border-box;
   font-family: inherit;
 }
 
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1;
+}
+
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
-  border-color: rgba(197, 160, 89, 0.55);
-  box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.12);
+  border-color: rgba(197, 160, 89, 0.75) !important;
+  box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.22) !important;
+  color: #ffffff !important;
 }
 
 .form-input.has-error,

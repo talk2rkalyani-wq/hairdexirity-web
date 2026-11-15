@@ -80,18 +80,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const handleToggleBilling = (e: React.MouseEvent) => {
     e.preventDefault()
-    e.stopPropagation()
     if (!isOpen && onToggleOpen) {
       onToggleOpen()
-      setIsDashboardsExpanded(true)
       setIsBillingExpanded(true)
     } else {
       setIsBillingExpanded((prev) => !prev)
     }
   }
 
-  const isParentActive = isDashboardRoute(activeId)
+  const isDashboardActive = isDashboardRoute(activeId)
   const isBillingActive = isBillingRoute(activeId)
+
+  const assistantItem = items.find((i) => i.id === 'assistant')
+  const otherNavItems = items.filter((i) => i.id !== 'assistant')
 
   const renderIcon = (iconName: NavigationItem['icon']) => {
     switch (iconName) {
@@ -171,13 +172,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <nav className="sidebar-nav" role="navigation">
           <ul className="nav-list">
             {/* =========================================================
-                1. EXPANDABLE "DASHBOARDS" MENU (Parent + Submenu)
+                1. AI ASSISTANT (Top Navigation Item)
+                ========================================================= */}
+            {assistantItem && (
+              <li key={assistantItem.id} className="nav-item">
+                <button
+                  type="button"
+                  className={`nav-btn ${activeId === assistantItem.id ? 'active' : ''}`}
+                  onClick={() => {
+                    onSelect(assistantItem.id)
+                    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+                      onClose()
+                    }
+                  }}
+                  aria-label={assistantItem.label}
+                  aria-current={activeId === assistantItem.id ? 'page' : undefined}
+                  title={assistantItem.label}
+                >
+                  <span className="nav-icon-wrap">
+                    {renderIcon(assistantItem.icon)}
+                  </span>
+                  <span className="nav-label nav-label-mobile">{assistantItem.label}</span>
+                </button>
+              </li>
+            )}
+
+            {/* =========================================================
+                2. EXPANDABLE "DASHBOARDS" MENU (Parent + Submenu)
                 ========================================================= */}
             {dashboardItems.length > 0 && (
               <li className="nav-item nav-group">
                 <button
                   type="button"
-                  className={`nav-btn nav-group-parent ${isParentActive ? 'active' : ''}`}
+                  className={`nav-btn nav-group-parent ${isDashboardActive ? 'active' : ''}`}
                   onClick={handleToggleDashboards}
                   aria-expanded={isDashboardsExpanded}
                   aria-controls="dashboards-submenu"
@@ -197,7 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <ChevronRightIcon size={16} />
                     )}
                   </span>
-                  {isParentActive && !isDashboardsExpanded && (
+                  {isDashboardActive && !isDashboardsExpanded && (
                     <span className="parent-active-dot" aria-hidden="true" />
                   )}
                 </button>
@@ -206,7 +233,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {isDashboardsExpanded && (
                   <ul className="dashboards-submenu-list" id="dashboards-submenu" role="menu">
                     {dashboardItems.map((sub) => {
-                      const isSubActive = sub.id === activeId
+                      const isSubActive = sub.id === activeId || activeId.startsWith(sub.id + '/')
                       return (
                         <li key={sub.id} className="submenu-item" role="none">
                           <button
@@ -231,114 +258,86 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         </li>
                       )
                     })}
-
-                    {/* =========================================================
-                        BILLING SUB-ACCORDION (Under Dashboards)
-                        ========================================================= */}
-                    {billingItems.length > 0 && (
-                      <li className="submenu-item billing-group-item" role="none">
-                        <button
-                          type="button"
-                          className={`submenu-btn billing-group-btn ${isBillingActive ? 'active' : ''}`}
-                          onClick={handleToggleBilling}
-                          aria-expanded={isBillingExpanded}
-                          aria-controls="billing-sub-menu"
-                          aria-label="Billing menu"
-                          title="Billing"
-                        >
-                          <span className="submenu-icon-wrap">
-                            <TagIcon size={18} />
-                          </span>
-                          <span className="submenu-label">Billing</span>
-                          <span className="billing-chevron-icon" aria-hidden="true">
-                            {isBillingExpanded ? (
-                              <ChevronDownIcon size={14} />
-                            ) : (
-                              <ChevronRightIcon size={14} />
-                            )}
-                          </span>
-                          {isBillingActive && !isBillingExpanded && (
-                            <span className="billing-active-dot" aria-hidden="true" />
-                          )}
-                        </button>
-
-                        {/* Nested Billing 9 Items */}
-                        {isBillingExpanded && (
-                          <ul className="billing-submenu-list" id="billing-sub-menu" role="menu">
-                            {billingItems.map((bItem) => {
-                              const isItemActive = bItem.id === activeId
-                              const isUpcoming = Boolean(bItem.badge)
-                              return (
-                                <li key={bItem.id} className="billing-sub-item" role="none">
-                                  <button
-                                    type="button"
-                                    className={`billing-sub-btn ${isItemActive ? 'active' : ''} ${isUpcoming ? 'is-upcoming' : ''}`}
-                                    onClick={() => {
-                                      onSelect(bItem.id)
-                                      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-                                        onClose()
-                                      }
-                                    }}
-                                    role="menuitem"
-                                    aria-label={bItem.label}
-                                    aria-current={isItemActive ? 'page' : undefined}
-                                    title={isUpcoming ? `${bItem.label} (Upcoming Phase)` : bItem.label}
-                                  >
-                                    <span className="billing-sub-icon-wrap">
-                                      {renderIcon(bItem.icon)}
-                                    </span>
-                                    <span className="billing-sub-label">{bItem.label}</span>
-                                    {bItem.badge && (
-                                      <span className="upcoming-pill">{bItem.badge}</span>
-                                    )}
-                                  </button>
-                                </li>
-                              )
-                            })}
-
-                            {/* Phase 6: Purchases & Supplier Management */}
-                            <li key="billing/purchases" className="billing-sub-item" role="none">
-                              <button
-                                type="button"
-                                className={`billing-sub-btn ${activeId.startsWith('billing/purchases') ? 'active' : ''}`}
-                                onClick={() => {
-                                  onSelect('billing/purchases')
-                                  if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-                                    onClose()
-                                  }
-                                }}
-                                role="menuitem"
-                                aria-label="Purchases & Suppliers"
-                                aria-current={activeId.startsWith('billing/purchases') ? 'page' : undefined}
-                                title="Purchases & Suppliers"
-                              >
-                                <span className="billing-sub-icon-wrap">
-                                  <PackageIcon size={16} />
-                                </span>
-                                <span className="billing-sub-label">Purchases & Suppliers</span>
-                              </button>
-                            </li>
-                          </ul>
-                        )}
-                      </li>
-                    )}
                   </ul>
                 )}
               </li>
             )}
 
-            {/* SECTION DIVIDER BETWEEN DASHBOARDS AND APPLICATIONS */}
-            {dashboardItems.length > 0 && items.length > 0 && (
-              <li className="sidebar-section-divider" aria-hidden="true">
-                <div className="sidebar-divider-line" />
-                <span className="sidebar-divider-label">Applications</span>
+            {/* =========================================================
+                3. EXPANDABLE "BILLING" MENU (Parent + Submenu)
+                ========================================================= */}
+            {billingItems.length > 0 && (
+              <li className="nav-item nav-group">
+                <button
+                  type="button"
+                  className={`nav-btn nav-group-parent ${isBillingActive ? 'active' : ''}`}
+                  onClick={handleToggleBilling}
+                  aria-expanded={isBillingExpanded}
+                  aria-controls="billing-submenu"
+                  aria-label="Billing menu"
+                  title="Billing"
+                >
+                  <span className="parent-left">
+                    <span className="nav-icon-wrap">
+                      <TagIcon size={21} />
+                    </span>
+                    <span className="nav-label nav-label-mobile">Billing</span>
+                  </span>
+                  <span className="nav-chevron-icon" aria-hidden="true">
+                    {isBillingExpanded ? (
+                      <ChevronDownIcon size={16} />
+                    ) : (
+                      <ChevronRightIcon size={16} />
+                    )}
+                  </span>
+                  {isBillingActive && !isBillingExpanded && (
+                    <span className="parent-active-dot" aria-hidden="true" />
+                  )}
+                </button>
+
+                {/* Billing Submenu List */}
+                {isBillingExpanded && (
+                  <ul className="dashboards-submenu-list" id="billing-submenu" role="menu">
+                    {billingItems.map((bItem) => {
+                      const isItemActive = bItem.id === activeId || activeId.startsWith(bItem.id + '/')
+                      const isUpcoming = Boolean(bItem.badge)
+                      return (
+                        <li key={bItem.id} className="submenu-item" role="none">
+                          <button
+                            type="button"
+                            className={`submenu-btn ${isItemActive ? 'active' : ''} ${isUpcoming ? 'is-upcoming' : ''}`}
+                            onClick={() => {
+                              onSelect(bItem.id)
+                              if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+                                onClose()
+                              }
+                            }}
+                            role="menuitem"
+                            aria-label={bItem.label}
+                            aria-current={isItemActive ? 'page' : undefined}
+                            title={isUpcoming ? `${bItem.label} (Upcoming Phase)` : bItem.label}
+                          >
+                            <span className="submenu-icon-wrap">
+                              {renderIcon(bItem.icon)}
+                            </span>
+                            <span className="submenu-label">{bItem.label}</span>
+                            {bItem.badge && (
+                              <span className="upcoming-pill">{bItem.badge}</span>
+                            )}
+                          </button>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
               </li>
             )}
 
             {/* =========================================================
-                2. PRESERVED EXISTING APPLICATION MENUS (100% Intact)
+                4. APPLICATION MENUS (Calendar, Clients, Staff, Services,
+                   Product Inventory, User Management, Settings)
                 ========================================================= */}
-            {items.map((item) => {
+            {otherNavItems.map((item) => {
               const isActive = item.id === activeId
 
               return (

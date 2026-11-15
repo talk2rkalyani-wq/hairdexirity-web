@@ -211,30 +211,32 @@
   font-weight: 600;
 }
 
-.form-row {
+.supplier-form-modal .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.form-field {
+.supplier-form-modal .form-field {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
 }
 
-.form-field.full {
+.supplier-form-modal .form-field.full {
   grid-column: span 2;
 }
 
-.form-field label {
+.supplier-form-modal .form-field label {
   font-size: 0.8rem;
   font-weight: 600;
   color: #475569;
 }
 
-.form-field input, .form-field select, .form-field textarea {
+.supplier-form-modal .form-field input,
+.supplier-form-modal .form-field select,
+.supplier-form-modal .form-field textarea {
   padding: 0.6rem 0.75rem;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -243,11 +245,13 @@
   outline: none;
 }
 
-.form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+.supplier-form-modal .form-field input:focus,
+.supplier-form-modal .form-field select:focus,
+.supplier-form-modal .form-field textarea:focus {
   border-color: #b76e79;
 }
 
-.form-actions {
+.supplier-form-modal .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
@@ -256,7 +260,7 @@
   border-top: 1px solid #e2e8f0;
 }
 
-.btn-cancel {
+.supplier-form-modal .btn-cancel {
   padding: 0.6rem 1.2rem;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -266,7 +270,7 @@
   cursor: pointer;
 }
 
-.btn-save {
+.supplier-form-modal .btn-save {
   padding: 0.6rem 1.4rem;
   border: none;
   border-radius: 6px;
@@ -276,7 +280,7 @@
   cursor: pointer;
 }
 
-.btn-save:hover {
+.supplier-form-modal .btn-save:hover {
   background: #a35d68;
 }
 

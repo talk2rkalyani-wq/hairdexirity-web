@@ -185,6 +185,8 @@ export interface User {
   active: boolean
   avatarUrl?: string
   createdAt: string
+  updatedAt?: string
+  authUserId?: string
 }
 
 export interface UserSession {

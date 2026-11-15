@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import type { User, UserSession } from '../../types/models'
 import { userService } from '../../services/userService'
-import { authService, type AuthMode } from '../../services/authService'
-import { credentialService, DEFAULT_TEST_PASSWORD } from '../../services/credentialService'
+import { DEFAULT_TEST_PASSWORD } from '../../services/credentialService'
 import { ROOT_ADMIN_CONFIG, ROOT_ADMIN_EMAIL } from '../../config/adminConfig'
 import './RootAdminPortalView.css'
 
@@ -30,7 +29,6 @@ const emptyFormState: OwnerSlotFormState = {
 export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ session, onLogout }) => {
   const [owners, setOwners] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [authMode, setAuthMode] = useState<AuthMode>(() => authService.getAuthMode())
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [submittingSlot, setSubmittingSlot] = useState<'OWNER_1' | 'OWNER_2' | null>(null)
@@ -72,17 +70,9 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
     return () => unsub()
   }, [loadOwners])
 
-  // Slot identification
-  const owner1 = owners.find((o) => o.ownerDesignation === 'OWNER_1') || owners[0] || null
-  const owner2 =
-    owners.find((o) => o.ownerDesignation === 'OWNER_2') || (owners.length > 1 && owners[1] !== owner1 ? owners[1] : null)
-
-  const handleToggleMode = () => {
-    const next: AuthMode = authMode === 'local_mock' ? 'supabase_auth' : 'local_mock'
-    authService.setAuthMode(next)
-    setAuthMode(next)
-    showToast(`Switched to ${next === 'local_mock' ? 'Demo Mode (Local Mock)' : 'Supabase Auth (Cloud)'}`)
-  }
+  // Slot identification by owner designation or standard ID fallback
+  const owner1 = owners.find((o) => o.ownerDesignation === 'OWNER_1' || o.id === 'user-owner-01') || null
+  const owner2 = owners.find((o) => o.ownerDesignation === 'OWNER_2' || o.id === 'user-owner-02') || null
 
   // Provisioning handler for Slot 1 or Slot 2
   const handleProvisionOwner = async (slot: 'OWNER_1' | 'OWNER_2') => {
@@ -95,6 +85,10 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
     }
     if (!form.email.trim() || !form.email.includes('@')) {
       setErrorMessage(`Please enter a valid email address for ${slot === 'OWNER_1' ? 'Owner 1' : 'Owner 2'}.`)
+      return
+    }
+    if (!form.password || form.password.trim().length < 6) {
+      setErrorMessage('Password must be at least 6 characters.')
       return
     }
 
@@ -112,7 +106,7 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
         session
       )
 
-      showToast(`🎉 ${slot === 'OWNER_1' ? 'Owner 1' : 'Owner 2'} (${newOwner.name}) credentials provisioned successfully!`)
+      showToast(`🎉 ${slot === 'OWNER_1' ? 'Owner 1' : 'Owner 2'} (${newOwner.name}) credentials provisioned and registered in Supabase Cloud!`)
       if (slot === 'OWNER_1') {
         setSlot1Form({ ...emptyFormState })
       } else {
@@ -130,8 +124,12 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
   // Toggle owner active status
   const handleToggleOwnerActive = async (owner: User) => {
     try {
-      const updated = await userService.toggleUserActive(owner.id, !owner.active, session)
-      showToast(`${owner.name} (${owner.ownerDesignation || 'Owner'}) is now ${updated.active ? 'Active' : 'Deactivated'}.`)
+      setErrorMessage(null)
+      const targetActive = !owner.active
+      const updated = await userService.toggleUserActive(owner.id, targetActive, session)
+      showToast(
+        `${owner.name} (${owner.ownerDesignation || 'Owner'}) is now ${updated.active ? 'Active' : 'Deactivated in Supabase Auth & Database'}.`
+      )
       await loadOwners()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to toggle status.'
@@ -142,17 +140,21 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
   // Delete / Release Owner slot
   const handleDeleteOwner = async (owner: User) => {
     const confirmed = window.confirm(
-      `Are you sure you want to remove ${owner.name} (${owner.ownerDesignation || 'Owner'})? This will release the owner slot.`
+      `Are you sure you want to release the slot for ${owner.name} (${owner.ownerDesignation || 'Owner'})? This will permanently delete their account from Supabase Auth and remove their salon profile.`
     )
     if (!confirmed) return
 
     try {
+      setErrorMessage(null)
+      setIsLoading(true)
       await userService.deleteUser(owner.id, session)
-      showToast(`${owner.name} was removed. Slot is now available.`)
+      showToast(`${owner.name} profile released and removed from Supabase Auth. Slot is now available.`)
       await loadOwners()
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to remove owner.'
+      const msg = err instanceof Error ? err.message : 'Failed to release owner slot.'
       setErrorMessage(msg)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -164,19 +166,25 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
 
   const handleConfirmPasswordReset = async () => {
     if (!resetModalOwner) return
-    if (!newPasswordInput || newPasswordInput.trim().length < 6) {
+    const trimmed = newPasswordInput.trim()
+    if (trimmed.length < 6) {
       alert('Password must be at least 6 characters.')
       return
     }
 
     try {
       setIsResettingPassword(true)
-      await credentialService.changePassword(resetModalOwner.id, newPasswordInput.trim())
-      showToast(`Password updated successfully for ${resetModalOwner.name}!`)
+      await userService.adminChangeOwnerPassword(
+        resetModalOwner.id,
+        resetModalOwner.authUserId,
+        trimmed,
+        session
+      )
+      showToast(`Password successfully updated in Supabase Auth for ${resetModalOwner.name}!`)
       setResetModalOwner(null)
       setNewPasswordInput('')
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to change password.'
+      const msg = err instanceof Error ? err.message : 'Failed to update owner password.'
       alert(msg)
     } finally {
       setIsResettingPassword(false)
@@ -213,16 +221,6 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
         </div>
 
         <div className="portal-header-actions">
-          <button
-            type="button"
-            className={`portal-mode-pill ${authMode === 'local_mock' ? 'pill-mock' : 'pill-cloud'}`}
-            onClick={handleToggleMode}
-            title="Click to toggle between Demo Mode and Supabase Cloud"
-          >
-            <span className="mode-status-dot" />
-            <span>{authMode === 'local_mock' ? 'Demo Mode (Offline)' : 'Supabase Auth (Cloud)'}</span>
-          </button>
-
           <div className="portal-admin-profile">
             <div className="admin-avatar">
               {ROOT_ADMIN_CONFIG.name.charAt(0).toUpperCase()}
@@ -350,6 +348,12 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
                         Provisioned: {new Date(owner1.createdAt).toLocaleDateString()}
                       </span>
                     </div>
+                    <div className="owner-meta-item">
+                      <span className="meta-icon">{owner1.authUserId ? '⚡' : '☁️'}</span>
+                      <span className="meta-text" style={{ color: owner1.authUserId ? '#38bdf8' : '#94a3b8' }}>
+                        {owner1.authUserId ? 'Supabase Auth Linked' : 'Profile Provisioned (Cloud)'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -372,7 +376,7 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
                     className={`btn-slot-action ${owner1.active ? 'btn-deactivate' : 'btn-activate'}`}
                     onClick={() => handleToggleOwnerActive(owner1)}
                   >
-                    {owner1.active ? 'Deactivate Owner' : 'Reactivate Owner'}
+                    {owner1.active ? 'Deactivate Owner' : 'Activate Owner'}
                   </button>
                   <button
                     type="button"
@@ -521,6 +525,12 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
                         Provisioned: {new Date(owner2.createdAt).toLocaleDateString()}
                       </span>
                     </div>
+                    <div className="owner-meta-item">
+                      <span className="meta-icon">{owner2.authUserId ? '⚡' : '☁️'}</span>
+                      <span className="meta-text" style={{ color: owner2.authUserId ? '#38bdf8' : '#94a3b8' }}>
+                        {owner2.authUserId ? 'Supabase Auth Linked' : 'Profile Provisioned (Cloud)'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -543,7 +553,7 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
                     className={`btn-slot-action ${owner2.active ? 'btn-deactivate' : 'btn-activate'}`}
                     onClick={() => handleToggleOwnerActive(owner2)}
                   >
-                    {owner2.active ? 'Deactivate Owner' : 'Reactivate Owner'}
+                    {owner2.active ? 'Deactivate Owner' : 'Activate Owner'}
                   </button>
                   <button
                     type="button"
@@ -706,7 +716,7 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
         <div className="portal-modal-backdrop" onClick={() => setResetModalOwner(null)}>
           <div className="portal-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="portal-modal-header">
-              <h3>Reset Password for {resetModalOwner.name}</h3>
+              <h3>Change Password for {resetModalOwner.name}</h3>
               <button
                 type="button"
                 className="btn-modal-close"
@@ -717,7 +727,7 @@ export const RootAdminPortalView: React.FC<RootAdminPortalViewProps> = ({ sessio
             </div>
             <div className="portal-modal-body">
               <p>
-                Enter a new password for Owner account (<code>{resetModalOwner.email}</code>):
+                Enter a new password for Owner account (<code>{resetModalOwner.email}</code>). It will be updated directly in Supabase Auth:
               </p>
               <input
                 type="password"

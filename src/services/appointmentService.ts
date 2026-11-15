@@ -126,6 +126,7 @@ export const appointmentService = {
    * Retrieves all appointments from canonical store, scoped by active session
    */
   async getAppointments(options?: { ignoreScope?: boolean }): Promise<Appointment[]> {
+    await appointmentStore.syncWithSupabase()
     const all = appointmentStore.getAll()
     if (options?.ignoreScope) return Promise.resolve(all)
     return Promise.resolve(filterAppointmentsBySession(all))
@@ -135,6 +136,7 @@ export const appointmentService = {
    * Retrieves an appointment by ID from canonical store, enforcing permission check
    */
   async getAppointmentById(id: string): Promise<Appointment | null> {
+    await appointmentStore.syncWithSupabase()
     const found = appointmentStore.getById(id)
     if (!found) return Promise.resolve(null)
     const session = sessionService.getCurrentSession()
@@ -151,6 +153,7 @@ export const appointmentService = {
     date: string,
     options?: { ignoreScope?: boolean }
   ): Promise<Appointment[]> {
+    await appointmentStore.syncWithSupabase()
     const list = appointmentStore.getByDate(date)
     if (options?.ignoreScope) return Promise.resolve(list)
     return Promise.resolve(filterAppointmentsBySession(list))
@@ -170,6 +173,7 @@ export const appointmentService = {
     date: string = getTodayDateStr(),
     options?: { ignoreScope?: boolean }
   ): Promise<EnrichedAppointment[]> {
+    await appointmentStore.syncWithSupabase()
     let appointments = appointmentStore.getByDate(date)
     if (!options?.ignoreScope) {
       appointments = filterAppointmentsBySession(appointments)
@@ -185,6 +189,7 @@ export const appointmentService = {
     clientId: string,
     options?: { ignoreScope?: boolean }
   ): Promise<EnrichedAppointment[]> {
+    await appointmentStore.syncWithSupabase()
     let clientApts = appointmentStore.getByClientId(clientId)
     if (!options?.ignoreScope) {
       clientApts = filterAppointmentsBySession(clientApts)
@@ -200,6 +205,7 @@ export const appointmentService = {
     endDate: string,
     options?: { ignoreScope?: boolean }
   ): Promise<EnrichedAppointment[]> {
+    await appointmentStore.syncWithSupabase()
     let appointments = appointmentStore.getByDateRange(startDate, endDate)
     if (!options?.ignoreScope) {
       appointments = filterAppointmentsBySession(appointments)
@@ -341,7 +347,7 @@ export const appointmentService = {
       serviceName: data.serviceName || service?.name,
     }
 
-    const added = appointmentStore.add(created)
+    const added = await appointmentStore.addAsync(created)
 
     // Verification check to ensure persistence succeeded
     const verified = appointmentStore.getById(uniqueId)
@@ -356,7 +362,7 @@ export const appointmentService = {
 
   /**
    * Updates an appointment's details with validation on schedule changes,
-   * persisting updates directly to canonical store.
+   * persisting updates directly to canonical store and Supabase Cloud.
    * Enforces role policies: Employees cannot reassign appointments to other staff.
    */
   async updateAppointment(
@@ -414,12 +420,19 @@ export const appointmentService = {
         : {}),
     }
 
-    const updated = appointmentStore.update(id, safeUpdates)
+    const updated = await appointmentStore.updateAsync(id, safeUpdates)
     if (!updated) {
       return Promise.reject(new Error(`Failed to update appointment ${id}`))
     }
 
     return Promise.resolve({ ...updated })
+  },
+
+  /**
+   * Deletes an appointment by ID
+   */
+  async deleteAppointment(id: string): Promise<boolean> {
+    return appointmentStore.removeAsync(id)
   },
 
 

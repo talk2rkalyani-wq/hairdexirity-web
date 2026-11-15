@@ -1,6 +1,7 @@
 import type { Appointment } from '../types/models.ts'
 import { mockAppointments, mockClients, mockStaff, mockServices } from '../mockData/salonEntities.ts'
 import { getSalonDateStr, getSalonTimeStr, timeToMinutes } from '../utils/formatters.ts'
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient.ts'
 
 const STORAGE_KEY = 'luma_salon_appointments_v1'
 
@@ -60,8 +61,8 @@ export function isAppointmentBlocking(
 }
 
 /**
- * Reads persisted appointments from localStorage if available,
- * otherwise initializes with mockAppointments with entity snapshots.
+ * Reads persisted appointments from localStorage if available.
+ * Defaults to empty array to ensure fresh real-data testing.
  */
 function loadInitialAppointments(): Appointment[] {
   try {
@@ -72,19 +73,13 @@ function loadInitialAppointments(): Appointment[] {
         if (Array.isArray(parsed)) {
           return parsed
         }
-      } else {
-        // Initial setup: persist baseline seed data with snapshots once
-        const initial = seedWithEntitySnapshots(mockAppointments)
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(initial))
-        return initial
       }
     }
   } catch (err) {
     console.warn('Failed to load appointments from localStorage:', err)
   }
 
-  // Fallback to initial mock appointments
-  return seedWithEntitySnapshots(mockAppointments)
+  return []
 }
 
 // Canonical In-Memory Appointment Collection
@@ -99,6 +94,209 @@ function persistToStorage(data: Appointment[]) {
   } catch (err) {
     console.warn('Failed to save appointments to localStorage:', err)
   }
+}
+
+function formatTimeForPostgres(timeStr?: string): string {
+  if (!timeStr) return '10:00:00'
+  const trimmed = timeStr.trim()
+  if (trimmed.length === 5) return `${trimmed}:00`
+  return trimmed
+}
+
+function formatTimeFromPostgres(timeStr?: any): string {
+  if (!timeStr) return '10:00'
+  const s = String(timeStr).trim()
+  return s.slice(0, 5)
+}
+
+function mapRowToAppointment(row: any): Appointment {
+  return {
+    id: row.id,
+    salonId: row.salon_id || 'salon-luma-01',
+    clientId: row.client_id || '',
+    staffId: row.staff_id || '',
+    assignedEmployeeId: row.assigned_employee_id || row.staff_id || '',
+    serviceId: row.service_id || '',
+    date: row.date,
+    startTime: formatTimeFromPostgres(row.start_time),
+    endTime: formatTimeFromPostgres(row.end_time),
+    status: row.status,
+    price: Number(row.price) || 0,
+    notes: row.notes || undefined,
+    clientName: row.client_name || undefined,
+    clientPhone: row.client_phone || undefined,
+    clientEmail: row.client_email || undefined,
+    staffName: row.staff_name || undefined,
+    serviceName: row.service_name || undefined,
+    checkedInAt: row.checked_in_at || undefined,
+    serviceStartedAt: row.service_started_at || undefined,
+    completedAt: row.completed_at || undefined,
+    cancellationReason: row.cancellation_reason || undefined,
+    createdAt: row.created_at || new Date().toISOString(),
+  }
+}
+
+function mapAppointmentToRow(apt: Appointment): Record<string, any> {
+  return {
+    id: apt.id,
+    salon_id: apt.salonId || 'salon-luma-01',
+    client_id: apt.clientId || null,
+    staff_id: apt.staffId || null,
+    assigned_employee_id: apt.assignedEmployeeId || apt.staffId || null,
+    service_id: apt.serviceId || null,
+    date: apt.date,
+    start_time: formatTimeForPostgres(apt.startTime),
+    end_time: formatTimeForPostgres(apt.endTime),
+    status: apt.status || 'scheduled',
+    price: Number(apt.price) || 0,
+    notes: apt.notes || null,
+    client_name: apt.clientName || null,
+    client_phone: apt.clientPhone || null,
+    client_email: apt.clientEmail || null,
+    staff_name: apt.staffName || null,
+    service_name: apt.serviceName || null,
+    checked_in_at: apt.checkedInAt || null,
+    service_started_at: apt.serviceStartedAt || null,
+    completed_at: apt.completedAt || null,
+    cancellation_reason: apt.cancellationReason || null,
+    created_at: apt.createdAt || new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }
+}
+
+async function insertRemoteAppointment(apt: Appointment): Promise<void> {
+  if (!isSupabaseConfigured() || !supabase) return
+
+  const row = mapAppointmentToRow(apt)
+  try {
+    const { error } = await supabase.from('appointments').insert(row)
+    if (error) {
+      console.warn('Direct insert to Supabase appointments table failed, checking foreign keys/constraints:', error)
+      if (
+        error.message?.includes('foreign key') ||
+        error.message?.includes('fkey') ||
+        error.code === '23503'
+      ) {
+        const { client_id, staff_id, service_id, assigned_employee_id, ...fallback } = row
+        const { error: retryErr } = await supabase.from('appointments').insert({
+          ...fallback,
+          client_id: null,
+          staff_id: null,
+          assigned_employee_id: null,
+          service_id: null,
+        })
+        if (retryErr) {
+          console.error('Fallback insert without foreign keys also failed:', retryErr)
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Network error inserting appointment to Supabase:', err)
+  }
+}
+
+async function updateRemoteAppointment(id: string, updates: Partial<Appointment>): Promise<void> {
+  if (!isSupabaseConfigured() || !supabase) return
+
+  const payload: Record<string, any> = {
+    updated_at: new Date().toISOString(),
+  }
+  if (updates.date !== undefined) payload.date = updates.date
+  if (updates.startTime !== undefined) payload.start_time = formatTimeForPostgres(updates.startTime)
+  if (updates.endTime !== undefined) payload.end_time = formatTimeForPostgres(updates.endTime)
+  if (updates.status !== undefined) payload.status = updates.status
+  if (updates.price !== undefined) payload.price = Number(updates.price) || 0
+  if (updates.notes !== undefined) payload.notes = updates.notes || null
+  if (updates.clientId !== undefined) payload.client_id = updates.clientId || null
+  if (updates.staffId !== undefined) payload.staff_id = updates.staffId || null
+  if (updates.assignedEmployeeId !== undefined) payload.assigned_employee_id = updates.assignedEmployeeId || null
+  if (updates.serviceId !== undefined) payload.service_id = updates.serviceId || null
+  if (updates.clientName !== undefined) payload.client_name = updates.clientName || null
+  if (updates.clientPhone !== undefined) payload.client_phone = updates.clientPhone || null
+  if (updates.clientEmail !== undefined) payload.client_email = updates.clientEmail || null
+  if (updates.staffName !== undefined) payload.staff_name = updates.staffName || null
+  if (updates.serviceName !== undefined) payload.service_name = updates.serviceName || null
+  if (updates.checkedInAt !== undefined) payload.checked_in_at = updates.checkedInAt || null
+  if (updates.serviceStartedAt !== undefined) payload.service_started_at = updates.serviceStartedAt || null
+  if (updates.completedAt !== undefined) payload.completed_at = updates.completedAt || null
+  if (updates.cancellationReason !== undefined) payload.cancellation_reason = updates.cancellationReason || null
+
+  try {
+    const { error } = await supabase.from('appointments').update(payload).eq('id', id)
+    if (error) {
+      console.warn('Update to Supabase appointments table failed:', error)
+      if (
+        error.message?.includes('foreign key') ||
+        error.message?.includes('fkey') ||
+        error.code === '23503'
+      ) {
+        const { client_id, staff_id, service_id, assigned_employee_id, ...fallback } = payload
+        await supabase.from('appointments').update(fallback).eq('id', id)
+      }
+    }
+  } catch (err) {
+    console.error('Network error updating appointment in Supabase:', err)
+  }
+}
+
+async function deleteRemoteAppointment(id: string): Promise<void> {
+  if (!isSupabaseConfigured() || !supabase) return
+  try {
+    const { error } = await supabase.from('appointments').delete().eq('id', id)
+    if (error) console.error('Error deleting appointment from Supabase:', error)
+  } catch (err) {
+    console.error('Network error deleting appointment from Supabase:', err)
+  }
+}
+
+let syncInProgress: Promise<Appointment[]> | null = null
+
+async function syncWithSupabase(): Promise<Appointment[]> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return canonicalAppointments
+  }
+
+  if (syncInProgress) {
+    return syncInProgress
+  }
+
+  syncInProgress = (async () => {
+    try {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('*')
+        .order('date', { ascending: true })
+
+      if (!error && data) {
+        const remoteAppointments: Appointment[] = data.map(mapRowToAppointment)
+
+        // If remote database is empty, but local storage has created appointments (like Raghav & Sapna),
+        // auto-push local appointments to Supabase Cloud
+        if (remoteAppointments.length === 0 && canonicalAppointments.length > 0) {
+          for (const apt of canonicalAppointments) {
+            await insertRemoteAppointment(apt)
+          }
+          return [...canonicalAppointments]
+        }
+
+        canonicalAppointments = remoteAppointments
+        persistToStorage(canonicalAppointments)
+        notifyListeners()
+        return [...canonicalAppointments]
+      }
+    } catch (err) {
+      console.warn('Error fetching appointments from Supabase:', err)
+    } finally {
+      syncInProgress = null
+    }
+    return [...canonicalAppointments]
+  })()
+
+  return syncInProgress
+}
+
+if (typeof window !== 'undefined') {
+  syncWithSupabase().catch((err) => console.warn('Initial Supabase appointments sync failed:', err))
 }
 
 // Listen for cross-tab or external storage changes
@@ -402,17 +600,33 @@ export const appointmentStore = {
   },
 
   /**
-   * Appends a newly created appointment, persists to storage, and notifies subscribers
+   * Appends a newly created appointment, persists to storage, notifies subscribers,
+   * and synchronizes to Supabase Cloud
    */
   add(appointment: Appointment): Appointment {
     canonicalAppointments.push({ ...appointment })
     persistToStorage(canonicalAppointments)
     notifyListeners()
+    insertRemoteAppointment(appointment).catch((err) =>
+      console.warn('[appointmentStore] Async insert to Supabase encountered error:', err)
+    )
     return { ...appointment }
   },
 
   /**
-   * Updates an existing appointment, persists to storage, and notifies subscribers
+   * Async variant of add ensuring Supabase write is awaited
+   */
+  async addAsync(appointment: Appointment): Promise<Appointment> {
+    canonicalAppointments.push({ ...appointment })
+    persistToStorage(canonicalAppointments)
+    notifyListeners()
+    await insertRemoteAppointment(appointment)
+    return { ...appointment }
+  },
+
+  /**
+   * Updates an existing appointment, persists to storage, notifies subscribers,
+   * and synchronizes to Supabase Cloud
    */
   update(id: string, updates: Partial<Appointment>): Appointment | null {
     const index = canonicalAppointments.findIndex((a) => a.id === id)
@@ -424,11 +638,31 @@ export const appointmentStore = {
     }
     persistToStorage(canonicalAppointments)
     notifyListeners()
+    updateRemoteAppointment(id, updates).catch((err) =>
+      console.warn('[appointmentStore] Async update to Supabase encountered error:', err)
+    )
     return { ...canonicalAppointments[index] }
   },
 
   /**
-   * Removes an appointment by ID from the canonical store
+   * Async variant of update ensuring Supabase write is awaited
+   */
+  async updateAsync(id: string, updates: Partial<Appointment>): Promise<Appointment | null> {
+    const index = canonicalAppointments.findIndex((a) => a.id === id)
+    if (index === -1) return null
+
+    canonicalAppointments[index] = {
+      ...canonicalAppointments[index],
+      ...updates,
+    }
+    persistToStorage(canonicalAppointments)
+    notifyListeners()
+    await updateRemoteAppointment(id, updates)
+    return { ...canonicalAppointments[index] }
+  },
+
+  /**
+   * Removes an appointment by ID from the canonical store and Supabase Cloud
    */
   remove(id: string): boolean {
     const index = canonicalAppointments.findIndex((a) => a.id === id)
@@ -436,7 +670,30 @@ export const appointmentStore = {
     canonicalAppointments.splice(index, 1)
     persistToStorage(canonicalAppointments)
     notifyListeners()
+    deleteRemoteAppointment(id).catch((err) =>
+      console.warn('[appointmentStore] Async delete from Supabase encountered error:', err)
+    )
     return true
+  },
+
+  /**
+   * Async variant of remove ensuring Supabase deletion is awaited
+   */
+  async removeAsync(id: string): Promise<boolean> {
+    const index = canonicalAppointments.findIndex((a) => a.id === id)
+    if (index === -1) return false
+    canonicalAppointments.splice(index, 1)
+    persistToStorage(canonicalAppointments)
+    notifyListeners()
+    await deleteRemoteAppointment(id)
+    return true
+  },
+
+  /**
+   * Manually triggers synchronization with Supabase Cloud
+   */
+  async syncWithSupabase(): Promise<Appointment[]> {
+    return syncWithSupabase()
   },
 
   /**

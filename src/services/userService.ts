@@ -347,6 +347,31 @@ export const userService = {
               throw new Error(`Supabase Auth creation failed: ${msg}`)
             }
           }
+
+          // If authUserId was not returned by /signup (e.g. user already registered in Supabase Auth),
+          // authenticate via clean fetch with initial password to retrieve their auth_user_id without session collision
+          if (!authUserId) {
+            try {
+              const tokenRes = await fetch(`${sbUrl}/auth/v1/token?grant_type=password`, {
+                method: 'POST',
+                headers: {
+                  'apikey': sbKey,
+                  'Authorization': `Bearer ${sbKey}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  email: normalizedEmail,
+                  password: data.initialPassword || DEFAULT_TEST_PASSWORD,
+                }),
+              })
+              const tokenJson = await tokenRes.json()
+              if (tokenJson?.user?.id) {
+                authUserId = tokenJson.user.id
+              }
+            } catch (tokenErr) {
+              console.warn('[userService] Notice retrieving existing auth user id:', tokenErr)
+            }
+          }
         } catch (authErr) {
           const msg = authErr instanceof Error ? authErr.message : 'Auth registration failed.'
           if (msg.includes('rate limit') || msg.includes('creation failed')) {

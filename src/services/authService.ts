@@ -86,9 +86,9 @@ export const authService = {
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         const currentLocal = sessionService.getCurrentSession()
         if (!currentLocal && sbSession.user) {
-          // Restore session strictly from database profile linked to auth_user_id
+          // Restore session from database profile linked to auth_user_id or verified email
           try {
-            await this.resolveAndEstablishSession(sbSession.user.id)
+            await this.resolveAndEstablishSession(sbSession.user.id, sbSession.user.email)
           } catch (err) {
             console.warn('[authService] Failed to restore session from auth state change:', err)
           }
@@ -108,7 +108,7 @@ export const authService = {
       const { data } = await supabase.auth.getSession()
       if (data?.session?.user) {
         if (!sessionService.getCurrentSession()) {
-          await this.resolveAndEstablishSession(data.session.user.id)
+          await this.resolveAndEstablishSession(data.session.user.id, data.session.user.email)
         }
       } else {
         // No live Supabase session -> clear any stale local session
@@ -133,7 +133,7 @@ export const authService = {
    * - Administrator privilege is granted ONLY via a verified record in public.administrators.
    * - Active status is enforced: inactive users receive "User is disabled. Please contact the administrator."
    */
-  async resolveAndEstablishSession(authUserId: string): Promise<UserSession> {
+  async resolveAndEstablishSession(authUserId: string, authUserEmail?: string): Promise<UserSession> {
     if (!authUserId) {
       if (supabase) await supabase.auth.signOut().catch(() => {})
       throw new Error('Authentication error: Missing authenticated identity.')
@@ -185,9 +185,10 @@ export const authService = {
       }
     }
 
-    // 2. Check Salon Users table (public.users) strictly by auth_user_id
+    // 2. Check Salon Users table (public.users)
     let dbUser: Record<string, unknown> | null = null
     if (supabase) {
+      // A. Check strictly by auth_user_id
       try {
         const { data: userData, error: userErr } = await supabase
           .from('users')
@@ -200,6 +201,77 @@ export const authService = {
         }
       } catch {
         // Handled below
+      }
+
+      // B. If not found by auth_user_id, try database RPC link helper
+      if (!dbUser) {
+        try {
+          const { data: rpcUser, error: rpcErr } = await supabase.rpc('rpc_link_authenticated_user')
+          if (!rpcErr && rpcUser) {
+            dbUser = rpcUser
+          }
+        } catch {
+          // Handled below
+        }
+      }
+
+      // C. If still not found, match by verified email in public.users
+      if (!dbUser && authUserEmail) {
+        const cleanEmail = authUserEmail.trim().toLowerCase()
+        try {
+          const { data: byEmail, error: emailErr } = await supabase
+            .from('users')
+            .select('*')
+            .ilike('email', cleanEmail)
+            .maybeSingle()
+
+          if (!emailErr && byEmail) {
+            dbUser = byEmail
+            // Link auth_user_id in Supabase if not yet set
+            if (!byEmail.auth_user_id || byEmail.auth_user_id !== authUserId) {
+              try {
+                await supabase
+                  .from('users')
+                  .update({ auth_user_id: authUserId, updated_at: new Date().toISOString() })
+                  .eq('id', byEmail.id)
+              } catch {
+                // Handled safely
+              }
+            }
+          }
+        } catch {
+          // Handled below
+        }
+      }
+
+      // D. Fallback: match from trusted local canonical user store if Supabase RLS hid unlinked user
+      if (!dbUser && authUserEmail) {
+        const cleanEmail = authUserEmail.trim().toLowerCase()
+        const localUser = await userService.getUserByEmail(cleanEmail)
+        if (localUser && localUser.role !== 'ADMIN' && !isRootAdminEmail(localUser.email)) {
+          dbUser = {
+            id: localUser.id,
+            salon_id: localUser.salonId || 'salon-luma-01',
+            name: localUser.name,
+            email: localUser.email,
+            role: localUser.role,
+            owner_designation: localUser.ownerDesignation || null,
+            employee_id: localUser.employeeId || null,
+            specialty: localUser.specialty || null,
+            active: localUser.active !== undefined ? localUser.active : true,
+            auth_user_id: authUserId,
+          }
+
+          // Link auth_user_id in Supabase public.users now that identity is verified
+          try {
+            await supabase
+              .from('users')
+              .update({ auth_user_id: authUserId, updated_at: new Date().toISOString() })
+              .eq('id', localUser.id)
+          } catch {
+            // Handled safely
+          }
+        }
       }
     }
 
@@ -319,8 +391,8 @@ export const authService = {
         throw new Error(authErrMsg)
       }
 
-      // 4. Resolve trusted application profile strictly by auth_user_id
-      const session = await this.resolveAndEstablishSession(data.user.id)
+      // 4. Resolve trusted application profile with fallback linking
+      const session = await this.resolveAndEstablishSession(data.user.id, data.user.email || normalizedEmail)
       return session
     } catch (err: unknown) {
       if (err instanceof Error) {

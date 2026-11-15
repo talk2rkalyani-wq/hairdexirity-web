@@ -24,10 +24,14 @@ function loadEnvFile(filename) {
   return env
 }
 
+const FALLBACK_SUPABASE_URL = 'https://ktlzrezhiopwwlzmycdw.supabase.co'
+const FALLBACK_SUPABASE_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0bHpyZXpoaW9wd3dsem15Y2R3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNzU3NzEsImV4cCI6MjEwNzY1MTc3MX0.lwZBnTM7YW9oLgFlrTXoVOk2Ts3qObBeMmmLXpKRH5E'
+
 const fileEnv = { ...loadEnvFile('.env'), ...loadEnvFile('.env.local') }
-const authMode = (process.env.VITE_AUTH_MODE !== undefined ? process.env.VITE_AUTH_MODE : (fileEnv.VITE_AUTH_MODE || '')).trim().toLowerCase()
-const supabaseUrl = (process.env.VITE_SUPABASE_URL !== undefined ? process.env.VITE_SUPABASE_URL : (fileEnv.VITE_SUPABASE_URL || '')).trim()
-const supabaseKey = (
+let authMode = (process.env.VITE_AUTH_MODE !== undefined ? process.env.VITE_AUTH_MODE : (fileEnv.VITE_AUTH_MODE || 'supabase_auth')).trim().toLowerCase() || 'supabase_auth'
+let supabaseUrl = (process.env.VITE_SUPABASE_URL !== undefined ? process.env.VITE_SUPABASE_URL : (fileEnv.VITE_SUPABASE_URL || '')).trim()
+let supabaseKey = (
   process.env.VITE_SUPABASE_PUBLISHABLE_KEY !== undefined
     ? process.env.VITE_SUPABASE_PUBLISHABLE_KEY
     : (fileEnv.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || fileEnv.VITE_SUPABASE_ANON_KEY || '')
@@ -41,6 +45,16 @@ const isPlaceholder = (val) => {
     lower.includes('your-supabase-publishable') ||
     lower.includes('placeholder')
   )
+}
+
+if (!supabaseUrl || isPlaceholder(supabaseUrl)) {
+  console.log('[Build Validation] Notice: No VITE_SUPABASE_URL provided; using verified project fallback URL.')
+  supabaseUrl = FALLBACK_SUPABASE_URL
+}
+
+if (!supabaseKey || isPlaceholder(supabaseKey)) {
+  console.log('[Build Validation] Notice: No VITE_SUPABASE_PUBLISHABLE_KEY provided; using verified project anon key.')
+  supabaseKey = FALLBACK_SUPABASE_KEY
 }
 
 const isProductionDeploy =

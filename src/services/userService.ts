@@ -313,8 +313,8 @@ export const userService = {
     // 3. Supabase Cloud Integration (Auth signup + database table synchronization)
     if (isSupabaseConfigured() && supabase) {
       // Step A: Register auth credentials in Supabase Auth via clean fetch (ZERO session collision)
-      const sbUrl = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '')
-      const sbKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY
+      const sbUrl = (import.meta.env.VITE_SUPABASE_URL || 'https://ktlzrezhiopwwlzmycdw.supabase.co').replace(/\/+$/, '')
+      const sbKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0bHpyZXpoaW9wd3dsem15Y2R3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNzU3NzEsImV4cCI6MjEwNzY1MTc3MX0.lwZBnTM7YW9oLgFlrTXoVOk2Ts3qObBeMmmLXpKRH5E'
       if (sbUrl && sbKey) {
         try {
           const authRes = await fetch(`${sbUrl}/auth/v1/signup`, {

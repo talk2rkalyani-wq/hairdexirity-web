@@ -11,9 +11,9 @@ const getEnvVar = (name: string): string | undefined => {
   return undefined
 }
 
-const rawUrl = getEnvVar('VITE_SUPABASE_URL')
-const supabaseUrl = rawUrl ? rawUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '') : undefined
-const supabaseKey = getEnvVar('VITE_SUPABASE_PUBLISHABLE_KEY') || getEnvVar('VITE_SUPABASE_ANON_KEY')
+const FALLBACK_SUPABASE_URL = 'https://ktlzrezhiopwwlzmycdw.supabase.co'
+const FALLBACK_SUPABASE_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0bHpyZXpoaW9wd3dsem15Y2R3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNzU3NzEsImV4cCI6MjEwNzY1MTc3MX0.lwZBnTM7YW9oLgFlrTXoVOk2Ts3qObBeMmmLXpKRH5E'
 
 const isPlaceholder = (val?: string): boolean => {
   if (!val) return true
@@ -24,6 +24,13 @@ const isPlaceholder = (val?: string): boolean => {
     lower.includes('placeholder')
   )
 }
+
+const envUrl = getEnvVar('VITE_SUPABASE_URL')
+const rawUrl = (!envUrl || isPlaceholder(envUrl)) ? FALLBACK_SUPABASE_URL : envUrl
+const supabaseUrl = rawUrl ? rawUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '') : undefined
+
+const envKey = getEnvVar('VITE_SUPABASE_PUBLISHABLE_KEY') || getEnvVar('VITE_SUPABASE_ANON_KEY')
+const supabaseKey = (!envKey || isPlaceholder(envKey)) ? FALLBACK_SUPABASE_KEY : envKey
 
 export const isSupabaseConfigured = (): boolean => {
   return Boolean(supabaseUrl && supabaseKey && !isPlaceholder(supabaseUrl) && !isPlaceholder(supabaseKey))

@@ -367,6 +367,7 @@
   margin-left: auto;
 }
 
+.submenu-btn.active .upcoming-pill,
 .billing-sub-btn.active .upcoming-pill {
   background: rgba(255, 255, 255, 0.2);
   color: #ffffff;

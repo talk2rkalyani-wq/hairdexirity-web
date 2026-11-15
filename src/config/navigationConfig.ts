@@ -17,8 +17,7 @@ export function isDashboardRoute(navId: string): boolean {
   return (
     clean.startsWith('owner/') ||
     clean.startsWith('employee/') ||
-    clean.startsWith('receptionist/') ||
-    clean.startsWith('billing/')
+    clean.startsWith('receptionist/')
   )
 }
 
@@ -146,6 +145,7 @@ export function getBillingSubmenuItems(role?: UserRole): NavigationItem[] {
     { id: 'billing/refunds', label: 'Refunds & Credit Notes', icon: 'refresh-cw', badge: 'Soon' },
     { id: 'billing/reports', label: 'Billing Reports', icon: 'trending-up', badge: 'Soon' },
     { id: 'billing/settings', label: 'Billing Settings', icon: 'settings', badge: 'Soon' },
+    { id: 'billing/purchases', label: 'Purchases & Suppliers', icon: 'inventory' },
   ]
 }
 

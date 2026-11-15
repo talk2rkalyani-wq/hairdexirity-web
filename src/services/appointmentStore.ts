@@ -167,15 +167,37 @@ function mapAppointmentToRow(apt: Appointment): Record<string, any> {
 async function insertRemoteAppointment(apt: Appointment): Promise<void> {
   if (!isSupabaseConfigured() || !supabase) return
 
-  const row = mapAppointmentToRow(apt)
+  let row = mapAppointmentToRow(apt)
   try {
-    const { error } = await supabase.from('appointments').insert(row)
+    let { error } = await supabase.from('appointments').insert(row)
     if (error) {
-      console.warn('Direct insert to Supabase appointments table failed, checking foreign keys/constraints:', error)
+      console.warn('Direct insert to Supabase appointments table failed, checking columns/foreign keys:', error)
+
+      // Handle missing optional columns if schema migration hasn't been applied yet
+      if (error.code === 'PGRST204' || error.message?.includes('schema cache')) {
+        const {
+          cancellation_reason,
+          checked_in_at,
+          service_started_at,
+          completed_at,
+          client_name,
+          client_phone,
+          client_email,
+          staff_name,
+          service_name,
+          ...coreRow
+        } = row
+        row = coreRow
+        const retryResult = await supabase.from('appointments').insert(row)
+        error = retryResult.error
+      }
+
+      // Handle foreign key constraint failure
       if (
-        error.message?.includes('foreign key') ||
-        error.message?.includes('fkey') ||
-        error.code === '23503'
+        error &&
+        (error.message?.includes('foreign key') ||
+          error.message?.includes('fkey') ||
+          error.code === '23503')
       ) {
         const { client_id, staff_id, service_id, assigned_employee_id, ...fallback } = row
         const { error: retryErr } = await supabase.from('appointments').insert({
@@ -198,7 +220,7 @@ async function insertRemoteAppointment(apt: Appointment): Promise<void> {
 async function updateRemoteAppointment(id: string, updates: Partial<Appointment>): Promise<void> {
   if (!isSupabaseConfigured() || !supabase) return
 
-  const payload: Record<string, any> = {
+  let payload: Record<string, any> = {
     updated_at: new Date().toISOString(),
   }
   if (updates.date !== undefined) payload.date = updates.date
@@ -222,13 +244,31 @@ async function updateRemoteAppointment(id: string, updates: Partial<Appointment>
   if (updates.cancellationReason !== undefined) payload.cancellation_reason = updates.cancellationReason || null
 
   try {
-    const { error } = await supabase.from('appointments').update(payload).eq('id', id)
+    let { error } = await supabase.from('appointments').update(payload).eq('id', id)
     if (error) {
       console.warn('Update to Supabase appointments table failed:', error)
+      if (error.code === 'PGRST204' || error.message?.includes('schema cache')) {
+        const {
+          cancellation_reason,
+          checked_in_at,
+          service_started_at,
+          completed_at,
+          client_name,
+          client_phone,
+          client_email,
+          staff_name,
+          service_name,
+          ...corePayload
+        } = payload
+        payload = corePayload
+        const retryResult = await supabase.from('appointments').update(payload).eq('id', id)
+        error = retryResult.error
+      }
       if (
-        error.message?.includes('foreign key') ||
-        error.message?.includes('fkey') ||
-        error.code === '23503'
+        error &&
+        (error.message?.includes('foreign key') ||
+          error.message?.includes('fkey') ||
+          error.code === '23503')
       ) {
         const { client_id, staff_id, service_id, assigned_employee_id, ...fallback } = payload
         await supabase.from('appointments').update(fallback).eq('id', id)

@@ -125,16 +125,18 @@
 .field-label {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #cbd5e1;
+  color: #e2e8f0;
+  letter-spacing: 0.01em;
 }
 
 .field-label .req {
   color: #f87171;
+  margin-left: 2px;
 }
 
 .field-label .opt {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: #94a3b8;
   font-weight: 400;
   margin-left: 0.25rem;
 }
@@ -143,21 +145,30 @@
 .field-select,
 .field-textarea {
   width: 100%;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
   border-radius: var(--radius-sm);
   padding: 0.65rem 0.85rem;
-  color: var(--text-primary);
-  font-size: 0.875rem;
+  color: #ffffff !important;
+  font-size: 0.9rem;
+  font-weight: 500;
   transition: all var(--transition-fast);
+}
+
+.field-input::placeholder,
+.field-textarea::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1;
 }
 
 .field-input:focus,
 .field-select:focus,
 .field-textarea:focus {
   outline: none;
-  border-color: rgba(168, 85, 247, 0.7);
-  box-shadow: 0 0 16px rgba(124, 58, 237, 0.25);
+  border-color: rgba(168, 85, 247, 0.8) !important;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25) !important;
+  color: #ffffff !important;
+  background: rgba(20, 29, 52, 0.95) !important;
 }
 
 .field-select {

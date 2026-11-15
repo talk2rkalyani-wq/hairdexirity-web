@@ -73,10 +73,123 @@ button {
 
 input, select, textarea {
   font-family: inherit;
-  color: inherit;
+  color: #ffffff;
   border: none;
   background: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ==============================================================================
+   GLOBAL FORM & INPUT READABILITY ENHANCEMENTS
+   Ensures every text field, select dropdown, and textarea across all forms
+   displays crisp, bright, highly legible text with high contrast in dark mode.
+   ============================================================================== */
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="color"]),
+select,
+textarea {
+  color: #ffffff !important;
+  color-scheme: dark;
+  caret-color: #c084fc;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1;
+}
+
+select option {
+  background-color: #0d1322 !important;
+  color: #ffffff !important;
+  padding: 8px 12px;
+}
+
+select option:disabled {
+  color: #64748b !important;
+  background-color: #070a12 !important;
+}
+
+/* High-contrast form controls across all modals & creation views */
+.field-input,
+.field-select,
+.field-textarea,
+.form-input,
+.form-select,
+.form-textarea,
+.cal-input,
+.portal-input,
+.pos-input,
+.stock-adj-input,
+.edit-prod-input {
+  color: #ffffff !important;
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: 8px;
+  font-size: 0.9rem !important;
+}
+
+.field-input:focus,
+.field-select:focus,
+.field-textarea:focus,
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus,
+.cal-input:focus,
+.portal-input:focus,
+.pos-input:focus,
+.stock-adj-input:focus,
+.edit-prod-input:focus {
+  border-color: rgba(168, 85, 247, 0.75) !important;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25) !important;
+  color: #ffffff !important;
+  outline: none !important;
+}
+
+.field-label,
+.form-label,
+.modal-label {
+  color: #e2e8f0 !important;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+}
+
+.field-label .req,
+.form-label .req {
+  color: #f87171 !important;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.field-label .opt,
+.form-label .opt {
+  color: #94a3b8 !important;
+  font-weight: 400;
+}
+
+/* Light container input overrides (for white public views or export modals) */
+.luma-share-modal input,
+.luma-share-modal select,
+.luma-share-modal textarea,
+.supplier-modal-content input,
+.supplier-modal-content select,
+.supplier-modal-content textarea,
+.supplier-form-modal input,
+.supplier-form-modal select,
+.supplier-form-modal textarea,
+.public-invoice-container input,
+.public-quotation-container input {
+  color: #1e293b !important;
+  color-scheme: light;
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+.luma-share-modal input::placeholder,
+.supplier-modal-content input::placeholder,
+.supplier-form-modal input::placeholder {
+  color: #94a3b8 !important;
 }
 
 /* Prevent iOS Safari auto-zoom on input focus by enforcing at least 16px font-size */

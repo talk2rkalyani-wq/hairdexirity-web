@@ -1,18 +1,246 @@
 /* Staff Form Modal Styles - Luma Dark System */
 
+.staff-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.2s ease;
+}
+
 .staff-modal-card {
   background: #0d1322;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
   width: 100%;
   max-width: 620px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 30px rgba(168, 85, 247, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(168, 85, 247, 0.15);
   animation: modalPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
   z-index: 101;
+  color: #ffffff;
+}
+
+/* Modal Header */
+.staff-modal-card .modal-header {
+  padding: 1.35rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.staff-modal-card .modal-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.staff-modal-card .modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.staff-modal-card .modal-subtitle {
+  font-size: 0.825rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.staff-modal-card .modal-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.staff-modal-card .modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* Success Banner */
+.staff-modal-card .modal-success-banner {
+  margin: 0.75rem 1.5rem 0 1.5rem;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Modal Form Structure */
+.staff-modal-card .modal-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.staff-modal-card .modal-form-body {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.staff-modal-card .form-group-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.staff-modal-card .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.staff-modal-card .field-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  letter-spacing: 0.01em;
+}
+
+.staff-modal-card .field-label .req {
+  color: #f87171;
+  margin-left: 2px;
+}
+
+.staff-modal-card .field-label .opt {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 400;
+  margin-left: 0.25rem;
+}
+
+/* High Contrast Input & Select Controls */
+.staff-modal-card .field-input,
+.staff-modal-card .field-select {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: 8px !important;
+  padding: 0.65rem 0.85rem !important;
+  color: #ffffff !important;
+  font-size: 0.9rem !important;
+  font-weight: 500;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+}
+
+.staff-modal-card .field-input::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1;
+}
+
+.staff-modal-card .field-input:focus,
+.staff-modal-card .field-select:focus {
+  outline: none !important;
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25) !important;
+  color: #ffffff !important;
+  background: rgba(20, 29, 52, 0.95) !important;
+}
+
+.staff-modal-card .field-select {
+  cursor: pointer;
+}
+
+.staff-modal-card .field-select option {
+  background: #0d1322 !important;
+  color: #ffffff !important;
+  padding: 6px 10px;
+}
+
+.staff-modal-card .input-error {
+  border-color: #ef4444 !important;
+}
+
+.staff-modal-card .error-text {
+  font-size: 0.75rem;
+  color: #f87171;
+}
+
+/* Form Actions */
+.staff-modal-card .modal-form-actions {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.staff-modal-card .btn-cancel {
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.staff-modal-card .btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.staff-modal-card .btn-submit {
+  padding: 0.65rem 1.5rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #9333ea 0%, #6366f1 100%);
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 14px rgba(147, 51, 234, 0.35);
+  transition: all 0.15s ease;
+}
+
+.staff-modal-card .btn-submit:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.45);
+}
+
+.staff-modal-card .btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @keyframes modalPopIn {

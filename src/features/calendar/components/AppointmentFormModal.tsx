@@ -178,6 +178,9 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
     setIsSubmitting(true)
 
     try {
+      const matchedService = services.find((s) => s.id === serviceId)
+      const effectivePrice = matchedService ? matchedService.price : price
+
       if (isEdit && initialAppointment) {
         const updated = await appointmentService.updateAppointment(initialAppointment.id, {
           clientId,
@@ -186,7 +189,7 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
           date,
           startTime,
           endTime,
-          price,
+          price: effectivePrice,
           status,
           notes: notes.trim() || undefined,
         })
@@ -208,7 +211,7 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
           date,
           startTime,
           endTime,
-          price,
+          price: effectivePrice,
           status,
           notes: notes.trim() || undefined,
         })
@@ -422,13 +425,12 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
                 <span className="cal-currency-symbol">₹</span>
                 <input
                   id="cal-price-input"
-                  type="number"
-                  min="0"
-                  step="50"
-                  className="cal-input with-prefix"
+                  type="text"
+                  className="cal-input with-prefix cal-readonly-input"
                   value={price}
-                  onChange={(e) => setPrice(Math.max(0, parseFloat(e.target.value) || 0))}
-                  required
+                  readOnly
+                  tabIndex={-1}
+                  title="Price is automatically fetched from service inventory"
                 />
               </div>
             </div>

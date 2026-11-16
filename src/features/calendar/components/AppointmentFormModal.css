@@ -234,6 +234,23 @@
   padding-left: 28px;
 }
 
+/* Readonly input styling */
+.cal-input.cal-readonly-input,
+.cal-input[readonly] {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #e2e8f0 !important;
+  cursor: default;
+  user-select: none;
+}
+
+.cal-input.cal-readonly-input:focus,
+.cal-input[readonly]:focus {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 /* Readonly computed display */
 .cal-input-readonly {
   background: rgba(168, 85, 247, 0.08);

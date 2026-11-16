@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import type { Service, ServiceCategory, ServicePricingType } from '../../../types/models'
+import { SERVICE_CATEGORIES } from '../../../types/models'
 import { CloseIcon, CheckIcon } from '../../../components/Icons'
 import './ServiceFormModal.css'
 
@@ -21,7 +22,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [duration, setDuration] = useState<number | string>(45)
-  const [category, setCategory] = useState<ServiceCategory>('haircut')
+  const [category, setCategory] = useState<ServiceCategory>('Hair')
   const [active, setActive] = useState(true)
 
   // Pricing Model State
@@ -57,7 +58,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
       setName(serviceToEdit.name || '')
       setDescription(serviceToEdit.description || '')
       setDuration(serviceToEdit.duration ?? 45)
-      setCategory(serviceToEdit.category || 'haircut')
+      setCategory(serviceToEdit.category || 'Hair')
       setActive(serviceToEdit.active !== undefined ? serviceToEdit.active : true)
 
       const pType: ServicePricingType = serviceToEdit.pricingType || 'gender'
@@ -88,7 +89,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
       setName('')
       setDescription('')
       setDuration(45)
-      setCategory('haircut')
+      setCategory('Hair')
       setActive(true)
       setPricingType('gender')
       setMalePrice(1000)
@@ -266,11 +267,16 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                   value={category}
                   onChange={(e) => setCategory(e.target.value as ServiceCategory)}
                 >
-                  <option value="haircut">Haircut & Styling</option>
-                  <option value="color">Color & Highlights</option>
-                  <option value="treatment">Hair Treatment & Spa</option>
-                  <option value="styling">Skin, Nails & Rituals</option>
-                  <option value="extensions">Hair Extensions</option>
+                  {SERVICE_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                  {category && !SERVICE_CATEGORIES.includes(category as any) && (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  )}
                 </select>
               </div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import type { Service, ServiceCategory, UserSession } from '../../types/models'
+import { SERVICE_CATEGORIES } from '../../types/models'
 import { serviceService } from '../../services/serviceService'
 import { sessionService } from '../../services/sessionService'
 import { permissionService } from '../../services/permissionService'
@@ -15,11 +16,7 @@ type CategoryFilter = 'all' | ServiceCategory
 
 const categories: { key: CategoryFilter; label: string }[] = [
   { key: 'all', label: 'All Services' },
-  { key: 'haircut', label: 'Haircut' },
-  { key: 'color', label: 'Color' },
-  { key: 'treatment', label: 'Treatment' },
-  { key: 'styling', label: 'Skin & Nails' },
-  { key: 'extensions', label: 'Extensions' },
+  ...SERVICE_CATEGORIES.map((cat) => ({ key: cat as CategoryFilter, label: cat })),
 ]
 
 export const ServicesView: React.FC = () => {

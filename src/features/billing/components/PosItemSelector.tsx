@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import type { Service } from '../../../types/models.ts'
+import { SERVICE_CATEGORIES } from '../../../types/models.ts'
 import type { InventoryProduct } from '../../../types/inventory.ts'
 import type { InvoiceLineItem } from '../../../types/finance.ts'
 import { serviceService } from '../../../services/serviceService.ts'
@@ -147,7 +148,7 @@ export const PosItemSelector: React.FC<PosItemSelectorProps> = ({
   }
 
   // Available Categories
-  const serviceCategories = ['ALL', 'haircut', 'color', 'styling', 'treatment', 'extensions'] as const
+  const serviceCategories = ['ALL', ...SERVICE_CATEGORIES]
   const productCategories = [
     'ALL',
     'Hair Care',

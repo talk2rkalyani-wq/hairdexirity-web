@@ -12,13 +12,13 @@ import { formatPdfCurrency, type SalonPdfInfo } from './pdfService.ts'
 
 const DEFAULT_SALON_INFO: SalonPdfInfo = {
   name: 'Hair Dexirity',
-  ownerName: 'Mia',
-  phone: '+91 98765 43210',
+  ownerName: 'Rajesh',
+  phone: '+91 99110 56149',
   email: 'contact@hairdexirity.example.com',
-  street: 'Level 2, Galleria Market, DLF Phase IV',
-  city: 'Gurugram',
-  state: 'Haryana',
-  postalCode: '122009',
+  street: '4th Floor, Community Center 52, New Friends Colony',
+  city: 'New Delhi',
+  state: 'Delhi',
+  postalCode: '110025',
   country: 'India',
   gstin: '06AAAAA0000A1Z5',
 }

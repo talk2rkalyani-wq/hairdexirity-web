@@ -83,6 +83,9 @@
   padding: 0.15rem 0.5rem;
   border-radius: 4px;
   width: fit-content;
+  background: rgba(168, 85, 247, 0.12);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.25);
 }
 
 .service-category-badge.cat-haircut {

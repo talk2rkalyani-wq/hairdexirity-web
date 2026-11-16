@@ -7,12 +7,36 @@ export type StaffRole =
   | 'colorist'
   | 'junior_stylist'
 
+export const SERVICE_CATEGORIES = [
+  'Hair',
+  'Hair Color',
+  'Bespoke Hair Color',
+  'Hair Texture',
+  'Hair Rituals',
+  'Kids hair Cut',
+  'Threading',
+  'Face Wax',
+  'Body Wax',
+  'Pedicure',
+  'Manicure',
+  'D-Tan',
+  'Bleach',
+  'Nails',
+  'Nail Art',
+  'Massages',
+  'Make UP',
+  'Facial',
+  'Skin Ritual',
+] as const
+
 export type ServiceCategory =
+  | (typeof SERVICE_CATEGORIES)[number]
   | 'haircut'
   | 'color'
   | 'styling'
   | 'treatment'
   | 'extensions'
+  | (string & {})
 
 export type AppointmentStatus =
   | 'scheduled'

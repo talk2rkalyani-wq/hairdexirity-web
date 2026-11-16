@@ -15,10 +15,10 @@ import type {
 const SALON_INFO = {
   name: 'HAIR DEXIRITY',
   tagline: 'Luxury Hair, Beauty & Wellness',
-  address: '104 Elegance Boulevard, Indiranagar',
-  city: 'Bengaluru, Karnataka 560038',
-  phone: '+91 98450 12345',
-  email: 'accounts@hairdexirity.in',
+  address: '4th Floor, Community Center, 52, New Friends Colony',
+  city: 'New Delhi, Delhi 110025',
+  phone: '+91 99110 56149',
+  website: 'Hairdexterity.com/',
   gstin: '29ABCDE1234F1Z5',
 }
 

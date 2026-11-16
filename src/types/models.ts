@@ -103,7 +103,7 @@ export interface Staff {
   jobTitle?: string
 }
 
-export type ServicePricingType = 'gender' | 'length'
+export type ServicePricingType = 'gender' | 'length' | 'wax_type'
 
 export interface GenderPricing {
   male: number
@@ -115,6 +115,12 @@ export interface LengthPricing {
   medium: number
   long: number
   vlong: number
+}
+
+export interface WaxPricing {
+  normal: number
+  chocolate: number
+  peelOff: number
 }
 
 export interface Service {
@@ -129,6 +135,7 @@ export interface Service {
   pricingType?: ServicePricingType
   genderPricing?: GenderPricing
   lengthPricing?: LengthPricing
+  waxPricing?: WaxPricing
 }
 
 export interface ClientPreferences {

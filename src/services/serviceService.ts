@@ -1,4 +1,4 @@
-import type { Service, ServiceCategory, UserSession, ServicePricingType, GenderPricing, LengthPricing } from '../types/models.ts'
+import type { Service, ServiceCategory, UserSession, ServicePricingType, GenderPricing, LengthPricing, WaxPricing } from '../types/models.ts'
 import { SERVICE_CATEGORIES } from '../types/models.ts'
 import { mockServices } from '../mockData/salonEntities.ts'
 import { appointmentStore } from './appointmentStore.ts'
@@ -79,6 +79,7 @@ function encodeServicePricing(description: string, service: Partial<Service>): s
       pricingType: service.pricingType,
       genderPricing: service.genderPricing,
       lengthPricing: service.lengthPricing,
+      waxPricing: service.waxPricing,
     }
     return `${cleanDesc} <!--hd_pricing:${JSON.stringify(meta)}-->`.trim()
   }
@@ -90,6 +91,7 @@ function parseServicePricing(rawDescription?: string): {
   pricingType?: Service['pricingType']
   genderPricing?: Service['genderPricing']
   lengthPricing?: Service['lengthPricing']
+  waxPricing?: Service['waxPricing']
 } {
   if (!rawDescription) {
     return { description: '' }
@@ -104,6 +106,7 @@ function parseServicePricing(rawDescription?: string): {
         pricingType: meta.pricingType,
         genderPricing: meta.genderPricing,
         lengthPricing: meta.lengthPricing,
+        waxPricing: meta.waxPricing,
       }
     } catch {
       // ignore JSON parse error
@@ -128,8 +131,27 @@ export const serviceService = {
           const remoteServices: Service[] = data.map((row: any) => {
             const parsedPricing = parseServicePricing(row.description)
 
+            const isBodyWaxCategory = row.category === 'Body Wax'
             const pricingType: ServicePricingType =
-              row.pricing_type || parsedPricing.pricingType || (row.price_short != null ? 'length' : 'gender')
+              row.pricing_type || parsedPricing.pricingType || (isBodyWaxCategory ? 'wax_type' : row.price_short != null ? 'length' : 'gender')
+
+            let waxPricing: WaxPricing | undefined = undefined
+            if (row.price_normal != null || row.price_chocolate != null || row.price_peel_off != null) {
+              waxPricing = {
+                normal: Number(row.price_normal ?? row.price),
+                chocolate: Number(row.price_chocolate ?? row.price),
+                peelOff: Number(row.price_peel_off ?? row.price),
+              }
+            } else if (parsedPricing.waxPricing) {
+              waxPricing = parsedPricing.waxPricing
+            } else if (pricingType === 'wax_type' || isBodyWaxCategory) {
+              const baseP = Number(row.price) || 0
+              waxPricing = {
+                normal: baseP,
+                chocolate: Math.round(baseP * 1.5) || 0,
+                peelOff: Math.round(baseP * 2) || 0,
+              }
+            }
 
             let genderPricing: GenderPricing | undefined = undefined
             if (row.price_male != null || row.price_female != null) {
@@ -175,6 +197,7 @@ export const serviceService = {
               pricingType,
               genderPricing,
               lengthPricing,
+              waxPricing,
             }
           })
 
@@ -294,13 +317,16 @@ export const serviceService = {
           price: created.price,
           category: created.category,
           active: created.active !== undefined ? created.active : true,
-          pricing_type: created.pricingType || 'gender',
+          pricing_type: created.pricingType || (created.category === 'Body Wax' ? 'wax_type' : 'gender'),
           price_male: created.genderPricing?.male ?? null,
           price_female: created.genderPricing?.female ?? null,
           price_short: created.lengthPricing?.short ?? null,
           price_medium: created.lengthPricing?.medium ?? null,
           price_long: created.lengthPricing?.long ?? null,
           price_vlong: created.lengthPricing?.vlong ?? null,
+          price_normal: created.waxPricing?.normal ?? null,
+          price_chocolate: created.waxPricing?.chocolate ?? null,
+          price_peel_off: created.waxPricing?.peelOff ?? null,
           updated_at: new Date().toISOString(),
         }
 
@@ -360,6 +386,11 @@ export const serviceService = {
         // Include dedicated pricing columns
         if (mergedService.pricingType !== undefined) {
           updatePayload.pricing_type = mergedService.pricingType
+        }
+        if (mergedService.waxPricing) {
+          updatePayload.price_normal = mergedService.waxPricing.normal
+          updatePayload.price_chocolate = mergedService.waxPricing.chocolate
+          updatePayload.price_peel_off = mergedService.waxPricing.peelOff
         }
         if (mergedService.genderPricing) {
           updatePayload.price_male = mergedService.genderPricing.male

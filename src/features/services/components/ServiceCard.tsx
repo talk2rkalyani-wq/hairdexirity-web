@@ -133,7 +133,22 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         </div>
 
         <div className="service-price-wrap" aria-label={`Price: ${formattedPrice}`}>
-          {service.pricingType === 'gender' && service.genderPricing ? (
+          {(service.pricingType === 'wax_type' || service.category === 'Body Wax') && service.waxPricing ? (
+            <div className="service-price-breakdown">
+              <span className="price-pricing-badge">Body Wax</span>
+              <div className="price-tier-chips">
+                <span className="price-chip" title="Normal">
+                  <span className="chip-key">Normal:</span> ₹{service.waxPricing.normal}
+                </span>
+                <span className="price-chip" title="Chocolate">
+                  <span className="chip-key">Choc:</span> ₹{service.waxPricing.chocolate}
+                </span>
+                <span className="price-chip" title="Peel off">
+                  <span className="chip-key">Peel off:</span> ₹{service.waxPricing.peelOff}
+                </span>
+              </div>
+            </div>
+          ) : service.pricingType === 'gender' && service.genderPricing ? (
             <div className="service-price-breakdown">
               <span className="price-pricing-badge">By Gender</span>
               <div className="price-tier-chips">

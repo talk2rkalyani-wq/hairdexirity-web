@@ -198,9 +198,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             {/* =========================================================
-                2. EXPANDABLE "DASHBOARDS" MENU (Parent + Submenu)
+                2. EXPANDABLE "DASHBOARDS" MENU or SINGLE DASHBOARD ITEM
                 ========================================================= */}
-            {dashboardItems.length > 0 && (
+            {dashboardItems.length === 1 ? (
+              <li key={dashboardItems[0].id} className="nav-item">
+                <button
+                  type="button"
+                  className={`nav-btn ${activeId === dashboardItems[0].id || activeId.startsWith(dashboardItems[0].id + '/') ? 'active' : ''}`}
+                  onClick={() => {
+                    onSelect(dashboardItems[0].id)
+                    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+                      onClose()
+                    }
+                  }}
+                  aria-label={dashboardItems[0].label}
+                  aria-current={activeId === dashboardItems[0].id || activeId.startsWith(dashboardItems[0].id + '/') ? 'page' : undefined}
+                  title={dashboardItems[0].label}
+                >
+                  <span className="nav-icon-wrap">
+                    <DashboardIcon size={21} />
+                  </span>
+                  <span className="nav-label nav-label-mobile">{dashboardItems[0].label}</span>
+                </button>
+              </li>
+            ) : dashboardItems.length > 1 ? (
               <li className="nav-item nav-group">
                 <button
                   type="button"
@@ -261,7 +282,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </ul>
                 )}
               </li>
-            )}
+            ) : null}
 
             {/* =========================================================
                 3. EXPANDABLE "BILLING" MENU (Parent + Submenu)

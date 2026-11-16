@@ -111,11 +111,7 @@ export function getDashboardSubmenuItems(role?: UserRole): NavigationItem[] {
 
     case 'RECEPTIONIST':
       return [
-        { id: 'receptionist/dashboard', label: "Today's Front Desk", icon: 'clipboard-list' },
-        { id: 'receptionist/calendar', label: 'Appointment Calendar', icon: 'calendar' },
-        { id: 'receptionist/bookings', label: 'New Booking', icon: 'calendar-plus' },
-        { id: 'receptionist/walk-ins', label: 'Walk-ins', icon: 'users' },
-        { id: 'receptionist/check-in', label: 'Check-in / Check-out', icon: 'user-check' },
+        { id: 'receptionist/dashboard', label: 'Dashboard', icon: 'clipboard-list' },
       ]
 
     case 'ADMIN':

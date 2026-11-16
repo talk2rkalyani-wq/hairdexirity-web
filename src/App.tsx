@@ -23,10 +23,6 @@ import { EmployeeAvailabilityView } from './features/dashboards/employee/Employe
 import { EmployeeLeaveManagementView } from './features/dashboards/employee/EmployeeLeaveManagementView'
 import { EmployeePerformanceView } from './features/dashboards/employee/EmployeePerformanceView'
 import { ReceptionistFrontDeskView } from './features/dashboards/receptionist/ReceptionistFrontDeskView'
-import { ReceptionistCalendarView } from './features/dashboards/receptionist/ReceptionistCalendarView'
-import { ReceptionistBookingsView } from './features/dashboards/receptionist/ReceptionistBookingsView'
-import { ReceptionistWalkInsView } from './features/dashboards/receptionist/ReceptionistWalkInsView'
-import { ReceptionistCheckInOutView } from './features/dashboards/receptionist/ReceptionistCheckInOutView'
 import { DashboardAccessDeniedState } from './features/dashboards/common/DashboardStateContainers'
 import { BillingOverviewView } from './features/billing/BillingOverviewView'
 import { NewBillView } from './features/billing/NewBillView'
@@ -382,16 +378,8 @@ export default function App(): React.JSX.Element | null {
         <EmployeeLeaveManagementView onNavigate={navigateTo} />
       ) : activeNavId === 'employee/performance' ? (
         <EmployeePerformanceView onNavigate={navigateTo} />
-      ) : activeNavId === 'receptionist/dashboard' ? (
+      ) : activeNavId === 'receptionist/dashboard' || activeNavId.startsWith('receptionist/') ? (
         <ReceptionistFrontDeskView receptionistName={session.name} onNavigate={navigateTo} />
-      ) : activeNavId === 'receptionist/calendar' ? (
-        <ReceptionistCalendarView onNavigate={navigateTo} />
-      ) : activeNavId === 'receptionist/bookings' ? (
-        <ReceptionistBookingsView onNavigate={navigateTo} />
-      ) : activeNavId === 'receptionist/walk-ins' ? (
-        <ReceptionistWalkInsView onNavigate={navigateTo} />
-      ) : activeNavId === 'receptionist/check-in' ? (
-        <ReceptionistCheckInOutView onNavigate={navigateTo} />
       ) : activeNavId === 'billing/overview' ? (
         <BillingOverviewView onNavigate={navigateTo} />
       ) : activeNavId === 'billing/new' ? (

@@ -16,6 +16,7 @@ import {
   formatCurrency,
   formatTime12h,
 } from '../../../utils/formatters'
+import { ScissorsIcon } from '../../../components/Icons'
 import './AppointmentFormModal.css'
 
 interface AppointmentFormModalProps {
@@ -88,10 +89,17 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
     }
   }, [isOpen])
 
+  const selectedService = useMemo(() => {
+    return services.find((s) => s.id === serviceId) || initialAppointment?.service || null
+  }, [services, serviceId, initialAppointment])
+
+  const effectiveDuration = selectedService?.duration ?? duration
+  const effectivePrice = selectedService?.price ?? price
+
   // Computed end time
   const endTime = useMemo(() => {
-    return calculateEndTime(startTime, duration)
-  }, [startTime, duration])
+    return calculateEndTime(startTime, effectiveDuration)
+  }, [startTime, effectiveDuration])
 
   // Initialize or reset form values
   useEffect(() => {
@@ -280,7 +288,7 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
             </div>
           )}
 
-          {/* Row 1: Client & Service */}
+          {/* Row 1: Client & Date */}
           <div className="cal-form-row">
             <div className="cal-field-group">
               <label htmlFor="cal-client-select" className="cal-label">
@@ -303,8 +311,25 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
             </div>
 
             <div className="cal-field-group">
+              <label htmlFor="cal-date-input" className="cal-label">
+                Appointment Date <span className="req">*</span>
+              </label>
+              <input
+                id="cal-date-input"
+                type="date"
+                className="cal-input cal-date-picker"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Requested Service & Assign Stylist */}
+          <div className="cal-form-row">
+            <div className="cal-field-group">
               <label htmlFor="cal-service-select" className="cal-label">
-                Service <span className="req">*</span>
+                Requested Service <span className="req">*</span>
               </label>
               <select
                 id="cal-service-select"
@@ -316,18 +341,15 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
                 <option value="" disabled>Select service...</option>
                 {services.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name} ({formatCurrency(s.price)} • {s.duration} min)
+                    {s.name} ({s.duration}m • {formatCurrency(s.price)})
                   </option>
                 ))}
               </select>
             </div>
-          </div>
 
-          {/* Row 2: Stylist & Date */}
-          <div className="cal-form-row">
             <div className="cal-field-group">
               <label htmlFor="cal-staff-select" className="cal-label">
-                Stylist / Staff <span className="req">*</span>
+                Assign Stylist <span className="req">*</span>
               </label>
               <select
                 id="cal-staff-select"
@@ -343,7 +365,7 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
                     value={st.id}
                     disabled={!st.active}
                   >
-                    {st.name} — {st.jobTitle || st.role} {!st.active ? '(Inactive)' : ''}
+                    {st.name} ({st.jobTitle || st.role}) {!st.active ? '(Inactive)' : ''}
                   </option>
                 ))}
               </select>
@@ -353,23 +375,20 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
                 </div>
               )}
             </div>
-
-            <div className="cal-field-group">
-              <label htmlFor="cal-date-input" className="cal-label">
-                Appointment Date <span className="req">*</span>
-              </label>
-              <input
-                id="cal-date-input"
-                type="date"
-                className="cal-input cal-date-picker"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-              />
-            </div>
           </div>
 
-          {/* Row 3: Start Time & Duration & Computed End Time */}
+          {/* Service Summary Pill (Estimated duration & Price) */}
+          {selectedService && (
+            <div className="cal-service-summary-pill">
+              <ScissorsIcon size={16} />
+              <span>
+                Estimated duration: <strong>{effectiveDuration} mins</strong> • Price:{' '}
+                <strong>{formatCurrency(effectivePrice)}</strong>
+              </span>
+            </div>
+          )}
+
+          {/* Row 3: Timing & Status */}
           <div className="cal-form-row tri-col">
             <div className="cal-field-group">
               <label htmlFor="cal-time-select" className="cal-label">
@@ -391,47 +410,9 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
             </div>
 
             <div className="cal-field-group">
-              <label htmlFor="cal-duration-input" className="cal-label">
-                Duration (min) <span className="req">*</span>
-              </label>
-              <input
-                id="cal-duration-input"
-                type="number"
-                min="15"
-                max="360"
-                step="5"
-                className="cal-input"
-                value={duration}
-                onChange={(e) => setDuration(Math.max(15, parseInt(e.target.value, 10) || 15))}
-                required
-              />
-            </div>
-
-            <div className="cal-field-group">
               <label className="cal-label">Computed End Time</label>
               <div className="cal-input-readonly" title="Automatically calculated from Start Time + Duration">
                 {formatTime12h(endTime)} ({endTime})
-              </div>
-            </div>
-          </div>
-
-          {/* Row 4: Price & Status */}
-          <div className="cal-form-row">
-            <div className="cal-field-group">
-              <label htmlFor="cal-price-input" className="cal-label">
-                Price (₹ INR) <span className="req">*</span>
-              </label>
-              <div className="cal-currency-input-wrap">
-                <span className="cal-currency-symbol">₹</span>
-                <input
-                  id="cal-price-input"
-                  type="text"
-                  className="cal-input with-prefix cal-readonly-input"
-                  value={price}
-                  readOnly
-                  tabIndex={-1}
-                  title="Price is automatically fetched from service inventory"
-                />
               </div>
             </div>
 
@@ -454,10 +435,10 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
             </div>
           </div>
 
-          {/* Row 5: Notes */}
+          {/* Row 4: Notes */}
           <div className="cal-field-group">
             <label htmlFor="cal-notes-textarea" className="cal-label">
-              Appointment Notes / Instructions <span className="cal-opt">(Optional)</span>
+              Notes / Preferences <span className="cal-opt">(Optional)</span>
             </label>
             <textarea
               id="cal-notes-textarea"

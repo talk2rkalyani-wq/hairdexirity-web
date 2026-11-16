@@ -1,4 +1,4 @@
-import type { Service, ServiceCategory, UserSession } from '../types/models.ts'
+import type { Service, ServiceCategory, UserSession, ServicePricingType, GenderPricing, LengthPricing } from '../types/models.ts'
 import { mockServices } from '../mockData/salonEntities.ts'
 import { appointmentStore } from './appointmentStore.ts'
 import { permissionService } from './permissionService.ts'
@@ -126,6 +126,42 @@ export const serviceService = {
         if (!error && data) {
           const remoteServices: Service[] = data.map((row: any) => {
             const parsedPricing = parseServicePricing(row.description)
+
+            const pricingType: ServicePricingType =
+              row.pricing_type || parsedPricing.pricingType || (row.price_short != null ? 'length' : 'gender')
+
+            let genderPricing: GenderPricing | undefined = undefined
+            if (row.price_male != null || row.price_female != null) {
+              genderPricing = {
+                male: Number(row.price_male ?? row.price),
+                female: Number(row.price_female ?? row.price),
+              }
+            } else if (parsedPricing.genderPricing) {
+              genderPricing = parsedPricing.genderPricing
+            } else if (pricingType === 'gender') {
+              genderPricing = {
+                male: Number(row.price) || 0,
+                female: Number(row.price) || 0,
+              }
+            }
+
+            let lengthPricing: LengthPricing | undefined = undefined
+            if (
+              row.price_short != null ||
+              row.price_medium != null ||
+              row.price_long != null ||
+              row.price_vlong != null
+            ) {
+              lengthPricing = {
+                short: Number(row.price_short ?? row.price),
+                medium: Number(row.price_medium ?? row.price),
+                long: Number(row.price_long ?? row.price),
+                vlong: Number(row.price_vlong ?? row.price),
+              }
+            } else if (parsedPricing.lengthPricing) {
+              lengthPricing = parsedPricing.lengthPricing
+            }
+
             return {
               id: row.id,
               salonId: row.salon_id || 'salon-luma-01',
@@ -135,9 +171,9 @@ export const serviceService = {
               price: Number(row.price) || 0,
               category: row.category as ServiceCategory,
               active: Boolean(row.active),
-              pricingType: row.pricing_type || parsedPricing.pricingType,
-              genderPricing: row.gender_pricing || parsedPricing.genderPricing,
-              lengthPricing: row.length_pricing || parsedPricing.lengthPricing,
+              pricingType,
+              genderPricing,
+              lengthPricing,
             }
           })
 
@@ -212,19 +248,42 @@ export const serviceService = {
 
     if (isSupabaseConfigured() && supabase) {
       try {
-        const encodedDesc = encodeServicePricing(created.description || '', created)
-        const { error } = await supabase.from('services').insert({
+        const fullInsertPayload: Record<string, any> = {
           id: srvId,
           salon_id: salonId,
           name: created.name,
-          description: encodedDesc,
+          description: created.description || '',
           duration: created.duration,
           price: created.price,
           category: created.category,
           active: created.active !== undefined ? created.active : true,
+          pricing_type: created.pricingType || 'gender',
+          price_male: created.genderPricing?.male ?? null,
+          price_female: created.genderPricing?.female ?? null,
+          price_short: created.lengthPricing?.short ?? null,
+          price_medium: created.lengthPricing?.medium ?? null,
+          price_long: created.lengthPricing?.long ?? null,
+          price_vlong: created.lengthPricing?.vlong ?? null,
           updated_at: new Date().toISOString(),
-        })
-        if (error) console.error('Error inserting service into Supabase:', error)
+        }
+
+        const { error } = await supabase.from('services').insert(fullInsertPayload)
+        if (error) {
+          console.warn('Direct insert with pricing columns notice:', error.message)
+          // Fallback if dedicated columns not yet migrated in remote database
+          const encodedDesc = encodeServicePricing(created.description || '', created)
+          await supabase.from('services').insert({
+            id: srvId,
+            salon_id: salonId,
+            name: created.name,
+            description: encodedDesc,
+            duration: created.duration,
+            price: created.price,
+            category: created.category,
+            active: created.active !== undefined ? created.active : true,
+            updated_at: new Date().toISOString(),
+          })
+        }
       } catch (err) {
         console.error('Network error creating service in Supabase:', err)
       }
@@ -251,13 +310,9 @@ export const serviceService = {
     if (isSupabaseConfigured() && supabase) {
       try {
         const mergedService = { ...servicesData[index], ...updates }
-        const encodedDesc = encodeServicePricing(
-          updates.description !== undefined ? updates.description : (servicesData[index].description || ''),
-          mergedService
-        )
         const updatePayload: Record<string, any> = {
           updated_at: new Date().toISOString(),
-          description: encodedDesc,
+          description: updates.description !== undefined ? updates.description : (servicesData[index].description || ''),
         }
         if (updates.name !== undefined) updatePayload.name = updates.name
         if (updates.duration !== undefined) updatePayload.duration = updates.duration
@@ -265,11 +320,45 @@ export const serviceService = {
         if (updates.category !== undefined) updatePayload.category = updates.category
         if (updates.active !== undefined) updatePayload.active = updates.active
 
+        // Include dedicated pricing columns
+        if (mergedService.pricingType !== undefined) {
+          updatePayload.pricing_type = mergedService.pricingType
+        }
+        if (mergedService.genderPricing) {
+          updatePayload.price_male = mergedService.genderPricing.male
+          updatePayload.price_female = mergedService.genderPricing.female
+        }
+        if (mergedService.lengthPricing) {
+          updatePayload.price_short = mergedService.lengthPricing.short
+          updatePayload.price_medium = mergedService.lengthPricing.medium
+          updatePayload.price_long = mergedService.lengthPricing.long
+          updatePayload.price_vlong = mergedService.lengthPricing.vlong
+        }
+
         const { error } = await supabase
           .from('services')
           .update(updatePayload)
           .eq('id', id)
-        if (error) console.error('Error updating service in Supabase:', error)
+
+        if (error) {
+          console.warn('Update with pricing columns notice:', error.message)
+          const encodedDesc = encodeServicePricing(
+            updates.description !== undefined ? updates.description : (servicesData[index].description || ''),
+            mergedService
+          )
+          await supabase
+            .from('services')
+            .update({
+              updated_at: new Date().toISOString(),
+              name: updates.name,
+              description: encodedDesc,
+              duration: updates.duration,
+              price: updates.price,
+              category: updates.category,
+              active: updates.active,
+            })
+            .eq('id', id)
+        }
       } catch (err) {
         console.error('Network error updating service in Supabase:', err)
       }

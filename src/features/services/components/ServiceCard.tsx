@@ -133,8 +133,42 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         </div>
 
         <div className="service-price-wrap" aria-label={`Price: ${formattedPrice}`}>
-          <span className="price-label">Price</span>
-          <span className="service-price-amount">{formattedPrice}</span>
+          {service.pricingType === 'gender' && service.genderPricing ? (
+            <div className="service-price-breakdown">
+              <span className="price-pricing-badge">By Gender</span>
+              <div className="price-tier-chips">
+                <span className="price-chip">
+                  <span className="chip-key">M:</span> ₹{service.genderPricing.male}
+                </span>
+                <span className="price-chip">
+                  <span className="chip-key">F:</span> ₹{service.genderPricing.female}
+                </span>
+              </div>
+            </div>
+          ) : service.pricingType === 'length' && service.lengthPricing ? (
+            <div className="service-price-breakdown">
+              <span className="price-pricing-badge">By Length</span>
+              <div className="price-tier-chips">
+                <span className="price-chip" title="Short">
+                  <span className="chip-key">S:</span> ₹{service.lengthPricing.short}
+                </span>
+                <span className="price-chip" title="Medium">
+                  <span className="chip-key">M:</span> ₹{service.lengthPricing.medium}
+                </span>
+                <span className="price-chip" title="Long">
+                  <span className="chip-key">L:</span> ₹{service.lengthPricing.long}
+                </span>
+                <span className="price-chip" title="VLong">
+                  <span className="chip-key">VL:</span> ₹{service.lengthPricing.vlong}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <>
+              <span className="price-label">Price</span>
+              <span className="service-price-amount">{formattedPrice}</span>
+            </>
+          )}
         </div>
       </div>
     </article>

@@ -71,6 +71,46 @@ function resolveSession(session?: UserSession | null): UserSession | null {
   return sessionService.getCurrentSession()
 }
 
+function encodeServicePricing(description: string, service: Partial<Service>): string {
+  const cleanDesc = description.replace(/<!--hd_pricing:.*?-->/g, '').trim()
+  if (service.pricingType) {
+    const meta = {
+      pricingType: service.pricingType,
+      genderPricing: service.genderPricing,
+      lengthPricing: service.lengthPricing,
+    }
+    return `${cleanDesc} <!--hd_pricing:${JSON.stringify(meta)}-->`.trim()
+  }
+  return cleanDesc
+}
+
+function parseServicePricing(rawDescription?: string): {
+  description: string
+  pricingType?: Service['pricingType']
+  genderPricing?: Service['genderPricing']
+  lengthPricing?: Service['lengthPricing']
+} {
+  if (!rawDescription) {
+    return { description: '' }
+  }
+  const match = rawDescription.match(/<!--hd_pricing:(.*?)-->/)
+  if (match) {
+    try {
+      const meta = JSON.parse(match[1])
+      const cleanDesc = rawDescription.replace(/<!--hd_pricing:.*?-->/g, '').trim()
+      return {
+        description: cleanDesc,
+        pricingType: meta.pricingType,
+        genderPricing: meta.genderPricing,
+        lengthPricing: meta.lengthPricing,
+      }
+    } catch {
+      // ignore JSON parse error
+    }
+  }
+  return { description: rawDescription }
+}
+
 export const serviceService = {
   /**
    * Retrieves all available services with Supabase Cloud real-time sync
@@ -84,16 +124,22 @@ export const serviceService = {
           .order('name', { ascending: true })
 
         if (!error && data) {
-          const remoteServices: Service[] = data.map((row: any) => ({
-            id: row.id,
-            salonId: row.salon_id || 'salon-luma-01',
-            name: row.name,
-            description: row.description || '',
-            duration: Number(row.duration) || 30,
-            price: Number(row.price) || 0,
-            category: row.category as ServiceCategory,
-            active: Boolean(row.active),
-          }))
+          const remoteServices: Service[] = data.map((row: any) => {
+            const parsedPricing = parseServicePricing(row.description)
+            return {
+              id: row.id,
+              salonId: row.salon_id || 'salon-luma-01',
+              name: row.name,
+              description: parsedPricing.description,
+              duration: Number(row.duration) || 30,
+              price: Number(row.price) || 0,
+              category: row.category as ServiceCategory,
+              active: Boolean(row.active),
+              pricingType: row.pricing_type || parsedPricing.pricingType,
+              genderPricing: row.gender_pricing || parsedPricing.genderPricing,
+              lengthPricing: row.length_pricing || parsedPricing.lengthPricing,
+            }
+          })
 
           // Auto sync local services to Supabase if remote is currently empty
           if (remoteServices.length === 0 && servicesData.length > 0) {
@@ -166,11 +212,12 @@ export const serviceService = {
 
     if (isSupabaseConfigured() && supabase) {
       try {
+        const encodedDesc = encodeServicePricing(created.description || '', created)
         const { error } = await supabase.from('services').insert({
           id: srvId,
           salon_id: salonId,
           name: created.name,
-          description: created.description || '',
+          description: encodedDesc,
           duration: created.duration,
           price: created.price,
           category: created.category,
@@ -203,11 +250,16 @@ export const serviceService = {
 
     if (isSupabaseConfigured() && supabase) {
       try {
+        const mergedService = { ...servicesData[index], ...updates }
+        const encodedDesc = encodeServicePricing(
+          updates.description !== undefined ? updates.description : (servicesData[index].description || ''),
+          mergedService
+        )
         const updatePayload: Record<string, any> = {
           updated_at: new Date().toISOString(),
+          description: encodedDesc,
         }
         if (updates.name !== undefined) updatePayload.name = updates.name
-        if (updates.description !== undefined) updatePayload.description = updates.description
         if (updates.duration !== undefined) updatePayload.duration = updates.duration
         if (updates.price !== undefined) updatePayload.price = updates.price
         if (updates.category !== undefined) updatePayload.category = updates.category

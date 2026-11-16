@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import type { Service, ServiceCategory } from '../../../types/models'
+import type { Service, ServiceCategory, ServicePricingType } from '../../../types/models'
 import { CloseIcon, CheckIcon } from '../../../components/Icons'
 import './ServiceFormModal.css'
 
@@ -21,14 +21,31 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [duration, setDuration] = useState<number | string>(45)
-  const [price, setPrice] = useState<number | string>(1000)
   const [category, setCategory] = useState<ServiceCategory>('haircut')
   const [active, setActive] = useState(true)
+
+  // Pricing Model State
+  const [pricingType, setPricingType] = useState<ServicePricingType>('gender')
+
+  // Price by Gender fields
+  const [malePrice, setMalePrice] = useState<number | string>(1000)
+  const [femalePrice, setFemalePrice] = useState<number | string>(1200)
+
+  // Price by Length fields
+  const [shortPrice, setShortPrice] = useState<number | string>(800)
+  const [mediumPrice, setMediumPrice] = useState<number | string>(1200)
+  const [longPrice, setLongPrice] = useState<number | string>(1600)
+  const [vlongPrice, setVlongPrice] = useState<number | string>(2000)
 
   const [errors, setErrors] = useState<{
     name?: string
     duration?: string
-    price?: string
+    malePrice?: string
+    femalePrice?: string
+    shortPrice?: string
+    mediumPrice?: string
+    longPrice?: string
+    vlongPrice?: string
   }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessToast, setShowSuccessToast] = useState(false)
@@ -40,16 +57,46 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
       setName(serviceToEdit.name || '')
       setDescription(serviceToEdit.description || '')
       setDuration(serviceToEdit.duration ?? 45)
-      setPrice(serviceToEdit.price ?? 1000)
       setCategory(serviceToEdit.category || 'haircut')
       setActive(serviceToEdit.active !== undefined ? serviceToEdit.active : true)
+
+      const pType: ServicePricingType = serviceToEdit.pricingType || 'gender'
+      setPricingType(pType)
+
+      if (serviceToEdit.genderPricing) {
+        setMalePrice(serviceToEdit.genderPricing.male ?? 1000)
+        setFemalePrice(serviceToEdit.genderPricing.female ?? 1200)
+      } else {
+        const baseP = serviceToEdit.price ?? 1000
+        setMalePrice(baseP)
+        setFemalePrice(baseP)
+      }
+
+      if (serviceToEdit.lengthPricing) {
+        setShortPrice(serviceToEdit.lengthPricing.short ?? 800)
+        setMediumPrice(serviceToEdit.lengthPricing.medium ?? 1200)
+        setLongPrice(serviceToEdit.lengthPricing.long ?? 1600)
+        setVlongPrice(serviceToEdit.lengthPricing.vlong ?? 2000)
+      } else {
+        const baseP = serviceToEdit.price ?? 1000
+        setShortPrice(Math.round(baseP * 0.8))
+        setMediumPrice(baseP)
+        setLongPrice(Math.round(baseP * 1.3))
+        setVlongPrice(Math.round(baseP * 1.6))
+      }
     } else {
       setName('')
       setDescription('')
       setDuration(45)
-      setPrice(1000)
       setCategory('haircut')
       setActive(true)
+      setPricingType('gender')
+      setMalePrice(1000)
+      setFemalePrice(1200)
+      setShortPrice(800)
+      setMediumPrice(1200)
+      setLongPrice(1600)
+      setVlongPrice(2000)
     }
     setErrors({})
     setShowSuccessToast(false)
@@ -58,7 +105,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
   if (!isOpen) return null
 
   const validate = (): boolean => {
-    const errs: { name?: string; duration?: string; price?: string } = {}
+    const errs: Record<string, string> = {}
 
     if (!name.trim()) {
       errs.name = 'Service name is required.'
@@ -69,9 +116,32 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
       errs.duration = 'Duration must be a positive number of minutes (e.g. 30, 45, 60).'
     }
 
-    const priceNum = Number(price)
-    if (isNaN(priceNum) || priceNum < 0) {
-      errs.price = 'Price cannot be negative.'
+    if (pricingType === 'gender') {
+      const maleNum = Number(malePrice)
+      if (malePrice === '' || isNaN(maleNum) || maleNum < 0) {
+        errs.malePrice = 'Male price cannot be negative or empty.'
+      }
+      const femaleNum = Number(femalePrice)
+      if (femalePrice === '' || isNaN(femaleNum) || femaleNum < 0) {
+        errs.femalePrice = 'Female price cannot be negative or empty.'
+      }
+    } else if (pricingType === 'length') {
+      const shortNum = Number(shortPrice)
+      if (shortPrice === '' || isNaN(shortNum) || shortNum < 0) {
+        errs.shortPrice = 'Short length price cannot be negative or empty.'
+      }
+      const medNum = Number(mediumPrice)
+      if (mediumPrice === '' || isNaN(medNum) || medNum < 0) {
+        errs.mediumPrice = 'Medium length price cannot be negative or empty.'
+      }
+      const longNum = Number(longPrice)
+      if (longPrice === '' || isNaN(longNum) || longNum < 0) {
+        errs.longPrice = 'Long length price cannot be negative or empty.'
+      }
+      const vlongNum = Number(vlongPrice)
+      if (vlongPrice === '' || isNaN(vlongNum) || vlongNum < 0) {
+        errs.vlongPrice = 'VLong length price cannot be negative or empty.'
+      }
     }
 
     setErrors(errs)
@@ -84,13 +154,28 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
 
     setIsSubmitting(true)
 
+    const basePrice = pricingType === 'gender'
+      ? Number(malePrice) || Number(femalePrice) || 0
+      : Number(shortPrice) || Number(mediumPrice) || 0
+
     const payload = {
       name: name.trim(),
       description: description.trim(),
       duration: Number(duration),
-      price: Number(price),
+      price: basePrice,
       category,
       active,
+      pricingType,
+      genderPricing: pricingType === 'gender' ? {
+        male: Number(malePrice) || 0,
+        female: Number(femalePrice) || 0,
+      } : undefined,
+      lengthPricing: pricingType === 'length' ? {
+        short: Number(shortPrice) || 0,
+        medium: Number(mediumPrice) || 0,
+        long: Number(longPrice) || 0,
+        vlong: Number(vlongPrice) || 0,
+      } : undefined,
     }
 
     try {
@@ -123,8 +208,8 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
             </h3>
             <p className="modal-subtitle">
               {isEdit
-                ? 'Update service pricing, duration, and category description.'
-                : 'Configure a new treatment or styling service for your salon.'}
+                ? 'Update service pricing model, duration, and category description.'
+                : 'Configure a new treatment or styling service with flexible pricing.'}
             </p>
           </div>
           <button
@@ -169,27 +254,26 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
               {errors.name && <span className="error-text">{errors.name}</span>}
             </div>
 
-            {/* Category Field */}
-            <div className="form-field">
-              <label className="field-label" htmlFor="service-category">
-                Service Category <span className="req">*</span>
-              </label>
-              <select
-                id="service-category"
-                className="field-select"
-                value={category}
-                onChange={(e) => setCategory(e.target.value as ServiceCategory)}
-              >
-                <option value="haircut">Haircut & Styling</option>
-                <option value="color">Color & Highlights</option>
-                <option value="treatment">Hair Treatment & Spa</option>
-                <option value="styling">Skin, Nails & Rituals</option>
-                <option value="extensions">Hair Extensions</option>
-              </select>
-            </div>
-
-            {/* Duration & Price Grid */}
+            {/* Category & Duration Grid */}
             <div className="form-group-grid-2">
+              <div className="form-field">
+                <label className="field-label" htmlFor="service-category">
+                  Service Category <span className="req">*</span>
+                </label>
+                <select
+                  id="service-category"
+                  className="field-select"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as ServiceCategory)}
+                >
+                  <option value="haircut">Haircut & Styling</option>
+                  <option value="color">Color & Highlights</option>
+                  <option value="treatment">Hair Treatment & Spa</option>
+                  <option value="styling">Skin, Nails & Rituals</option>
+                  <option value="extensions">Hair Extensions</option>
+                </select>
+              </div>
+
               <div className="form-field">
                 <label className="field-label" htmlFor="service-duration">
                   Duration (Minutes) <span className="req">*</span>
@@ -213,28 +297,217 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                   <span className="error-text">{errors.duration}</span>
                 )}
               </div>
+            </div>
 
-              <div className="form-field">
-                <label className="field-label" htmlFor="service-price">
-                  Price (INR) <span className="req">*</span>
-                </label>
-                <div className="input-affix-wrapper">
-                  <span className="input-prefix">₹</span>
-                  <input
-                    id="service-price"
-                    type="number"
-                    min="0"
-                    step="50"
-                    className={`field-input affix-input-prefix ${
-                      errors.price ? 'input-error' : ''
-                    }`}
-                    placeholder="1200"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                  />
+            {/* Pricing Section with Toggle */}
+            <div className="service-pricing-section">
+              <div className="pricing-section-header">
+                <div>
+                  <label className="field-label">
+                    Price Configuration <span className="req">*</span>
+                  </label>
+                  <span className="pricing-helper-note">Choose your service pricing model</span>
                 </div>
-                {errors.price && <span className="error-text">{errors.price}</span>}
               </div>
+
+              {/* Pricing Type Toggle Switch */}
+              <div className="pricing-toggle-bar" role="tablist" aria-label="Pricing Option">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={pricingType === 'gender'}
+                  className={`pricing-toggle-option ${
+                    pricingType === 'gender' ? 'active' : ''
+                  }`}
+                  onClick={() => setPricingType('gender')}
+                >
+                  <span className="toggle-option-icon">🚻</span>
+                  <span className="toggle-option-text">Price By Gender</span>
+                </button>
+
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={pricingType === 'length'}
+                  className={`pricing-toggle-option ${
+                    pricingType === 'length' ? 'active' : ''
+                  }`}
+                  onClick={() => setPricingType('length')}
+                >
+                  <span className="toggle-option-icon">📏</span>
+                  <span className="toggle-option-text">Price By Length</span>
+                </button>
+              </div>
+
+              {/* Price Fields for Price By Gender */}
+              {pricingType === 'gender' && (
+                <div className="pricing-fields-card animated-fade-in">
+                  <div className="pricing-fields-hint">
+                    Set customized pricing for Male and Female clients:
+                  </div>
+                  <div className="pricing-grid-gender">
+                    {/* Male Price */}
+                    <div className="form-field">
+                      <label className="field-label tier-label-male" htmlFor="male-price">
+                        Male Price <span className="req">*</span>
+                      </label>
+                      <div className="input-affix-wrapper">
+                        <span className="input-prefix">₹</span>
+                        <input
+                          id="male-price"
+                          type="number"
+                          min="0"
+                          step="50"
+                          className={`field-input affix-input-prefix ${
+                            errors.malePrice ? 'input-error' : ''
+                          }`}
+                          placeholder="1000"
+                          value={malePrice}
+                          onChange={(e) => setMalePrice(e.target.value)}
+                        />
+                      </div>
+                      {errors.malePrice && (
+                        <span className="error-text">{errors.malePrice}</span>
+                      )}
+                    </div>
+
+                    {/* Female Price */}
+                    <div className="form-field">
+                      <label className="field-label tier-label-female" htmlFor="female-price">
+                        Female Price <span className="req">*</span>
+                      </label>
+                      <div className="input-affix-wrapper">
+                        <span className="input-prefix">₹</span>
+                        <input
+                          id="female-price"
+                          type="number"
+                          min="0"
+                          step="50"
+                          className={`field-input affix-input-prefix ${
+                            errors.femalePrice ? 'input-error' : ''
+                          }`}
+                          placeholder="1200"
+                          value={femalePrice}
+                          onChange={(e) => setFemalePrice(e.target.value)}
+                        />
+                      </div>
+                      {errors.femalePrice && (
+                        <span className="error-text">{errors.femalePrice}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Price Fields for Price By Length */}
+              {pricingType === 'length' && (
+                <div className="pricing-fields-card animated-fade-in">
+                  <div className="pricing-fields-hint">
+                    Set customized pricing based on hair/application length:
+                  </div>
+                  <div className="pricing-grid-length">
+                    {/* Short */}
+                    <div className="form-field">
+                      <label className="field-label tier-badge-short" htmlFor="short-price">
+                        Short <span className="req">*</span>
+                      </label>
+                      <div className="input-affix-wrapper">
+                        <span className="input-prefix">₹</span>
+                        <input
+                          id="short-price"
+                          type="number"
+                          min="0"
+                          step="50"
+                          className={`field-input affix-input-prefix ${
+                            errors.shortPrice ? 'input-error' : ''
+                          }`}
+                          placeholder="800"
+                          value={shortPrice}
+                          onChange={(e) => setShortPrice(e.target.value)}
+                        />
+                      </div>
+                      {errors.shortPrice && (
+                        <span className="error-text">{errors.shortPrice}</span>
+                      )}
+                    </div>
+
+                    {/* Medium */}
+                    <div className="form-field">
+                      <label className="field-label tier-badge-medium" htmlFor="medium-price">
+                        Medium <span className="req">*</span>
+                      </label>
+                      <div className="input-affix-wrapper">
+                        <span className="input-prefix">₹</span>
+                        <input
+                          id="medium-price"
+                          type="number"
+                          min="0"
+                          step="50"
+                          className={`field-input affix-input-prefix ${
+                            errors.mediumPrice ? 'input-error' : ''
+                          }`}
+                          placeholder="1200"
+                          value={mediumPrice}
+                          onChange={(e) => setMediumPrice(e.target.value)}
+                        />
+                      </div>
+                      {errors.mediumPrice && (
+                        <span className="error-text">{errors.mediumPrice}</span>
+                      )}
+                    </div>
+
+                    {/* Long */}
+                    <div className="form-field">
+                      <label className="field-label tier-badge-long" htmlFor="long-price">
+                        Long <span className="req">*</span>
+                      </label>
+                      <div className="input-affix-wrapper">
+                        <span className="input-prefix">₹</span>
+                        <input
+                          id="long-price"
+                          type="number"
+                          min="0"
+                          step="50"
+                          className={`field-input affix-input-prefix ${
+                            errors.longPrice ? 'input-error' : ''
+                          }`}
+                          placeholder="1600"
+                          value={longPrice}
+                          onChange={(e) => setLongPrice(e.target.value)}
+                        />
+                      </div>
+                      {errors.longPrice && (
+                        <span className="error-text">{errors.longPrice}</span>
+                      )}
+                    </div>
+
+                    {/* VLong */}
+                    <div className="form-field">
+                      <label className="field-label tier-badge-vlong" htmlFor="vlong-price">
+                        VLong <span className="req">*</span>
+                      </label>
+                      <div className="input-affix-wrapper">
+                        <span className="input-prefix">₹</span>
+                        <input
+                          id="vlong-price"
+                          type="number"
+                          min="0"
+                          step="50"
+                          className={`field-input affix-input-prefix ${
+                            errors.vlongPrice ? 'input-error' : ''
+                          }`}
+                          placeholder="2000"
+                          value={vlongPrice}
+                          onChange={(e) => setVlongPrice(e.target.value)}
+                        />
+                      </div>
+                      {errors.vlongPrice && (
+                        <span className="error-text">{errors.vlongPrice}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Description Field */}

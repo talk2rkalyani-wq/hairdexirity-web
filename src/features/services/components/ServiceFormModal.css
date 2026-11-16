@@ -240,6 +240,140 @@
   padding-right: 3rem !important;
 }
 
+/* ==============================================================================
+   PRICING SECTION & TOGGLE SWITCHER
+   ============================================================================== */
+
+.service-pricing-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.pricing-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pricing-helper-note {
+  display: block;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.15rem;
+}
+
+/* Segmented Toggle Bar */
+.pricing-toggle-bar {
+  display: flex;
+  background: rgba(10, 15, 29, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 6px;
+}
+
+.pricing-toggle-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pricing-toggle-option:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+}
+
+.pricing-toggle-option.active {
+  background: linear-gradient(135deg, #9333ea 0%, #6366f1 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(147, 51, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.toggle-option-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.toggle-option-text {
+  letter-spacing: 0.01em;
+}
+
+/* Dynamic Pricing Fields Card */
+.pricing-fields-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: rgba(20, 29, 52, 0.5);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 10px;
+  padding: 0.9rem;
+}
+
+.pricing-fields-hint {
+  font-size: 0.775rem;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+/* Grid for Price By Gender */
+.pricing-grid-gender {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Grid for Price By Length */
+.pricing-grid-length {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+/* Tier labels styling */
+.tier-label-male,
+.tier-label-female,
+.tier-badge-short,
+.tier-badge-medium,
+.tier-badge-long,
+.tier-badge-vlong {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.animated-fade-in {
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 600px) {
   .service-modal-card {
     max-width: 100%;
@@ -250,5 +384,13 @@
 
   .form-group-grid-2 {
     grid-template-columns: 1fr;
+  }
+
+  .pricing-grid-gender {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-grid-length {
+    grid-template-columns: 1fr 1fr;
   }
 }

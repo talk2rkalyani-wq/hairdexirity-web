@@ -79,6 +79,20 @@ export interface Staff {
   jobTitle?: string
 }
 
+export type ServicePricingType = 'gender' | 'length'
+
+export interface GenderPricing {
+  male: number
+  female: number
+}
+
+export interface LengthPricing {
+  short: number
+  medium: number
+  long: number
+  vlong: number
+}
+
 export interface Service {
   id: string
   salonId: string
@@ -88,6 +102,9 @@ export interface Service {
   price: number
   category: ServiceCategory
   active: boolean
+  pricingType?: ServicePricingType
+  genderPricing?: GenderPricing
+  lengthPricing?: LengthPricing
 }
 
 export interface ClientPreferences {

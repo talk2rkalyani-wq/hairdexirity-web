@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import type { Service, ServiceCategory, ServicePricingType } from '../../../types/models'
 import { SERVICE_CATEGORIES } from '../../../types/models'
+import { serviceService } from '../../../services/serviceService'
 import { CloseIcon, CheckIcon } from '../../../components/Icons'
 import './ServiceFormModal.css'
 
@@ -23,6 +24,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
   const [description, setDescription] = useState('')
   const [duration, setDuration] = useState<number | string>(45)
   const [category, setCategory] = useState<ServiceCategory>('Hair')
+  const [categoriesList, setCategoriesList] = useState<string[]>([...SERVICE_CATEGORIES])
   const [active, setActive] = useState(true)
 
   // Pricing Model State
@@ -53,6 +55,12 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) return
+
+    serviceService.getCategories().then((cats) => {
+      if (cats && cats.length > 0) {
+        setCategoriesList(cats)
+      }
+    })
 
     if (serviceToEdit) {
       setName(serviceToEdit.name || '')
@@ -267,12 +275,12 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                   value={category}
                   onChange={(e) => setCategory(e.target.value as ServiceCategory)}
                 >
-                  {SERVICE_CATEGORIES.map((cat) => (
+                  {categoriesList.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
                     </option>
                   ))}
-                  {category && !SERVICE_CATEGORIES.includes(category as any) && (
+                  {category && !categoriesList.includes(category) && (
                     <option key={category} value={category}>
                       {category}
                     </option>

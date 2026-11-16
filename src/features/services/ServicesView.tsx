@@ -14,16 +14,27 @@ import './ServicesView.css'
 
 type CategoryFilter = 'all' | ServiceCategory
 
-const categories: { key: CategoryFilter; label: string }[] = [
-  { key: 'all', label: 'All Services' },
-  ...SERVICE_CATEGORIES.map((cat) => ({ key: cat as CategoryFilter, label: cat })),
-]
-
 export const ServicesView: React.FC = () => {
   const [session, setSession] = useState<UserSession | null>(() => sessionService.getCurrentSession())
   const canManage = permissionService.canAssignServices(session)
   const canDelete = permissionService.canDeleteService(session)
   const isEmployee = session?.role === 'EMPLOYEE'
+
+  // Categories list from Supabase
+  const [categoriesList, setCategoriesList] = useState<string[]>([...SERVICE_CATEGORIES])
+
+  useEffect(() => {
+    serviceService.getCategories().then((cats) => {
+      if (cats && cats.length > 0) {
+        setCategoriesList(cats)
+      }
+    })
+  }, [])
+
+  const categories = useMemo<{ key: CategoryFilter; label: string }[]>(() => [
+    { key: 'all', label: 'All Services' },
+    ...categoriesList.map((cat) => ({ key: cat as CategoryFilter, label: cat })),
+  ], [categoriesList])
 
   // Selection & Bulk State
   const [selectedServiceIds, setSelectedServiceIds] = useState<Set<string>>(new Set())

@@ -37,6 +37,7 @@ export const PosItemSelector: React.FC<PosItemSelectorProps> = ({
   const [barcodeMessage, setBarcodeMessage] = useState<{ text: string; isError: boolean } | null>(null)
   const [selectedServiceCategory, setSelectedServiceCategory] = useState<string>('ALL')
   const [selectedProductCategory, setSelectedProductCategory] = useState<string>('ALL')
+  const [serviceCategories, setServiceCategories] = useState<string[]>(['ALL', ...SERVICE_CATEGORIES])
   const [isLoading, setIsLoading] = useState(true)
   const barcodeInputRef = useRef<HTMLInputElement>(null)
 
@@ -48,12 +49,16 @@ export const PosItemSelector: React.FC<PosItemSelectorProps> = ({
     Promise.all([
       serviceService.getServices(),
       inventoryService.fetchInventoryProducts(),
+      serviceService.getCategories(),
     ])
-      .then(([srvList, prodList]) => {
+      .then(([srvList, prodList, catList]) => {
         if (!mounted) return
         setServices(srvList.filter((s) => s.active))
         // Only active/low_stock/out_of_stock products (exclude archived)
         setProducts(prodList.filter((p) => p.status !== 'archived'))
+        if (catList && catList.length > 0) {
+          setServiceCategories(['ALL', ...catList])
+        }
       })
       .catch((err) => {
         console.error('Failed to load items catalog for POS:', err)
@@ -148,7 +153,6 @@ export const PosItemSelector: React.FC<PosItemSelectorProps> = ({
   }
 
   // Available Categories
-  const serviceCategories = ['ALL', ...SERVICE_CATEGORIES]
   const productCategories = [
     'ALL',
     'Hair Care',

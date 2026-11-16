@@ -1,4 +1,5 @@
 import type { Service, ServiceCategory, UserSession, ServicePricingType, GenderPricing, LengthPricing } from '../types/models.ts'
+import { SERVICE_CATEGORIES } from '../types/models.ts'
 import { mockServices } from '../mockData/salonEntities.ts'
 import { appointmentStore } from './appointmentStore.ts'
 import { permissionService } from './permissionService.ts'
@@ -228,6 +229,42 @@ export const serviceService = {
   async getServicesByCategory(category: ServiceCategory): Promise<Service[]> {
     const all = await this.getServices()
     return all.filter((s) => s.category === category && s.active)
+  },
+
+  /**
+   * Retrieves all active service categories from Supabase (or fallback to defaults)
+   */
+  async getCategories(): Promise<string[]> {
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('service_categories')
+          .select('name, display_order')
+          .eq('active', true)
+          .order('display_order', { ascending: true })
+
+        if (!error && data && data.length > 0) {
+          return data.map((d: any) => d.name)
+        }
+
+        // If table exists but empty, auto-seed the 19 standard categories into Supabase
+        if (!error && data && data.length === 0) {
+          const currentSession = sessionService.getCurrentSession()
+          const salonId = currentSession?.salonId || 'salon-luma-01'
+          const seeds = SERVICE_CATEGORIES.map((cat, idx) => ({
+            id: `cat-${salonId}-${cat.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+            salon_id: salonId,
+            name: cat,
+            display_order: idx + 1,
+            active: true,
+          }))
+          await supabase.from('service_categories').upsert(seeds, { onConflict: 'salon_id,name' })
+        }
+      } catch (err) {
+        console.warn('Notice fetching service_categories from Supabase:', err)
+      }
+    }
+    return [...SERVICE_CATEGORIES]
   },
 
   /**

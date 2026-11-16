@@ -6,6 +6,7 @@ import { clientService } from '../../../../services/clientService'
 import { appointmentService } from '../../../../services/appointmentService'
 import { getSalonDateStr, formatCurrency } from '../../../../utils/formatters'
 import { CloseIcon, UsersIcon, ScissorsIcon } from '../../../../components/Icons'
+import { ServiceSelectionModal } from '../../../services/components/ServiceSelectionModal'
 import './WalkInIntakeModal.css'
 
 interface WalkInIntakeModalProps {
@@ -22,9 +23,10 @@ export const WalkInIntakeModal: React.FC<WalkInIntakeModalProps> = ({
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [serviceId, setServiceId] = useState('')
+  const [selectedServices, setSelectedServices] = useState<Service[]>([])
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false)
   const [staffId, setStaffId] = useState('')
   const [notes, setNotes] = useState('')
-  const [services, setServices] = useState<Service[]>([])
   const [staffList, setStaffList] = useState<Staff[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -42,9 +44,11 @@ export const WalkInIntakeModal: React.FC<WalkInIntakeModalProps> = ({
     ]).then(([srvs, stfs]) => {
       const activeSrvs = srvs.filter((s) => s.active)
       const activeStfs = stfs.filter((s) => s.active)
-      setServices(activeSrvs)
       setStaffList(activeStfs)
-      if (activeSrvs.length > 0) setServiceId(activeSrvs[0].id)
+      if (activeSrvs.length > 0) {
+        setServiceId(activeSrvs[0].id)
+        setSelectedServices([activeSrvs[0]])
+      }
       if (activeStfs.length > 0) setStaffId(activeStfs[0].id)
     }).catch((err) => {
       console.error('Failed to load services or staff for walk-in modal:', err)
@@ -53,7 +57,20 @@ export const WalkInIntakeModal: React.FC<WalkInIntakeModalProps> = ({
 
   if (!isOpen) return null
 
-  const selectedService = services.find((s) => s.id === serviceId)
+  const totalDuration = selectedServices.reduce((sum, s) => sum + (s.duration || 0), 0)
+  const totalPrice = selectedServices.reduce((sum, s) => sum + (s.price || 0), 0)
+
+  const handleRemoveService = (idToRemove: string) => {
+    setSelectedServices((prev) => {
+      const next = prev.filter((s) => s.id !== idToRemove)
+      if (next.length > 0) {
+        setServiceId(next[0].id)
+      } else {
+        setServiceId('')
+      }
+      return next
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -61,8 +78,8 @@ export const WalkInIntakeModal: React.FC<WalkInIntakeModalProps> = ({
       setError('Guest name is required.')
       return
     }
-    if (!serviceId) {
-      setError('Please select a service.')
+    if (selectedServices.length === 0) {
+      setError('Please select at least one service.')
       return
     }
     if (!staffId) {
@@ -74,8 +91,10 @@ export const WalkInIntakeModal: React.FC<WalkInIntakeModalProps> = ({
       setIsSubmitting(true)
       setError(null)
 
-      const duration = selectedService?.duration || 30
-      const price = selectedService?.price || 0
+      const duration = totalDuration || 30
+      const price = totalPrice
+      const primaryServiceId = selectedServices[0]?.id || serviceId
+      const combinedServiceNames = selectedServices.map((s) => s.name).join(' + ')
 
       // Find or create client
       const allClients = await clientService.getClients()
@@ -113,13 +132,18 @@ export const WalkInIntakeModal: React.FC<WalkInIntakeModalProps> = ({
       await appointmentService.createAppointment({
         clientId: client.id,
         staffId,
-        serviceId,
+        serviceId: primaryServiceId,
+        serviceName: combinedServiceNames,
         date: todayStr,
         startTime,
         endTime,
         status: 'checked_in',
         price,
-        notes: notes.trim() ? `[Walk-in] ${notes.trim()}` : '[Walk-in guest]',
+        notes: notes.trim()
+          ? `[Walk-in] ${notes.trim()}`
+          : selectedServices.length > 1
+          ? `[Walk-in] ${combinedServiceNames}`
+          : '[Walk-in guest]',
         checkedInAt: new Date().toISOString(),
       })
 
@@ -202,22 +226,49 @@ export const WalkInIntakeModal: React.FC<WalkInIntakeModalProps> = ({
             {/* Service & Stylist Selection */}
             <div className="walkin-grid-2">
               <div className="form-field">
-                <label className="field-label" htmlFor="walkin-service">
-                  Requested Service <span className="req">*</span>
+                <label className="field-label">
+                  Requested Service(s) <span className="req">*</span>
                 </label>
-                <select
-                  id="walkin-service"
-                  className="field-select"
-                  value={serviceId}
-                  onChange={(e) => setServiceId(e.target.value)}
-                  required
+                <button
+                  type="button"
+                  className="btn-select-services-trigger"
+                  onClick={() => setIsServiceModalOpen(true)}
                 >
-                  {services.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.duration}m • {formatCurrency(s.price)})
-                    </option>
-                  ))}
-                </select>
+                  <div className="trigger-left">
+                    <ScissorsIcon size={16} />
+                    <span>
+                      {selectedServices.length === 0
+                        ? 'Click to Select Service(s)...'
+                        : `${selectedServices.length} Service${selectedServices.length > 1 ? 's' : ''} Selected`}
+                    </span>
+                  </div>
+                  <span className="trigger-action-tag">
+                    {selectedServices.length === 0 ? '+ Select Services' : 'Change / Add +'}
+                  </span>
+                </button>
+
+                {/* Selected Services Tags */}
+                {selectedServices.length > 0 && (
+                  <div className="selected-services-chips-container">
+                    {selectedServices.map((srv) => (
+                      <span key={srv.id} className="selected-service-chip">
+                        <span>{srv.name}</span>
+                        <strong>({srv.duration}m • {formatCurrency(srv.price)})</strong>
+                        <button
+                          type="button"
+                          className="chip-remove-btn"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleRemoveService(srv.id)
+                          }}
+                          title={`Remove ${srv.name}`}
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="form-field">
@@ -231,6 +282,7 @@ export const WalkInIntakeModal: React.FC<WalkInIntakeModalProps> = ({
                   onChange={(e) => setStaffId(e.target.value)}
                   required
                 >
+                  <option value="" disabled>Select stylist...</option>
                   {staffList.map((st) => (
                     <option key={st.id} value={st.id}>
                       {st.name} ({st.jobTitle || st.role})
@@ -241,12 +293,12 @@ export const WalkInIntakeModal: React.FC<WalkInIntakeModalProps> = ({
             </div>
 
             {/* Service Summary Pill */}
-            {selectedService && (
+            {selectedServices.length > 0 && (
               <div className="walkin-summary-pill">
                 <ScissorsIcon size={16} />
                 <span>
-                  Estimated duration: <strong>{selectedService.duration} mins</strong> • Price:{' '}
-                  <strong>{formatCurrency(selectedService.price)}</strong>
+                  Estimated duration: <strong>{totalDuration} mins</strong> • Price:{' '}
+                  <strong>{formatCurrency(totalPrice)}</strong>
                 </span>
               </div>
             )}
@@ -286,6 +338,18 @@ export const WalkInIntakeModal: React.FC<WalkInIntakeModalProps> = ({
           </div>
         </form>
       </div>
+
+      {/* Animated Multi-Service Selection Modal */}
+      <ServiceSelectionModal
+        isOpen={isServiceModalOpen}
+        selectedServices={selectedServices}
+        onConfirm={(chosen) => {
+          setSelectedServices(chosen)
+          if (chosen.length > 0) setServiceId(chosen[0].id)
+        }}
+        onClose={() => setIsServiceModalOpen(false)}
+        title="Select Walk-In Services"
+      />
     </div>
   )
 }

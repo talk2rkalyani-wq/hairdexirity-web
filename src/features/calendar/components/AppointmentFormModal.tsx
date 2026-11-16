@@ -17,6 +17,7 @@ import {
   formatTime12h,
 } from '../../../utils/formatters'
 import { ScissorsIcon } from '../../../components/Icons'
+import { ServiceSelectionModal } from '../../services/components/ServiceSelectionModal'
 import './AppointmentFormModal.css'
 
 interface AppointmentFormModalProps {
@@ -59,6 +60,8 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
   // Form State
   const [clientId, setClientId] = useState<string>('')
   const [serviceId, setServiceId] = useState<string>('')
+  const [selectedServices, setSelectedServices] = useState<Service[]>([])
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false)
   const [staffId, setStaffId] = useState<string>('')
   const [date, setDate] = useState<string>('')
   const [startTime, setStartTime] = useState<string>('10:00')
@@ -80,7 +83,8 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
     ]).then(([clientsData, servicesData, staffData]) => {
       if (!active) return
       setClients(clientsData)
-      setServices(servicesData.filter((s) => s.active))
+      const activeServices = servicesData.filter((s) => s.active)
+      setServices(activeServices)
       setStaffList(staffData)
     })
 
@@ -89,14 +93,18 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
     }
   }, [isOpen])
 
-  const selectedService = useMemo(() => {
-    return services.find((s) => s.id === serviceId) || initialAppointment?.service || null
-  }, [services, serviceId, initialAppointment])
+  // Computed total duration and price from all selected services
+  const effectiveDuration = useMemo(() => {
+    if (selectedServices.length === 0) return duration
+    return selectedServices.reduce((sum, s) => sum + (s.duration || 0), 0)
+  }, [selectedServices, duration])
 
-  const effectiveDuration = selectedService?.duration ?? duration
-  const effectivePrice = selectedService?.price ?? price
+  const effectivePrice = useMemo(() => {
+    if (selectedServices.length === 0) return price
+    return selectedServices.reduce((sum, s) => sum + (s.price || 0), 0)
+  }, [selectedServices, price])
 
-  // Computed end time
+  // Computed end time based on combined duration of all selected services
   const endTime = useMemo(() => {
     return calculateEndTime(startTime, effectiveDuration)
   }, [startTime, effectiveDuration])
@@ -124,6 +132,13 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
       setPrice(initialAppointment.price)
       setStatus(initialAppointment.status)
       setNotes(initialAppointment.notes || '')
+
+      if (initialAppointment.service) {
+        setSelectedServices([initialAppointment.service])
+      } else if (services.length > 0) {
+        const found = services.find((s) => s.id === initialAppointment.serviceId)
+        if (found) setSelectedServices([found])
+      }
     } else {
       // New Appointment defaults
       const firstClient = clients[0]?.id || ''
@@ -139,17 +154,33 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
       setPrice(firstService?.price || 1000)
       setStatus('scheduled')
       setNotes('')
+
+      if (firstService) {
+        setSelectedServices([firstService])
+      }
     }
   }, [isOpen, initialAppointment, defaultDate, defaultTime, clients, services, staffList])
 
-  // When user selects a Service, auto-derive Duration and Price
-  const handleServiceChange = (newServiceId: string) => {
-    setServiceId(newServiceId)
-    const matchedService = services.find((s) => s.id === newServiceId)
-    if (matchedService) {
-      setDuration(matchedService.duration)
-      setPrice(matchedService.price)
+  // Handlers for animated service selection modal
+  const handleConfirmServices = (chosen: Service[]) => {
+    setSelectedServices(chosen)
+    if (chosen.length > 0) {
+      setServiceId(chosen[0].id)
+    } else {
+      setServiceId('')
     }
+  }
+
+  const handleRemoveSingleService = (idToRemove: string) => {
+    setSelectedServices((prev) => {
+      const next = prev.filter((s) => s.id !== idToRemove)
+      if (next.length > 0) {
+        setServiceId(next[0].id)
+      } else {
+        setServiceId('')
+      }
+      return next
+    })
   }
 
   // Handle Form Submit
@@ -162,8 +193,8 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
       setErrorMessage('Please select a client.')
       return
     }
-    if (!serviceId) {
-      setErrorMessage('Please select a service.')
+    if (selectedServices.length === 0) {
+      setErrorMessage('Please select at least one service.')
       return
     }
     if (!staffId) {
@@ -178,34 +209,42 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
       setErrorMessage('Please specify a start time.')
       return
     }
-    if (duration <= 0) {
-      setErrorMessage('Duration must be greater than 0 minutes.')
-      return
-    }
 
     setIsSubmitting(true)
 
     try {
-      const matchedService = services.find((s) => s.id === serviceId)
-      const effectivePrice = matchedService ? matchedService.price : price
+      const primaryServiceId = selectedServices[0]?.id || serviceId
+      const primaryService = selectedServices[0] || services.find((s) => s.id === primaryServiceId)
+      const combinedServiceNames = selectedServices.map((s) => s.name).join(' + ')
+
+      const multiServiceSummary =
+        selectedServices.length > 1
+          ? `Services: ${selectedServices.map((s) => `${s.name} (${formatCurrency(s.price)})`).join(', ')}`
+          : ''
+      const finalNotes = notes.trim()
+        ? multiServiceSummary
+          ? `${notes.trim()}\n[${multiServiceSummary}]`
+          : notes.trim()
+        : multiServiceSummary || undefined
 
       if (isEdit && initialAppointment) {
         const updated = await appointmentService.updateAppointment(initialAppointment.id, {
           clientId,
-          serviceId,
+          serviceId: primaryServiceId,
+          serviceName: combinedServiceNames,
           staffId,
           date,
           startTime,
           endTime,
           price: effectivePrice,
           status,
-          notes: notes.trim() || undefined,
+          notes: finalNotes,
         })
 
         const enrichedUpdated: EnrichedAppointment = {
           ...updated,
           client: clients.find((c) => c.id === clientId) || initialAppointment.client,
-          service: services.find((s) => s.id === serviceId) || initialAppointment.service,
+          service: primaryService || initialAppointment.service,
           staff: staffList.find((s) => s.id === staffId) || initialAppointment.staff,
         }
 
@@ -214,20 +253,21 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
       } else {
         const created = await appointmentService.createAppointment({
           clientId,
-          serviceId,
+          serviceId: primaryServiceId,
+          serviceName: combinedServiceNames,
           staffId,
           date,
           startTime,
           endTime,
           price: effectivePrice,
           status,
-          notes: notes.trim() || undefined,
+          notes: finalNotes,
         })
 
         const enrichedCreated: EnrichedAppointment = {
           ...created,
           client: clients.find((c) => c.id === clientId),
-          service: services.find((s) => s.id === serviceId),
+          service: primaryService,
           staff: staffList.find((s) => s.id === staffId),
         }
 
@@ -325,26 +365,52 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
             </div>
           </div>
 
-          {/* Row 2: Requested Service & Assign Stylist */}
+          {/* Row 2: Requested Services & Assign Stylist */}
           <div className="cal-form-row">
             <div className="cal-field-group">
-              <label htmlFor="cal-service-select" className="cal-label">
-                Requested Service <span className="req">*</span>
+              <label className="cal-label">
+                Requested Service(s) <span className="req">*</span>
               </label>
-              <select
-                id="cal-service-select"
-                className="cal-input cal-select"
-                value={serviceId}
-                onChange={(e) => handleServiceChange(e.target.value)}
-                required
+              <button
+                type="button"
+                className="btn-select-services-trigger"
+                onClick={() => setIsServiceModalOpen(true)}
               >
-                <option value="" disabled>Select service...</option>
-                {services.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.duration}m • {formatCurrency(s.price)})
-                  </option>
-                ))}
-              </select>
+                <div className="trigger-left">
+                  <ScissorsIcon size={16} />
+                  <span>
+                    {selectedServices.length === 0
+                      ? 'Click to Select Service(s)...'
+                      : `${selectedServices.length} Service${selectedServices.length > 1 ? 's' : ''} Selected`}
+                  </span>
+                </div>
+                <span className="trigger-action-tag">
+                  {selectedServices.length === 0 ? '+ Select Services' : 'Change / Add +'}
+                </span>
+              </button>
+
+              {/* Selected Services Tags */}
+              {selectedServices.length > 0 && (
+                <div className="selected-services-chips-container">
+                  {selectedServices.map((srv) => (
+                    <span key={srv.id} className="selected-service-chip">
+                      <span>{srv.name}</span>
+                      <strong>({srv.duration}m • {formatCurrency(srv.price)})</strong>
+                      <button
+                        type="button"
+                        className="chip-remove-btn"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleRemoveSingleService(srv.id)
+                        }}
+                        title={`Remove ${srv.name}`}
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="cal-field-group">
@@ -378,7 +444,7 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
           </div>
 
           {/* Service Summary Pill (Estimated duration & Price) */}
-          {selectedService && (
+          {selectedServices.length > 0 && (
             <div className="cal-service-summary-pill">
               <ScissorsIcon size={16} />
               <span>
@@ -474,6 +540,14 @@ export const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({
           </div>
         </form>
       </div>
+
+      {/* Animated Multi-Service Selection Modal */}
+      <ServiceSelectionModal
+        isOpen={isServiceModalOpen}
+        selectedServices={selectedServices}
+        onConfirm={handleConfirmServices}
+        onClose={() => setIsServiceModalOpen(false)}
+      />
     </div>
   )
 }

@@ -15,7 +15,7 @@ interface ServiceCardProps {
   onDelete?: (service: Service) => void
 }
 
-export function formatCategoryLabel(category: ServiceCategory): string {
+function formatCategoryLabel(category: ServiceCategory): string {
   switch (category) {
     case 'haircut':
       return 'Haircut & Styling'

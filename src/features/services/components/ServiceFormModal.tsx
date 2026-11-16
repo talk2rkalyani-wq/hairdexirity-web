@@ -244,7 +244,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
         )}
 
         {/* Form Body */}
-        <form className="modal-form" onSubmit={handleSubmit}>
+        <form className="modal-form" onSubmit={handleSubmit} noValidate>
           <div className="modal-form-body">
             {/* Name Field */}
             <div className="form-field">
@@ -296,8 +296,8 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                   <input
                     id="service-duration"
                     type="number"
-                    min="5"
-                    step="5"
+                    min="1"
+                    step="any"
                     className={`field-input affix-input ${
                       errors.duration ? 'input-error' : ''
                     }`}
@@ -371,7 +371,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                           id="male-price"
                           type="number"
                           min="0"
-                          step="50"
+                          step="any"
                           className={`field-input affix-input-prefix ${
                             errors.malePrice ? 'input-error' : ''
                           }`}
@@ -396,7 +396,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                           id="female-price"
                           type="number"
                           min="0"
-                          step="50"
+                          step="any"
                           className={`field-input affix-input-prefix ${
                             errors.femalePrice ? 'input-error' : ''
                           }`}
@@ -431,7 +431,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                           id="short-price"
                           type="number"
                           min="0"
-                          step="50"
+                          step="any"
                           className={`field-input affix-input-prefix ${
                             errors.shortPrice ? 'input-error' : ''
                           }`}
@@ -456,7 +456,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                           id="medium-price"
                           type="number"
                           min="0"
-                          step="50"
+                          step="any"
                           className={`field-input affix-input-prefix ${
                             errors.mediumPrice ? 'input-error' : ''
                           }`}
@@ -481,7 +481,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                           id="long-price"
                           type="number"
                           min="0"
-                          step="50"
+                          step="any"
                           className={`field-input affix-input-prefix ${
                             errors.longPrice ? 'input-error' : ''
                           }`}
@@ -506,7 +506,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                           id="vlong-price"
                           type="number"
                           min="0"
-                          step="50"
+                          step="any"
                           className={`field-input affix-input-prefix ${
                             errors.vlongPrice ? 'input-error' : ''
                           }`}
